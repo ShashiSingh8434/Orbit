@@ -1,7 +1,7 @@
 /// Centralized constants used across the Orbit app.
 abstract final class AppConstants {
   // ── Asset Paths ──
-  static const String appLogoPath = 'assets/app_logo.png';
+  static const String appLogoPath = 'assets/app_logo_dark.png';
   static const String googleImgPath = 'assets/google_img.png';
 
   // ── SharedPreferences Keys ──
