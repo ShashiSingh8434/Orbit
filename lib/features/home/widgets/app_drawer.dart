@@ -118,11 +118,13 @@ class AppDrawer extends StatelessWidget {
   // ── Theme Selection Bottom Sheet ──
 
   void _showThemeBottomSheet(BuildContext context) {
+    // Capture provider before opening the sheet — the drawer's context
+    // becomes deactivated when MaterialApp rebuilds on theme change.
+    final themeProvider = context.read<ThemeProvider>();
+
     showModalBottomSheet(
       context: context,
       builder: (sheetContext) {
-        final themeProvider = context.read<ThemeProvider>();
-
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
@@ -134,7 +136,7 @@ class AppDrawer extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 8, bottom: 16),
                   child: Text(
                     'Appearance',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(sheetContext).textTheme.headlineSmall,
                   ),
                 ),
                 // Use StatefulBuilder so the radio tiles update in the sheet.
