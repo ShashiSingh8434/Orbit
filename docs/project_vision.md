@@ -1,83 +1,243 @@
-# Student Daily Life Helper - Project Vision
+# Orbit — Project Vision
 
-This document outlines the vision and brainstorming for a mobile application designed to be a frictionless, AI-powered daily assistant for college students. 
+## Vision Statement
 
-## 🎯 The Core Vision
-To build a highly frequently used, practical daily life helper for students. It shouldn't be a massive, bloated ERP system, but rather a personal, smart companion that handles the cognitive load of college life (classes, food, tasks, and reflection).
+**Orbit is an open-source AI-powered Personal Intelligence System designed for students.**
 
-## ✨ Core Features
+Rather than being another productivity app or college ERP, Orbit aims to become a student's second brain—a companion that remembers, understands, and grows alongside them throughout their academic journey.
 
-### 1. AI-Powered Daily Diary & Task Manager
-* **Frictionless Entry:** A simple interface to log daily thoughts, events, and what happened during the day.
-* **AI Task Extraction:** As the user writes (e.g., "I have a DBMS assignment due this Friday and I need to buy groceries tomorrow"), the AI automatically parses the text and adds these to a structured "Upcoming Tasks" list with due dates.
-* **Weekly Analysis:** The AI reviews the week's entries to generate a personalized progress report, highlighting achievements, tracking mood/stress, and offering actionable life suggestions (e.g., "You've been pulling a lot of late nights, try to rest this weekend").
+Its purpose is to reduce cognitive load by helping students organize their lives, reflect on their progress, and make better decisions through AI-driven memory, context, and personalized insights.
 
-### 2. Smart Academic Timetable
-* **Image-to-Schedule:** The user simply takes a photo of the college-provided timetable.
-* **AI Vision Extraction:** The app uses vision models to extract subjects, times, and room numbers, converting the image into a structured digital schedule.
-* **Daily Flow:** A clean UI showing "What's next?" so the student always knows where they need to be without checking a messy gallery image.
-
-### 3. Mess / Cafeteria Menu Tracker
-* **Image-to-Menu:** Similar to the timetable, the user uploads a picture of the hostel/mess menu.
-* **Structured Data:** The AI structures this into Breakfast, Lunch, Snacks, and Dinner for each day of the week.
-* **Quick Glance:** A home screen widget or dashboard card showing exactly what is being served for the next meal.
+The long-term goal is not simply to answer questions, but to build an application that understands the user over months and years.
 
 ---
 
-## 🛠️ Recommended Technology Stack
+# Core Philosophy
 
-Since this is a mobile application that will rely heavily on AI, here is a recommended modern stack:
+Modern AI is incredibly capable, but it forgets every conversation unless context is manually provided.
 
-* **Frontend:** **Flutter** or **React Native**. These frameworks allow you to build for both Android and iOS from a single codebase. Flutter is highly recommended for building beautiful, custom UIs quickly.
-* **Backend & Database:** **Firebase** or **Supabase**. Perfect for open-source projects. They provide authentication, real-time databases, and cloud storage (for the uploaded images).
-* **AI Provider:** **Google Gemini API**. Gemini is exceptionally good at multimodal tasks—meaning it can handle the text analysis (Diary) AND the vision tasks (extracting data from Timetable/Menu images) using a single, unified API.
-* **Local Storage:** It's crucial that things like the timetable and mess menu are available offline. We can use local databases like SQLite (or Hive/Isar in Flutter) to cache this data.
+Orbit changes that.
 
----
+Instead of acting like a chatbot, Orbit continuously builds a structured understanding of the user's life by learning from journals, schedules, goals, routines, academic activities, and daily interactions.
 
-## 🗺️ Step-by-Step Roadmap
-
-To build this slowly and sustainably, we should follow a phased approach:
-
-### Phase 1: The AI Diary Foundation
-* Setup the basic mobile app shell and navigation.
-* Build the Daily Diary writing interface.
-* Integrate the AI API to process diary entries and automatically extract Tasks and Due Dates.
-* Build a simple Task List UI to display the extracted tasks.
-
-### Phase 2: The Vision Features
-* Build image upload capabilities.
-* Prompt engineering: Design the AI prompts to accurately extract Timetable and Mess Menu data from images into structured JSON.
-* Build the UI to display the daily schedule and current meals.
-
-### Phase 3: The Unified Dashboard
-* Create a master "Home" screen that acts as the ultimate daily dashboard.
-* It should show: "Current Meal", "Next Class", "Pending Tasks", and a prompt to "Write today's diary".
-
-### Phase 4: Weekly Insights & Polish
-* Implement the background AI logic to generate weekly summaries and life suggestions from the diary history.
-* UI polish, animations, and preparing for open-source release.
+Every interaction contributes to a long-term memory system that enables increasingly personalized recommendations.
 
 ---
 
-## 💡 App Name Ideas (For Fun!)
+# Guiding Principles
 
-**Short & Punchy**
-* **Sync** - Simple and implies getting everything organized.
-* **Node** - A central point for all your college info.
-* **Orbit** - Managing the things revolving around your day.
-* **Pulse** - Keeping a finger on the pulse of your daily life.
+### AI-First
 
-**Academic & Campus Focused**
-* **ScholarSync**
-* **UniNode**
-* **UniSync**
-* **CampusCompanion**
+Every feature should ask:
 
-**Daily Routine & Diary Focused**
-* **DailyMind**
-* **MindLog**
-* **DaySync**
-* **StudentFlow**
-* **RoutineAI**
-* **DailyScholar**
+> *"How can AI make this simpler?"*
+
+AI is not an add-on—it is the foundation of the application.
+
+---
+
+### Frictionless Experience
+
+The user should never spend unnecessary time organizing information.
+
+Examples include:
+
+* Writing naturally instead of filling forms.
+* Uploading timetable images instead of manually creating schedules.
+* Automatically extracting tasks from journal entries.
+* Understanding context without repeated explanations.
+
+---
+
+### Personal Intelligence
+
+Orbit should understand patterns such as:
+
+* productivity
+* mood
+* habits
+* routines
+* sleep
+* academic workload
+* goals
+* consistency
+
+The application should evolve with the user instead of starting from scratch every day.
+
+---
+
+### Memory Over Conversations
+
+Orbit does not simply remember chats.
+
+It remembers experiences.
+
+Examples include:
+
+* important life events
+* academic milestones
+* projects
+* habits
+* recurring struggles
+* achievements
+* long-term goals
+
+These memories become searchable and usable by AI.
+
+---
+
+# Initial Product (MVP)
+
+The first version focuses on building the foundation of the memory system.
+
+## AI Daily Journal
+
+A distraction-free journal where students can freely write about their day.
+
+AI automatically:
+
+* extracts important events
+* detects mood
+* identifies goals
+* recognizes tasks
+* tracks habits
+* generates summaries
+* stores meaningful memories
+
+---
+
+## Smart Task Manager
+
+Instead of manually creating tasks,
+
+Users simply write:
+
+> "I have a DBMS assignment due Friday and need to buy groceries tomorrow."
+
+Orbit automatically creates structured tasks with deadlines and priorities.
+
+---
+
+## Weekly Reflection
+
+Every week Orbit analyzes:
+
+* journals
+* completed tasks
+* productivity
+* mood
+* habits
+
+and produces personalized reports highlighting:
+
+* achievements
+* areas for improvement
+* consistency
+* suggestions for the upcoming week
+
+---
+
+## Smart Timetable
+
+Students upload an image of their class timetable.
+
+AI converts it into structured schedules with:
+
+* subjects
+* timings
+* classrooms
+* recurring classes
+
+The app always knows:
+
+> "What's my next class?"
+
+---
+
+## Mess / Cafeteria Menu
+
+Students upload a weekly menu image.
+
+Orbit converts it into searchable structured data.
+
+The home screen can instantly display:
+
+* current meal
+* next meal
+* weekly menu
+
+without opening gallery images.
+
+---
+
+# Long-Term Vision
+
+The MVP is only the beginning.
+
+Future versions of Orbit will become a complete student intelligence platform capable of understanding long-term context.
+
+Possible future capabilities include:
+
+* Long-term memory retrieval
+* Goal planning and tracking
+* AI study companion
+* Semester analytics
+* Attendance insights
+* Assignment planning
+* Health and habit tracking
+* Smart reminders
+* Calendar integration
+* Knowledge management
+* Voice journaling
+* Wearable integration
+* Multi-device synchronization
+
+Ultimately, Orbit should feel less like an application and more like a personal operating system for student life.
+
+---
+
+# Technical Philosophy
+
+Orbit is designed around one core idea:
+
+**The application owns the memory.**
+
+Large Language Models provide reasoning.
+
+Orbit provides context.
+
+The system continuously:
+
+1. Collects information.
+2. Structures memories.
+3. Retrieves relevant context.
+4. Builds optimized prompts.
+5. Uses AI to generate personalized responses.
+
+This architecture allows Orbit to become more intelligent over time without depending entirely on any single AI model.
+
+---
+
+# Development Philosophy
+
+Orbit is an open-source, community-driven project.
+
+The objective is not only to build a useful application but also to create a learning platform where contributors can explore:
+
+* Flutter
+* Firebase
+* System Design
+* AI Integration
+* Prompt Engineering
+* Memory Architecture
+* Retrieval Systems
+* Mobile Development
+* Open Source Collaboration
+
+Every contribution—whether code, design, documentation, testing, or ideas—helps shape the future of Orbit.
+
+---
+
+# Mission
+
+> **Build an AI companion that remembers your journey, understands your growth, and helps students become better every day.**
