@@ -127,6 +127,14 @@ class AppDrawer extends ConsumerWidget {
                 ),
 
                 _DrawerItem(
+                  icon: Icons.help_outline_rounded,
+                  label: 'How to use Orbit',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.guide);
+                  },
+                ),
+                _DrawerItem(
                   icon: Icons.settings_rounded,
                   label: 'Settings',
                   onTap: () {
@@ -134,23 +142,20 @@ class AppDrawer extends ConsumerWidget {
                     context.push(AppRoutes.settings);
                   },
                 ),
+
+                const Divider(height: 24),
+
+                _DrawerItem(
+                  icon: Icons.logout_rounded,
+                  label: 'Logout',
+                  iconColor: colorScheme.error,
+                  textColor: colorScheme.error,
+                  onTap: () => _confirmLogout(context, ref),
+                ),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
               ],
             ),
           ),
-
-          // ── Logout ──────────────────────────────────────────────────────
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: _DrawerItem(
-              icon: Icons.logout_rounded,
-              label: 'Logout',
-              iconColor: colorScheme.error,
-              textColor: colorScheme.error,
-              onTap: () => _confirmLogout(context, ref),
-            ),
-          ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
         ],
       ),
     );

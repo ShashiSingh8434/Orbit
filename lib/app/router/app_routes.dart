@@ -28,4 +28,7 @@ abstract final class AppRoutes {
 
   /// App settings. Deep-link: `orbit://settings`
   static const settings = '/home/settings';
+
+  /// App guide.
+  static const guide = '/home/guide';
 }

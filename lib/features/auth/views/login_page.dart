@@ -3,81 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/orbit_logo.dart';
 import '../controllers/auth_controller.dart';
-import '../widgets/google_sign_in_button.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
+class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends ConsumerState<LoginPage>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _logoFade;
-  late final Animation<Offset> _logoSlide;
-  late final Animation<double> _titleFade;
-  late final Animation<Offset> _titleSlide;
-  late final Animation<double> _subtitleFade;
-  late final Animation<Offset> _subtitleSlide;
-  late final Animation<double> _buttonFade;
-  late final Animation<Offset> _buttonSlide;
-  late final Animation<double> _footerFade;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-
-    _logoFade = _buildFade(0.0, 0.35);
-    _logoSlide = _buildSlide(0.0, 0.35);
-
-    _titleFade = _buildFade(0.15, 0.50);
-    _titleSlide = _buildSlide(0.15, 0.50);
-
-    _subtitleFade = _buildFade(0.30, 0.60);
-    _subtitleSlide = _buildSlide(0.30, 0.60);
-
-    _buttonFade = _buildFade(0.45, 0.75);
-    _buttonSlide = _buildSlide(0.45, 0.75);
-
-    _footerFade = _buildFade(0.65, 1.0);
-
-    _controller.forward();
-  }
-
-  Animation<double> _buildFade(double begin, double end) {
-    return CurvedAnimation(
-      parent: _controller,
-      curve: Interval(begin, end, curve: Curves.easeOut),
-    );
-  }
-
-  Animation<Offset> _buildSlide(double begin, double end) {
-    return Tween<Offset>(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Interval(begin, end, curve: Curves.easeOutCubic),
-    ));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    
     // Watch the controller state for loading / error info
     final controllerState = ref.watch(authControllerProvider);
     final isLoading = controllerState.isLoading;
@@ -103,80 +37,42 @@ class _LoginPageState extends ConsumerState<LoginPage>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 24),
-
-                      // ── Logo ──
-                      SlideTransition(
-                        position: _logoSlide,
-                        child: FadeTransition(
-                          opacity: _logoFade,
-                          child: const OrbitLogo(size: 100),
-                        ),
-                      ),
-
+                      const OrbitLogo(size: 100),
                       const SizedBox(height: 40),
-
-                      // ── Title ──
-                      SlideTransition(
-                        position: _titleSlide,
-                        child: FadeTransition(
-                          opacity: _titleFade,
-                          child: Text(
-                            'Welcome to ${AppConstants.appName}',
-                            style: theme.textTheme.headlineLarge,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
+                      Text(
+                        'Welcome to ${AppConstants.appName}',
+                        style: theme.textTheme.headlineLarge,
+                        textAlign: TextAlign.center,
                       ),
-
                       const SizedBox(height: 12),
-
-                      // ── Subtitle ──
-                      SlideTransition(
-                        position: _subtitleSlide,
-                        child: FadeTransition(
-                          opacity: _subtitleFade,
-                          child: Text(
-                            AppConstants.appTagline,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
+                      Text(
+                        AppConstants.appTagline,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-
                       const SizedBox(height: 48),
 
-                      // ── Error Message ──
                       _ErrorBanner(
                         message: errorMessage,
                         onDismiss: () => ref.read(authControllerProvider.notifier).clearError(),
                       ),
 
-                      // ── Google Sign-In Button ──
-                      SlideTransition(
-                        position: _buttonSlide,
-                        child: FadeTransition(
-                          opacity: _buttonFade,
-                          child: GoogleSignInButton(
-                            isLoading: isLoading,
-                            onPressed: () => ref.read(authControllerProvider.notifier).signInWithGoogle(),
-                          ),
-                        ),
+                      // ── Slide to Sign In Button ──
+                      _SlideToSignInButton(
+                        isLoading: isLoading,
+                        onSignIn: () => ref.read(authControllerProvider.notifier).signInWithGoogle(),
                       ),
 
                       SizedBox(height: 48 + bottomPadding),
 
-                      // ── Footer ──
-                      FadeTransition(
-                        opacity: _footerFade,
-                        child: Text(
-                          'Powered by ${AppConstants.appName}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant.withAlpha(120),
-                          ),
-                          textAlign: TextAlign.center,
+                      Text(
+                        'Powered by ${AppConstants.appName}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant.withAlpha(120),
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -186,6 +82,192 @@ class _LoginPageState extends ConsumerState<LoginPage>
           },
         ),
       ),
+    );
+  }
+}
+
+class _SlideToSignInButton extends StatefulWidget {
+  final VoidCallback onSignIn;
+  final bool isLoading;
+
+  const _SlideToSignInButton({
+    required this.onSignIn,
+    required this.isLoading,
+  });
+
+  @override
+  State<_SlideToSignInButton> createState() => _SlideToSignInButtonState();
+}
+
+class _SlideToSignInButtonState extends State<_SlideToSignInButton> with SingleTickerProviderStateMixin {
+  double _dragPosition = 0.0;
+  bool _isFinished = false;
+  late AnimationController _springController;
+  late Animation<double> _springAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _springController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _springController.addListener(() {
+      setState(() {
+        _dragPosition = _springAnimation.value;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _springController.dispose();
+    super.dispose();
+  }
+
+  void _onPanUpdate(DragUpdateDetails details, double maxWidth) {
+    if (widget.isLoading || _isFinished) return;
+    
+    setState(() {
+      _dragPosition += details.delta.dx;
+      if (_dragPosition < 0) _dragPosition = 0;
+      if (_dragPosition > maxWidth - 56) _dragPosition = maxWidth - 56; // 56 is ball size
+    });
+  }
+
+  void _onPanEnd(DragEndDetails details, double maxWidth) {
+    if (widget.isLoading || _isFinished) return;
+    
+    if (_dragPosition > (maxWidth - 56) * 0.8) {
+      // Trigger sign in
+      setState(() {
+        _dragPosition = maxWidth - 56;
+        _isFinished = true;
+      });
+      widget.onSignIn();
+    } else {
+      // Snap back
+      _springAnimation = Tween<double>(begin: _dragPosition, end: 0.0).animate(
+        CurvedAnimation(parent: _springController, curve: Curves.easeOutBack),
+      );
+      _springController.forward(from: 0);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_SlideToSignInButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isLoading && !widget.isLoading && _isFinished) {
+      // Reset if it stopped loading (e.g. failed login or dialog closed)
+      _isFinished = false;
+      _springAnimation = Tween<double>(begin: _dragPosition, end: 0.0).animate(
+        CurvedAnimation(parent: _springController, curve: Curves.easeOutBack),
+      );
+      _springController.forward(from: 0);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        const ballSize = 56.0;
+        
+        return Container(
+          height: ballSize,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(ballSize / 2),
+            border: Border.all(color: colorScheme.outlineVariant),
+          ),
+          child: Stack(
+            children: [
+              // Filled track background when sliding
+              Container(
+                width: _dragPosition + ballSize,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withAlpha(50),
+                  borderRadius: BorderRadius.circular(ballSize / 2),
+                ),
+              ),
+              
+              // Text
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: ballSize * 0.5),
+                  child: Opacity(
+                    // Fade out text as we drag
+                    opacity: (1.0 - (_dragPosition / (maxWidth - ballSize))).clamp(0.0, 1.0),
+                    child: Text(
+                      'Slide to Sign in',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Draggable Ball
+              Positioned(
+                left: _dragPosition,
+                top: 0,
+                bottom: 0,
+                child: GestureDetector(
+                  onPanUpdate: (d) => _onPanUpdate(d, maxWidth),
+                  onPanEnd: (d) => _onPanEnd(d, maxWidth),
+                  child: Container(
+                    width: ballSize,
+                    height: ballSize,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.shadow.withAlpha(50),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: widget.isLoading 
+                        ? SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: colorScheme.onPrimary,
+                            ),
+                          )
+                        : Container(
+                            width: 36,
+                            height: 36,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Image.asset(
+                                AppConstants.googleImgPath,
+                                width: 22,
+                                height: 22,
+                              ),
+                            ),
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

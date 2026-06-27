@@ -12,6 +12,7 @@ import '../../features/decision/views/decision_list_page.dart';
 import '../../features/event/views/event_list_page.dart';
 import '../../features/learning/views/learning_list_page.dart';
 import '../../features/settings/views/settings_page.dart';
+import '../../features/home/views/guide_page.dart';
 import 'app_routes.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
@@ -96,6 +97,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const LearningListPage(),
           ),
 
+          // Guide
+          GoRoute(
+            path: 'guide',
+            builder: (_, __) => const GuidePage(),
+          ),
+
           // Settings
           GoRoute(
             path: 'settings',
@@ -121,8 +128,12 @@ class _RouterNotifier extends ChangeNotifier {
     final authValue = _ref.read(authStateProvider);
     final loc = state.matchedLocation;
 
+    if (loc == AppRoutes.splash) {
+      return null;
+    }
+
     if (authValue.isLoading) {
-      return loc == AppRoutes.splash ? null : AppRoutes.splash;
+      return AppRoutes.splash;
     }
 
     final isAuthenticated = authValue.value != null;
@@ -130,7 +141,8 @@ class _RouterNotifier extends ChangeNotifier {
     if (!isAuthenticated) {
       return loc == AppRoutes.login ? null : AppRoutes.login;
     }
-    if (loc == AppRoutes.splash || loc == AppRoutes.login) {
+    
+    if (loc == AppRoutes.login) {
       return AppRoutes.home;
     }
 

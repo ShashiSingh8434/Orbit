@@ -55,7 +55,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppConstants.appName),
+        title: Text(AppConstants.appName,style: Theme.of(context).textTheme.headlineLarge,),
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_month_rounded),
@@ -163,12 +163,13 @@ class _GreetingSection extends StatelessWidget {
           isToday 
             ? (firstName != null ? 'Hello, $firstName 👋' : 'Welcome 👋')
             : 'Your day on $dateLabel',
-          style: theme.textTheme.headlineLarge,
+          style: theme.textTheme.headlineMedium,
+
         ),
         const SizedBox(height: 6),
         Text(
-          'Your personal orbit starts here.',
-          style: theme.textTheme.bodyLarge?.copyWith(
+          'Reflect on your day, let AI organize the rest.',
+          style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
