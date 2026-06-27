@@ -2,29 +2,34 @@
 
 An AI-powered personal operating system for students — built with Flutter, Firebase, and Material 3.
 
-Orbit handles the cognitive load of college life: classes, food, tasks, and reflection — all in one place.
+Orbit handles the cognitive load of student life by allowing you to braindump your day in a single reflection. Orbit's AI brain parses your text and automatically organizes your classes, tasks, decisions, learnings, and mood.
 
-## Screenshots
+## ✨ Features
 
-> Coming soon
+- **Smart Reflection:** Write your daily thoughts naturally; Orbit automatically extracts structured Tasks, Events, Decisions, Learnings, and Moods.
+- **AI Infrastructure Layer:** Robust multi-provider AI system (Google Gemini & Groq).
+  - *Automatic Fallback:* If a provider hits a rate limit or goes offline, Orbit seamlessly fails over to another provider.
+  - *Secure Keys:* Connect your own API keys, encrypted locally using `flutter_secure_storage`.
+  - *Analytics Dashboard:* Track your AI token usage, request latency, and provider health in real-time.
+- **Detailed Daily Summaries:** Choose between paragraph or bullet-point summaries of your day.
+- **Modern UI/UX:** Space-themed custom splash screen, interactive "Slide to Sign In" slider, and Material 3 dynamic color theming.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 - **Flutter** (Dart)
 - **Firebase** (Auth, Firestore)
-- **Google Sign-In**
-- **Provider** (State Management)
-- **Material 3** with dynamic theming
+- **Riverpod** (State Management & Dependency Injection)
+- **Gemini & Groq** (Generative AI)
+- **Material 3** 
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - Flutter SDK `>=3.12.0`
 - Dart `>=3.0.0`
-- Android Studio / VS Code
 - A Firebase project
-- Node.js (for FlutterFire CLI)
+- API Keys for Google Gemini (and optionally Groq)
 
 ### 1. Clone the repo
 
@@ -33,7 +38,20 @@ git clone https://github.com/ShashiSingh8434/Orbit.git
 cd orbit
 ```
 
-### 2. Firebase Setup
+### 2. Environment Variables
+
+Orbit uses a `.env` file to manage default API keys. Create a `.env` file in the root directory:
+
+```bash
+cp .env.example .env
+```
+Add your API keys to the `.env` file:
+```env
+GEMINI_API_KEY=your_gemini_key_here
+GROQ_API_KEY=your_groq_key_here
+```
+
+### 3. Firebase Setup
 
 Install the FlutterFire CLI if you haven't:
 
@@ -41,35 +59,20 @@ Install the FlutterFire CLI if you haven't:
 dart pub global activate flutterfire_cli
 ```
 
-Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com), then configure it:
+Configure your Firebase project:
 
 ```bash
 flutterfire configure
 ```
 
-This generates `lib/firebase_options.dart` with your project credentials.
-
 #### Enable Authentication
-
 1. Go to **Firebase Console → Authentication → Sign-in method**
-2. Enable **Google** as a sign-in provider
-3. Add your **SHA-1** and **SHA-256** fingerprints (Android):
-
-```bash
-cd android
-./gradlew signingReport
-```
+2. Enable **Google** as a sign-in provider.
+3. Add your **SHA-1** fingerprint (required for Android Google Sign-In).
 
 #### Enable Firestore
-
 1. Go to **Firebase Console → Firestore Database**
-2. Create a database (start in **test mode** for development)
-
-### 3. Google Sign-In (Android)
-
-Ensure your `android/app/build.gradle` has the correct `applicationId` matching the one registered in Firebase.
-
-For debug builds, Firebase uses the debug SHA-1 from `signingReport`. No additional configuration needed.
+2. Create a database (start in **test mode** for development).
 
 ### 4. Install dependencies
 
@@ -83,38 +86,10 @@ flutter pub get
 flutter run
 ```
 
-## Project Structure
+## 🏗️ Architecture
 
-```
-lib/
-├── main.dart
-├── firebase_options.dart
-├── app/
-│   ├── app.dart
-│   └── theme/
-│       ├── app_theme.dart
-│       └── theme_provider.dart
-├── core/
-│   ├── constants/
-│   └── widgets/
-└── features/
-    ├── auth/
-    │   ├── services/
-    │   ├── provider/
-    │   ├── views/
-    │   └── widgets/
-    └── home/
-        ├── views/
-        └── widgets/
-```
+- **Feature-First Architecture:** Code is organized by domain (`ai`, `auth`, `day`, `event`, `tasks`, etc.) rather than by layer.
+- **Riverpod Providers:** Heavy use of Riverpod for immutable state management, data caching, and dependency injection.
+- **AI Abstraction Layer:** The `AiRequestManager` handles queueing, rate limits, and provider failovers to ensure reliable AI inferences regardless of the underlying SDK.
 
-## Architecture
 
-- **MVVM** with feature-first folder structure
-- **Views** — UI only, no business logic
-- **Providers** — state management via `ChangeNotifier`
-- **Services** — Firebase communication layer
-
-## License
-
-MIT
