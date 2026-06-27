@@ -111,33 +111,11 @@ class AppDrawer extends ConsumerWidget {
                 ),
 
                 _DrawerItem(
-                  icon: Icons.palette_rounded,
-                  label: 'Appearance',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showThemeSheet(context, ref);
-                  },
-                ),
-                _DrawerItem(
                   icon: Icons.settings_rounded,
                   label: 'Settings',
                   onTap: () {
                     Navigator.pop(context);
                     context.push(AppRoutes.settings);
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.info_outline_rounded,
-                  label: 'About',
-                  onTap: () {
-                    Navigator.pop(context);
-                    showAboutDialog(
-                      context: context,
-                      applicationName: AppConstants.appName,
-                      applicationVersion: AppConstants.appVersion,
-                      applicationLegalese:
-                          '© 2025 ${AppConstants.appName}. All rights reserved.',
-                    );
                   },
                 ),
               ],
@@ -159,77 +137,6 @@ class AppDrawer extends ConsumerWidget {
           SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
         ],
       ),
-    );
-  }
-
-  // ── Theme Picker ──────────────────────────────────────────────────────────
-
-  void _showThemeSheet(BuildContext context, WidgetRef ref) {
-    // Capture the notifier before the sheet opens — the drawer context may
-    // become invalid after the sheet triggers a MaterialApp rebuild.
-    final notifier = ref.read(themeNotifierProvider.notifier);
-
-    showModalBottomSheet(
-      context: context,
-      builder: (sheetCtx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, bottom: 16),
-                  child: Text(
-                    'Appearance',
-                    style: Theme.of(sheetCtx).textTheme.headlineSmall,
-                  ),
-                ),
-                StatefulBuilder(
-                  builder: (ctx, setSheetState) {
-                    ThemeMode current = ref.read(themeNotifierProvider);
-                    return Column(
-                      children: [
-                        _ThemeTile(
-                          icon: Icons.brightness_auto_rounded,
-                          label: 'System',
-                          value: ThemeMode.system,
-                          groupValue: current,
-                          onChanged: (m) {
-                            notifier.setThemeMode(m!);
-                            setSheetState(() => current = m);
-                          },
-                        ),
-                        _ThemeTile(
-                          icon: Icons.light_mode_rounded,
-                          label: 'Light',
-                          value: ThemeMode.light,
-                          groupValue: current,
-                          onChanged: (m) {
-                            notifier.setThemeMode(m!);
-                            setSheetState(() => current = m);
-                          },
-                        ),
-                        _ThemeTile(
-                          icon: Icons.dark_mode_rounded,
-                          label: 'Dark',
-                          value: ThemeMode.dark,
-                          groupValue: current,
-                          onChanged: (m) {
-                            notifier.setThemeMode(m!);
-                            setSheetState(() => current = m);
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
