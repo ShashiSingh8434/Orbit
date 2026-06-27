@@ -39,9 +39,10 @@ class ReflectionController extends Notifier<void> {
     required String text,
     List<String> tags = const [],
     String source = 'manual',
+    DateTime? date,
   }) async {
     final uid = _requireUid();
-    final now = DateTime.now();
+    final now = date ?? DateTime.now();
     final reflection = ReflectionModel(
       id: _generateId(),
       text: text.trim(),

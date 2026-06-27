@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../app/router/app_routes.dart';
+import '../../auth/controllers/auth_controller.dart';
 import '../controllers/reflection_controller.dart';
 import '../models/reflection_model.dart';
 import '../widgets/reflection_card.dart';
@@ -29,7 +30,7 @@ class ReflectionListPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.calendar_today_rounded),
             tooltip: 'Pick date',
-            onPressed: () => _pickDate(context, resolvedDate),
+            onPressed: () => _pickDate(context, ref, resolvedDate),
           ),
         ],
       ),
@@ -65,12 +66,14 @@ class ReflectionListPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _pickDate(BuildContext context, String current) async {
+  Future<void> _pickDate(BuildContext context, WidgetRef ref, String current) async {
+    final auth = ref.read(authStateProvider).value;
+    final creationTime = auth?.metadata.creationTime ?? DateTime.now().subtract(const Duration(days: 30));
     final picked = await showDatePicker(
       context: context,
       initialDate: OrbitDateUtils.parseKey(current),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      firstDate: DateTime(creationTime.year, creationTime.month, creationTime.day),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null && context.mounted) {
       context.go(AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(picked)));

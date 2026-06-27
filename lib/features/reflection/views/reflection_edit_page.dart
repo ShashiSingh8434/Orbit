@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../auth/controllers/auth_controller.dart';
 import '../controllers/reflection_controller.dart';
 import '../models/reflection_model.dart';
 import '../widgets/reflection_tag_chip.dart';
@@ -172,6 +173,7 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
           text: text,
           tags: List.from(_tags),
           source: _isListening ? 'voice' : 'manual',
+          date: OrbitDateUtils.parseKey(_resolvedDate),
         );
         await controller.clearDraft();
       }
@@ -213,7 +215,44 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Reflection' : 'New Reflection'),
+        title: GestureDetector(
+          onTap: () async {
+            final auth = ref.read(authStateProvider).value;
+            final creationTime = auth?.metadata.creationTime ?? DateTime.now().subtract(const Duration(days: 30));
+            final initialDate = OrbitDateUtils.parseKey(_resolvedDate);
+            final selectedDate = await showDatePicker(
+              context: context,
+              initialDate: initialDate,
+              firstDate: DateTime(creationTime.year, creationTime.month, creationTime.day),
+              lastDate: DateTime.now().add(const Duration(days: 365)),
+            );
+            if (selectedDate != null && mounted) {
+              setState(() {
+                _resolvedDate = OrbitDateUtils.dateKey(selectedDate);
+              });
+            }
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(isEditing ? 'Edit Reflection' : 'New Reflection'),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _resolvedDate,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.edit_calendar_rounded, size: 12, color: colorScheme.onSurfaceVariant),
+                ],
+              ),
+            ],
+          ),
+        ),
         leading: BackButton(onPressed: () => context.pop()),
         actions: [
           if (_isSaving)

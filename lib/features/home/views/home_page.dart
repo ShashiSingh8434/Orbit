@@ -65,6 +65,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 initialDate: _dateForIndex(_currentIndex),
                 firstDate: DateTime(creationTime.year, creationTime.month, creationTime.day),
                 lastDate: DateTime.now().add(const Duration(days: 365)),
+
               );
               if (selectedDate != null) {
                 final targetIndex = _initialPage + selectedDate.difference(_initialDate).inDays;
@@ -199,7 +200,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
         setState(() => _minTimeElapsed = true);
       }

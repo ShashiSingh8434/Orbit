@@ -27,21 +27,48 @@ class TaskController extends Notifier<void> {
     _repo = ref.watch(taskRepositoryProvider);
   }
 
-  Future<void> addTask({required String title, String description = ''}) async {
+  Future<void> addTask({
+    required String title,
+    String description = '',
+    DateTime? dueDate,
+    String? dueTime,
+  }) async {
     final uid = _requireUid();
     final task = TaskModel(
       id: _generateId(),
       title: title.trim(),
       description: description.trim(),
       createdAt: DateTime.now(),
+      dueDate: dueDate,
+      dueTime: dueTime,
     );
     await _repo.saveTask(uid, task);
+  }
+
+  Future<void> editTask(
+    TaskModel task, {
+    required String title,
+    String description = '',
+    DateTime? dueDate,
+    String? dueTime,
+  }) async {
+    final uid = _requireUid();
+    final updatedTask = task.copyWith(
+      title: title.trim(),
+      description: description.trim(),
+      dueDate: dueDate,
+      dueTime: dueTime,
+      updatedAt: DateTime.now(),
+      metadata: task.metadata?.copyWith(manualOverride: true),
+    );
+    await _repo.updateTask(uid, updatedTask);
   }
 
   Future<void> toggleDone(TaskModel task, bool isDone) async {
     final uid = _requireUid();
     final updatedTask = task.copyWith(
       status: isDone ? 'completed' : 'pending',
+      completedAt: isDone ? DateTime.now() : null,
       metadata: task.metadata?.copyWith(manualOverride: true),
     );
     await _repo.updateTask(uid, updatedTask);
