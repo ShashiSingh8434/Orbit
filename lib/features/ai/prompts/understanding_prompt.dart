@@ -36,25 +36,30 @@ Today's date is $reflectionDate.
 
 <extraction_rules>
 $summaryInstruction
-2. TASKS: Only extract actionable items the user needs to do. Do NOT treat past activities as tasks.
-   - "I need to buy groceries" → task. "I went to the gym" → NOT a task.
-   - Set priority to "medium" unless urgency is implied.
-   - Set status to "pending" unless the user says they completed it.
+
+2. TASKS: Extract actionable items the user needs to do, OR tasks they explicitly mention completing.
+   - If user says "add a task to..." or "I need to...": FIRST check EXISTING PENDING TASKS. If it already exists, output its `originalId` to avoid duplicates. Otherwise, create a new task with status="pending".
+   - If user says "mark [X] as complete", "I finished [X]", or similar: find the best match in EXISTING PENDING TASKS, set its status to "completed", and YOU MUST output its exact ID in the `originalId` field.
+   - If you can't find a match for a completed task, create a new one with status="completed".
    - EXISTING PENDING TASKS:
    $pendingTasksStr
-   - VERY IMPORTANT: If the user indicates they completed or updated an existing pending task, YOU MUST output its exact ID in the `originalId` field.
-3. LEARNINGS: Extract insights, realizations, or new knowledge gained.
-   - "I learned that consistency matters" → learning.
-   - Category should be one of: Life, Tech, Health, Academic, Career, Finance, Relationships, or General.
+
+3. LEARNINGS: Extract insights, realizations, or explicit "I learned..." statements.
+   - If user says "I learned this...", "Today I realized...", extract it.
+   - Category should be one of: Life, Tech, Health, Academic, Career, Finance, Relationships, General.
+
 4. DECISIONS: Extract choices or commitments the user explicitly made.
-   - "I decided to wake up at 5am" → decision. "I went to the gym" → NOT a decision.
-5. EVENTS: Extract activities that happened or are scheduled.
-   - "I went to the gym at 6am" → event with eventDate="$reflectionDate", time="6:00 AM".
-   - "My project deadline is Sept 5" → event with eventDate="2026-09-05".
+   - If user says "I decided to...", "I took a decision to...", "I'm going to commit to...", extract it.
+   - Example: "I decided to wake up at 5am" → decision. 
+
+5. EVENTS: Extract activities that happened or are scheduled (e.g., "add event...").
+   - If user says "add event" or "schedule...", FIRST check EXISTING UPCOMING EVENTS to avoid duplicates. If it exists, output its `originalId`.
+   - If user says "I went to the gym at 6am" → eventDate="$reflectionDate", time="6:00 AM".
    - Always provide eventDate in YYYY-MM-DD format. Default to "$reflectionDate" if no date is mentioned.
    - EXISTING UPCOMING EVENTS:
    $upcomingEventsStr
    - VERY IMPORTANT: If the user mentions an event that matches an existing event, YOU MUST output its exact ID in the `originalId` field to avoid duplicates.
+
 6. MOODS: Infer the user's emotional state.
    - Map to a 1-5 integer scale: 1=Very Bad, 2=Bad, 3=Neutral, 4=Good, 5=Very Good.
    - timeOfDay should be one of: Morning, Afternoon, Evening, Night, General.

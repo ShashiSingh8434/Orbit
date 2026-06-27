@@ -105,7 +105,45 @@ class GuidePage extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 40),
           
+          _SectionHeader(
+            icon: Icons.psychology_rounded,
+            title: 'Prompt Engineering Tips',
+            color: colorScheme.tertiary,
+          ),
+          const SizedBox(height: 16),
+          _InfoCard(
+            text: 'To get the most precise and accurate results from Orbit\'s AI, you can use direct commands to explicitly guide it:',
+            children: [
+              _BulletPoint(
+                icon: Icons.add_task_rounded,
+                title: 'Explicit Task Creation',
+                description: 'Say "Add a task to..." or "I need to..." to ensure the AI treats it as a pending task. Example: "Add a task to review my project notes tomorrow."',
+              ),
+              _BulletPoint(
+                icon: Icons.checklist_rtl_rounded,
+                title: 'Marking Tasks Complete',
+                description: 'To check off an existing task, explicitly name it and say you finished it. Example: "Mark review project notes as complete" or "I finished buying groceries."',
+              ),
+              _BulletPoint(
+                icon: Icons.add_card_rounded,
+                title: 'Explicit Events',
+                description: 'Use the word "schedule" or "add event" to firmly create an upcoming event. Example: "Schedule an event for my dentist appointment on Monday at 10 AM."',
+              ),
+              _BulletPoint(
+                icon: Icons.gavel_rounded,
+                title: 'Decisions & Commitments',
+                description: 'Declare your choices with phrases like "I took a decision to..." or "I decided to...". Example: "I took a decision to start learning Flutter every evening."',
+              ),
+              _BulletPoint(
+                icon: Icons.school_rounded,
+                title: 'Direct Insights',
+                description: 'When you want to log a specific takeaway, say "I learned this..." or "Today I realized...". Example: "I learned this: consistency is more important than intensity."',
+              ),
+            ],
+          ),
+
           const SizedBox(height: 40),
         ],
       ),

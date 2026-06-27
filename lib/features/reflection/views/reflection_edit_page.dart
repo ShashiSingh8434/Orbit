@@ -169,11 +169,20 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
           dateKey: _resolvedDate,
         );
       } else {
+        DateTime baseDate = OrbitDateUtils.parseKey(_resolvedDate);
+        DateTime finalDate;
+        if (_resolvedDate == OrbitDateUtils.todayKey()) {
+          finalDate = DateTime.now();
+        } else {
+          final now = DateTime.now();
+          finalDate = DateTime(baseDate.year, baseDate.month, baseDate.day, now.hour, now.minute, now.second);
+        }
+
         await controller.addReflection(
           text: text,
           tags: List.from(_tags),
           source: _isListening ? 'voice' : 'manual',
-          date: OrbitDateUtils.parseKey(_resolvedDate),
+          date: finalDate,
         );
         await controller.clearDraft();
       }

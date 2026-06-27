@@ -142,7 +142,7 @@ class AiRequestManager {
     late AiProvider testProvider;
     switch (providerId) {
       case 'gemini':
-        testProvider = GeminiProvider(apiKey: apiKey, model: 'gemini-1.5-flash', id: 'test', name: 'test', priority: 1);
+        testProvider = GeminiProvider(apiKey: apiKey, model: 'gemini-2.5-flash', id: 'test', name: 'test', priority: 1);
         break;
       case 'groq':
         testProvider = GroqProvider(apiKey: apiKey, model: 'llama-3.1-8b-instant', id: 'test', name: 'test', priority: 1);
