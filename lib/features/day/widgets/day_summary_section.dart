@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_routes.dart';
 import '../../../core/widgets/pulsing_skeleton.dart';
 import '../models/day_model.dart';
 
@@ -93,6 +95,17 @@ class DaySummarySection extends StatelessWidget {
               day!.summary,
               style: theme.textTheme.bodyLarge?.copyWith(
                 height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.tonalIcon(
+                onPressed: () {
+                  context.push(AppRoutes.detailedSummary, extra: {'date': date});
+                },
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text('See detailed summary'),
               ),
             ),
           ],

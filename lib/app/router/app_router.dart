@@ -13,6 +13,7 @@ import '../../features/event/views/event_list_page.dart';
 import '../../features/learning/views/learning_list_page.dart';
 import '../../features/settings/views/settings_page.dart';
 import '../../features/home/views/guide_page.dart';
+import '../../features/day/views/detailed_summary_page.dart';
 import 'app_routes.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
@@ -107,6 +108,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'settings',
             builder: (_, __) => const SettingsPage(),
+          ),
+          // Detailed Summary
+          GoRoute(
+            path: 'detailed-summary',
+            builder: (_, state) {
+              final extra = state.extra as Map<String, dynamic>?;
+              final date = extra?['date'] as DateTime? ?? DateTime.now();
+              return DetailedSummaryPage(date: date);
+            },
           ),
         ],
       ),

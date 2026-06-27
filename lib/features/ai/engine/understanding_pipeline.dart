@@ -17,6 +17,7 @@ import '../sync_services/learning_sync_service.dart';
 import '../sync_services/decision_sync_service.dart';
 import '../sync_services/event_sync_service.dart';
 import '../sync_services/mood_sync_service.dart';
+import '../prompts/understanding_prompt.dart';
 
 final understandingPipelineProvider = Provider<UnderstandingPipeline>((ref) {
   return UnderstandingPipeline(
@@ -55,69 +56,7 @@ class UnderstandingPipeline {
       return;
     }
 
-    final schema = Schema.object(
-      properties: {
-        'summary': Schema.object(
-          properties: {
-            'summary': Schema.string(description: 'A brief, encouraging 1-2 sentence summary of the reflection.'),
-            'aiConfidence': Schema.number(description: 'Confidence score from 0.0 to 1.0'),
-          },
-        ),
-        'tasks': Schema.array(
-          items: Schema.object(
-            properties: {
-              'title': Schema.string(description: 'Short actionable title for the task'),
-              'description': Schema.string(description: 'Additional detail about the task'),
-              'dueDate': Schema.string(description: 'YYYY-MM-DD format if mentioned, otherwise null', nullable: true),
-              'dueTime': Schema.string(description: 'HH:mm format if mentioned, otherwise null', nullable: true),
-              'priority': Schema.enumString(enumValues: ['low', 'medium', 'high'], description: 'Task priority'),
-              'status': Schema.enumString(enumValues: ['pending', 'completed'], description: 'Task status'),
-              'aiConfidence': Schema.number(),
-            },
-          ),
-        ),
-        'learnings': Schema.array(
-          items: Schema.object(
-            properties: {
-              'title': Schema.string(description: 'Short title for the learning/insight'),
-              'description': Schema.string(description: 'Detail about what was learned'),
-              'category': Schema.string(description: 'Category like Life, Tech, Health, Academic, etc.'),
-              'aiConfidence': Schema.number(),
-            },
-          ),
-        ),
-        'decisions': Schema.array(
-          items: Schema.object(
-            properties: {
-              'decision': Schema.string(description: 'The decision that was made'),
-              'reason': Schema.string(description: 'Why this decision was made'),
-              'aiConfidence': Schema.number(),
-            },
-          ),
-        ),
-        'events': Schema.array(
-          items: Schema.object(
-            properties: {
-              'title': Schema.string(description: 'Short title for the event'),
-              'description': Schema.string(description: 'Additional detail about the event'),
-              'eventDate': Schema.string(description: 'YYYY-MM-DD format. Use the reflection date if not explicitly mentioned.'),
-              'time': Schema.string(description: 'Time of day like "6:00 AM" or "Morning"', nullable: true),
-              'location': Schema.string(description: 'Location if mentioned', nullable: true),
-              'aiConfidence': Schema.number(),
-            },
-          ),
-        ),
-        'moods': Schema.array(
-          items: Schema.object(
-            properties: {
-              'timeOfDay': Schema.enumString(enumValues: ['Morning', 'Afternoon', 'Evening', 'Night', 'General'], description: 'When the mood was felt'),
-              'value': Schema.integer(description: 'Mood on a 1-5 scale: 1=Very Bad, 2=Bad, 3=Neutral, 4=Good, 5=Very Good'),
-              'aiConfidence': Schema.number(),
-            },
-          ),
-        ),
-      },
-    );
+    final schema = UnderstandingPromptBuilder.buildSchema();
 
     final model = GenerativeModel(
       model: 'gemini-2.5-flash',
@@ -127,44 +66,21 @@ class UnderstandingPipeline {
         responseSchema: schema,
       ),
     );
-
-    final reflectionDate = OrbitDateUtils.dateKey(reflection.createdAt);
     
     final existingDay = await daySyncService.getDay(uid, reflection.createdAt);
     final existingSummary = existingDay?.summary;
-    final summaryInstruction = existingSummary != null && existingSummary.isNotEmpty
-        ? '1. SUMMARY: The existing summary for this day is "$existingSummary". Merge this new reflection into the summary to create a comprehensive, cohesive, and encouraging 1-2 sentence summary of the entire day.'
-        : '1. SUMMARY: Write a brief (1-2 sentence), encouraging summary.';
+    
+    // Fetch context to prevent duplicates and enable task completion
+    final pendingTasks = await taskSyncService.getPendingTasks(uid);
+    final upcomingEvents = await eventSyncService.getUpcomingEvents(uid);
 
-    final prompt = '''
-You are the AI brain of Orbit, a student operating system.
-Your job is to read the user's daily reflection and extract precise, structured data.
-Be analytical and highly accurate. If a section has no relevant data, return an empty array.
-
-Today's date is $reflectionDate.
-
-Extraction rules:
-$summaryInstruction
-2. TASKS: Only extract actionable items the user needs to do. Do NOT treat past activities as tasks.
-   - "I need to buy groceries" → task. "I went to the gym" → NOT a task.
-   - Set priority to "medium" unless urgency is implied.
-   - Set status to "pending" unless the user says they completed it.
-3. LEARNINGS: Extract insights, realizations, or new knowledge gained.
-   - "I learned that consistency matters" → learning.
-   - Category should be one of: Life, Tech, Health, Academic, Career, Finance, Relationships, or General.
-4. DECISIONS: Extract choices or commitments the user explicitly made.
-   - "I decided to wake up at 5am" → decision. "I went to the gym" → NOT a decision.
-5. EVENTS: Extract activities that happened or are scheduled.
-   - "I went to the gym at 6am" → event with eventDate="$reflectionDate", time="6:00 AM".
-   - "My project deadline is Sept 5" → event with eventDate="2026-09-05".
-   - Always provide eventDate in YYYY-MM-DD format. Default to "$reflectionDate" if no date is mentioned.
-6. MOODS: Infer the user's emotional state.
-   - Map to a 1-5 integer scale: 1=Very Bad, 2=Bad, 3=Neutral, 4=Good, 5=Very Good.
-   - timeOfDay should be one of: Morning, Afternoon, Evening, Night, General.
-
-Reflection text:
-"${reflection.text}"
-''';
+    final prompt = UnderstandingPromptBuilder.buildPrompt(
+      createdAt: reflection.createdAt,
+      reflectionText: reflection.text,
+      existingSummary: existingSummary,
+      pendingTasks: pendingTasks,
+      upcomingEvents: upcomingEvents,
+    );
 
     try {
       final response = await model.generateContent([Content.text(prompt)]);

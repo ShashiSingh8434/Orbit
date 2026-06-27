@@ -7,6 +7,7 @@ part 'task_dto.g.dart';
 abstract class TaskDto with _$TaskDto {
   const factory TaskDto({
     required String title,
+    String? originalId,
     String? description,
     String? dueDate, // Keep as string from AI (e.g. "YYYY-MM-DD")
     String? dueTime, // Keep as string (e.g. "14:30")

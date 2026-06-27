@@ -11,6 +11,7 @@ abstract final class AppRoutes {
   static const String decisions = '/home/decisions';
   static const String events = '/home/events';
   static const String learnings = '/home/learnings';
+  static const String detailedSummary = '/home/detailed-summary';
 
   /// Reflections for a specific date (deep-linkable: `orbit://reflection/:date`)
   static String reflectionByDate(String date) => '/home/reflections/$date';

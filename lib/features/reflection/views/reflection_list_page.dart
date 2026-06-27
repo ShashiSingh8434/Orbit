@@ -37,20 +37,39 @@ class ReflectionListPage extends ConsumerWidget {
       body: reflectionsAsync.when(
         data: (reflections) => reflections.isEmpty
             ? _EmptyState()
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: reflections.length,
-                itemBuilder: (_, i) {
-                  final r = reflections[i];
-                  return ReflectionCard(
-                    reflection: r,
-                    onEdit: () => context.push(
-                      '/home/reflections/edit',
-                      extra: {'dateKey': resolvedDate, 'reflectionId': r.id},
+            : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.tonalIcon(
+                        onPressed: () {
+                          context.push(AppRoutes.detailedSummary, extra: {'date': OrbitDateUtils.parseKey(resolvedDate)});
+                        },
+                        icon: const Icon(Icons.auto_awesome),
+                        label: const Text('See detailed summary'),
+                      ),
                     ),
-                    onDelete: () => _confirmDelete(context, ref, r, resolvedDate),
-                  );
-                },
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      itemCount: reflections.length,
+                      itemBuilder: (_, i) {
+                        final r = reflections[i];
+                        return ReflectionCard(
+                          reflection: r,
+                          onEdit: () => context.push(
+                            '/home/reflections/edit',
+                            extra: {'dateKey': resolvedDate, 'reflectionId': r.id},
+                          ),
+                          onDelete: () => _confirmDelete(context, ref, r, resolvedDate),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),

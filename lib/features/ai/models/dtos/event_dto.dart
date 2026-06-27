@@ -7,6 +7,7 @@ part 'event_dto.g.dart';
 abstract class EventDto with _$EventDto {
   const factory EventDto({
     required String title,
+    String? originalId,
     String? description,
     required String eventDate, // "YYYY-MM-DD"
     String? time,

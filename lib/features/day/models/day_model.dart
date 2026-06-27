@@ -10,6 +10,8 @@ abstract class DayModel with _$DayModel {
     @Default('') String summary,
     @Default('auto') String summaryMode,
     @Default(0) int reflectionCount,
+    String? detailedSummary,
+    String? detailedSummaryBullet,
     double? averageMood,
     DateTime? createdAt,
     DateTime? updatedAt,

@@ -67,7 +67,7 @@ class _SplashPageState extends ConsumerState<SplashPage> with TickerProviderStat
           builder: (context, child) {
             return CustomPaint(
               size: const Size(double.infinity, double.infinity),
-              painter: _SpacePainter(
+              painter: SpacePainter(
                 orbitProgress: _orbitController.value,
                 pulseProgress: _pulseController.value,
                 starProgress: _starController.value,
@@ -82,14 +82,14 @@ class _SplashPageState extends ConsumerState<SplashPage> with TickerProviderStat
   }
 }
 
-class _SpacePainter extends CustomPainter {
+class SpacePainter extends CustomPainter {
   final double orbitProgress;
   final double pulseProgress;
   final double starProgress;
   final ColorScheme colorScheme;
   final bool isDark;
 
-  _SpacePainter({
+  SpacePainter({
     required this.orbitProgress,
     required this.pulseProgress,
     required this.starProgress,
@@ -238,5 +238,5 @@ class _SpacePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _SpacePainter oldDelegate) => true;
+  bool shouldRepaint(covariant SpacePainter oldDelegate) => true;
 }

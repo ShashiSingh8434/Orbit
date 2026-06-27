@@ -143,15 +143,6 @@ class AppDrawer extends ConsumerWidget {
                   },
                 ),
 
-                const Divider(height: 24),
-
-                _DrawerItem(
-                  icon: Icons.logout_rounded,
-                  label: 'Logout',
-                  iconColor: colorScheme.error,
-                  textColor: colorScheme.error,
-                  onTap: () => _confirmLogout(context, ref),
-                ),
                 SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
               ],
             ),
@@ -161,34 +152,6 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  // ── Logout Confirmation ───────────────────────────────────────────────────
-
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to sign out?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogCtx);
-              Navigator.pop(context); // Close drawer
-              ref.read(authControllerProvider.notifier).signOut();
-            },
-            child: Text(
-              'Logout',
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ── Drawer Item ───────────────────────────────────────────────────────────────

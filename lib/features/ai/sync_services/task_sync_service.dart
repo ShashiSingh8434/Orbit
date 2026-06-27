@@ -17,16 +17,29 @@ class TaskSyncService {
 
   String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
+  Future<List<TaskModel>> getPendingTasks(String uid) async {
+    final allTasks = await _repository.watchTasks(uid).first;
+    return allTasks.where((t) => t.status == 'pending').toList();
+  }
+
   Future<void> syncTasks(String uid, List<TaskDto> extractedTasks, String reflectionId, DateTime dayDate) async {
     // Fetch existing tasks to perform duplicate and completion detection
     final existingTasksStream = _repository.watchTasks(uid).first;
     final existingTasks = await existingTasksStream;
 
     for (final dto in extractedTasks) {
-      final normalizedNewTitle = _normalize(dto.title);
+      int existingIndex = -1;
+
+      // 1. Check if AI matched an exact ID
+      if (dto.originalId != null && dto.originalId!.isNotEmpty) {
+        existingIndex = existingTasks.indexWhere((t) => t.id == dto.originalId);
+      }
       
-      // Fuzzy title matching
-      int existingIndex = existingTasks.indexWhere((t) => _normalize(t.title) == normalizedNewTitle);
+      // 2. Fallback to Fuzzy title matching if no ID or ID not found
+      if (existingIndex == -1) {
+        final normalizedNewTitle = _normalize(dto.title);
+        existingIndex = existingTasks.indexWhere((t) => _normalize(t.title) == normalizedNewTitle);
+      }
       
       if (existingIndex != -1) {
         // Update existing task
