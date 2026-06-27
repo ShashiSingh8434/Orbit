@@ -12,8 +12,12 @@ class DaySyncService {
 
   DaySyncService(this._repository);
 
+  Future<DayModel?> getDay(String uid, DateTime date) {
+    return _repository.getDay(uid, date);
+  }
+
   Future<void> syncDaySummary(String uid, DateTime date, SummaryDto summaryDto) async {
-    var day = await _repository.getDay(uid, date);
+    var day = await getDay(uid, date);
     
     if (day == null) {
       day = DayModel(

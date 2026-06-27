@@ -5,11 +5,13 @@ import '../models/day_model.dart';
 class DaySummarySection extends StatelessWidget {
   final DayModel? day;
   final bool isLoading;
+  final DateTime date;
 
   const DaySummarySection({
     super.key,
     required this.day,
     required this.isLoading,
+    required this.date,
   });
 
   @override
@@ -36,6 +38,9 @@ class DaySummarySection extends StatelessWidget {
       );
     }
 
+    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
+    final emptyText = isToday ? 'No summary available for today. Write a reflection to capture your day!' : 'No summary available for this day.';
+
     if (day == null || day!.summary.isEmpty) {
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -58,7 +63,7 @@ class DaySummarySection extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'No summary available for today. Write a reflection to capture your day!',
+                emptyText,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,

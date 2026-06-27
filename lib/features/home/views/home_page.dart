@@ -114,26 +114,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                   ] else ...[
-                    dayDataAsync.when(
-                      data: (data) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          DaySummarySection(day: data.day, isLoading: false),
-                          const SizedBox(height: 16),
-                          TaskSection(tasks: data.tasks, isLoading: false),
-                          const SizedBox(height: 16),
-                          LearningSection(learnings: data.learnings, isLoading: false),
-                          const SizedBox(height: 16),
-                          DecisionSection(decisions: data.decisions, isLoading: false),
-                          const SizedBox(height: 16),
-                          EventSection(events: data.events, isLoading: false),
-                          const SizedBox(height: 16),
-                          MoodSection(moods: data.moods, isLoading: false),
-                        ],
-                      ),
-                      loading: () => const DaySkeletonLoader(),
-                      error: (e, st) => Center(child: Text('Error: $e')),
-                    ),
+                    _DelayedDataView(asyncValue: dayDataAsync, date: date),
                   ],
                 ],
               ),
@@ -165,13 +146,21 @@ class _GreetingSection extends StatelessWidget {
     return displayName.trim().split(' ').first;
   }
 
+  String _formatDate(DateTime date) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final firstName = _extractFirstName(userDisplayName);
     final isToday = date.day == DateTime.now().day && date.month == DateTime.now().month && date.year == DateTime.now().year;
 
-    final dateLabel = isToday ? "Today" : "${date.day}/${date.month}/${date.year}";
+    final dateLabel = isToday ? "Today" : _formatDate(date);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,6 +179,59 @@ class _GreetingSection extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DelayedDataView extends StatefulWidget {
+  final AsyncValue<DayData> asyncValue;
+  final DateTime date;
+
+  const _DelayedDataView({required this.asyncValue, required this.date});
+
+  @override
+  State<_DelayedDataView> createState() => _DelayedDataViewState();
+}
+
+class _DelayedDataViewState extends State<_DelayedDataView> {
+  bool _minTimeElapsed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() => _minTimeElapsed = true);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.asyncValue.when(
+      data: (data) {
+        if (!_minTimeElapsed) {
+          return DaySkeletonLoader(date: widget.date);
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            DaySummarySection(day: data.day, isLoading: false, date: widget.date),
+            const SizedBox(height: 16),
+            TaskSection(tasks: data.tasks, isLoading: false, date: widget.date),
+            const SizedBox(height: 16),
+            LearningSection(learnings: data.learnings, isLoading: false, date: widget.date),
+            const SizedBox(height: 16),
+            DecisionSection(decisions: data.decisions, isLoading: false, date: widget.date),
+            const SizedBox(height: 16),
+            EventSection(events: data.events, isLoading: false, date: widget.date),
+            const SizedBox(height: 16),
+            MoodSection(moods: data.moods, isLoading: false, date: widget.date),
+          ],
+        );
+      },
+      loading: () => DaySkeletonLoader(date: widget.date),
+      error: (err, stack) => Center(child: Text('Error loading day data: $err')),
     );
   }
 }

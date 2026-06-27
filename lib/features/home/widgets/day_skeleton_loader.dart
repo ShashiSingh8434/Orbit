@@ -8,25 +8,30 @@ import '../../event/widgets/event_section.dart';
 import '../../mood/widgets/mood_section.dart';
 
 class DaySkeletonLoader extends StatelessWidget {
-  const DaySkeletonLoader({super.key});
+  final DateTime date;
+
+  const DaySkeletonLoader({
+    super.key,
+    required this.date,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
-        HorizontalTextLoader(),
-        SizedBox(height: 24),
-        DaySummarySection(day: null, isLoading: true),
-        SizedBox(height: 16),
-        TaskSection(tasks: null, isLoading: true),
-        SizedBox(height: 16),
-        LearningSection(learnings: null, isLoading: true),
-        SizedBox(height: 16),
-        DecisionSection(decisions: null, isLoading: true),
-        SizedBox(height: 16),
-        EventSection(events: null, isLoading: true),
-        SizedBox(height: 16),
-        MoodSection(moods: null, isLoading: true),
+        const HorizontalTextLoader(),
+        const SizedBox(height: 24),
+        DaySummarySection(day: null, isLoading: true, date: date),
+        const SizedBox(height: 16),
+        TaskSection(tasks: null, isLoading: true, date: date),
+        const SizedBox(height: 16),
+        LearningSection(learnings: null, isLoading: true, date: date),
+        const SizedBox(height: 16),
+        DecisionSection(decisions: null, isLoading: true, date: date),
+        const SizedBox(height: 16),
+        EventSection(events: null, isLoading: true, date: date),
+        const SizedBox(height: 16),
+        MoodSection(moods: null, isLoading: true, date: date),
       ],
     );
   }

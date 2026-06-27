@@ -5,11 +5,13 @@ import '../models/task_model.dart';
 class TaskSection extends StatelessWidget {
   final List<TaskModel>? tasks;
   final bool isLoading;
+  final DateTime date;
 
   const TaskSection({
     super.key,
     required this.tasks,
     required this.isLoading,
+    required this.date,
   });
 
   @override
@@ -49,6 +51,9 @@ class TaskSection extends StatelessWidget {
       );
     }
 
+    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
+    final emptyText = isToday ? 'No tasks for today' : 'No tasks for this day';
+
     if (tasks == null || tasks!.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -59,14 +64,14 @@ class TaskSection extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.task_alt_outlined, color: colorScheme.onSurfaceVariant),
+            Icon(Icons.check_circle_outline, color: colorScheme.onSurfaceVariant),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'No tasks for today',
+                    emptyText,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.bold,

@@ -129,6 +129,12 @@ class UnderstandingPipeline {
     );
 
     final reflectionDate = OrbitDateUtils.dateKey(reflection.createdAt);
+    
+    final existingDay = await daySyncService.getDay(uid, reflection.createdAt);
+    final existingSummary = existingDay?.summary;
+    final summaryInstruction = existingSummary != null && existingSummary.isNotEmpty
+        ? '1. SUMMARY: The existing summary for this day is "$existingSummary". Merge this new reflection into the summary to create a comprehensive, cohesive, and encouraging 1-2 sentence summary of the entire day.'
+        : '1. SUMMARY: Write a brief (1-2 sentence), encouraging summary.';
 
     final prompt = '''
 You are the AI brain of Orbit, a student operating system.
@@ -138,7 +144,7 @@ Be analytical and highly accurate. If a section has no relevant data, return an 
 Today's date is $reflectionDate.
 
 Extraction rules:
-1. SUMMARY: Write a brief (1-2 sentence), encouraging summary.
+$summaryInstruction
 2. TASKS: Only extract actionable items the user needs to do. Do NOT treat past activities as tasks.
    - "I need to buy groceries" → task. "I went to the gym" → NOT a task.
    - Set priority to "medium" unless urgency is implied.

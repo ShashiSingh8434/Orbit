@@ -5,11 +5,13 @@ import '../models/mood_model.dart';
 class MoodSection extends StatelessWidget {
   final List<MoodModel>? moods;
   final bool isLoading;
+  final DateTime date;
 
   const MoodSection({
     super.key,
     required this.moods,
     required this.isLoading,
+    required this.date,
   });
 
   @override
@@ -36,6 +38,9 @@ class MoodSection extends StatelessWidget {
       );
     }
 
+    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
+    final emptyText = isToday ? 'No moods recorded today' : 'No moods recorded for this day';
+
     if (moods == null || moods!.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -53,7 +58,7 @@ class MoodSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'No moods recorded',
+                    emptyText,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.bold,

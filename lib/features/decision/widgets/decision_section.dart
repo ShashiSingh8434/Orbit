@@ -5,11 +5,13 @@ import '../models/decision_model.dart';
 class DecisionSection extends StatelessWidget {
   final List<DecisionModel>? decisions;
   final bool isLoading;
+  final DateTime date;
 
   const DecisionSection({
     super.key,
     required this.decisions,
     required this.isLoading,
+    required this.date,
   });
 
   @override
@@ -49,6 +51,9 @@ class DecisionSection extends StatelessWidget {
       );
     }
 
+    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
+    final emptyText = isToday ? 'No decisions made today' : 'No decisions made on this day';
+
     if (decisions == null || decisions!.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -59,14 +64,14 @@ class DecisionSection extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle_outline, color: colorScheme.onSurfaceVariant),
+            Icon(Icons.call_split, color: colorScheme.onSurfaceVariant),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'No decisions made today',
+                    emptyText,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.bold,

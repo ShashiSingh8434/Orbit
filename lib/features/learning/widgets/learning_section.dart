@@ -5,11 +5,13 @@ import '../models/learning_model.dart';
 class LearningSection extends StatelessWidget {
   final List<LearningModel>? learnings;
   final bool isLoading;
+  final DateTime date;
 
   const LearningSection({
     super.key,
     required this.learnings,
     required this.isLoading,
+    required this.date,
   });
 
   @override
@@ -49,6 +51,9 @@ class LearningSection extends StatelessWidget {
       );
     }
 
+    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
+    final emptyText = isToday ? 'No learnings captured today' : 'No learnings captured for this day';
+
     if (learnings == null || learnings!.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -66,7 +71,7 @@ class LearningSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'No learnings captured today',
+                    emptyText,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.bold,

@@ -5,11 +5,13 @@ import '../models/event_model.dart';
 class EventSection extends StatelessWidget {
   final List<EventModel>? events;
   final bool isLoading;
+  final DateTime date;
 
   const EventSection({
     super.key,
     required this.events,
     required this.isLoading,
+    required this.date,
   });
 
   @override
@@ -49,6 +51,9 @@ class EventSection extends StatelessWidget {
       );
     }
 
+    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
+    final emptyText = isToday ? 'No events for today' : 'No events for this day';
+
     if (events == null || events!.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -66,7 +71,7 @@ class EventSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'No events for today',
+                    emptyText,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
@@ -97,7 +102,7 @@ class EventSection extends StatelessWidget {
             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
-        ...events!.map<Widget>((e) => ListTile(
+        ..._getSortedEvents().map<Widget>((e) => ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.event, color: Colors.deepPurple),
           title: Text(e.title),
@@ -106,5 +111,12 @@ class EventSection extends StatelessWidget {
         )).toList(),
       ],
     );
+  }
+
+  List<EventModel> _getSortedEvents() {
+    if (events == null) return [];
+    final sorted = List<EventModel>.from(events!);
+    sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return sorted;
   }
 }
