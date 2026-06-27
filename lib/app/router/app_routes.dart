@@ -32,4 +32,7 @@ abstract final class AppRoutes {
 
   /// App guide.
   static const guide = '/home/guide';
+
+  /// AI Analytics dashboard.
+  static const aiAnalytics = '/home/ai-analytics';
 }

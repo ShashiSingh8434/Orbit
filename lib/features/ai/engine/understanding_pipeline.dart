@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
-import '../../../core/utils/date_utils.dart';
 import '../../reflection/models/reflection_model.dart';
 import '../models/dtos/summary_dto.dart';
 import '../models/dtos/task_dto.dart';
@@ -18,9 +15,12 @@ import '../sync_services/decision_sync_service.dart';
 import '../sync_services/event_sync_service.dart';
 import '../sync_services/mood_sync_service.dart';
 import '../prompts/understanding_prompt.dart';
+import '../providers/ai_request.dart';
+import '../engine/ai_request_manager.dart';
 
 final understandingPipelineProvider = Provider<UnderstandingPipeline>((ref) {
   return UnderstandingPipeline(
+    aiRequestManager: ref.read(aiRequestManagerProvider),
     daySyncService: ref.read(daySyncServiceProvider),
     taskSyncService: ref.read(taskSyncServiceProvider),
     learningSyncService: ref.read(learningSyncServiceProvider),
@@ -31,6 +31,7 @@ final understandingPipelineProvider = Provider<UnderstandingPipeline>((ref) {
 });
 
 class UnderstandingPipeline {
+  final AiRequestManager aiRequestManager;
   final DaySyncService daySyncService;
   final TaskSyncService taskSyncService;
   final LearningSyncService learningSyncService;
@@ -39,6 +40,7 @@ class UnderstandingPipeline {
   final MoodSyncService moodSyncService;
 
   UnderstandingPipeline({
+    required this.aiRequestManager,
     required this.daySyncService,
     required this.taskSyncService,
     required this.learningSyncService,
@@ -50,23 +52,8 @@ class UnderstandingPipeline {
   Future<void> onReflectionSaved(String uid, ReflectionModel reflection) async {
     debugPrint('UnderstandingPipeline triggered for reflection: ${reflection.id}');
 
-    final apiKey = dotenv.env['GEMINI_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty) {
-      debugPrint('Error: GEMINI_API_KEY not found in .env');
-      return;
-    }
-
     final schema = UnderstandingPromptBuilder.buildSchema();
 
-    final model = GenerativeModel(
-      model: 'gemini-2.5-flash',
-      apiKey: apiKey,
-      generationConfig: GenerationConfig(
-        responseMimeType: 'application/json',
-        responseSchema: schema,
-      ),
-    );
-    
     final existingDay = await daySyncService.getDay(uid, reflection.createdAt);
     final existingSummary = existingDay?.summary;
     
@@ -83,9 +70,14 @@ class UnderstandingPipeline {
     );
 
     try {
-      final response = await model.generateContent([Content.text(prompt)]);
+      final response = await aiRequestManager.generate(AiRequest(
+        prompt: prompt,
+        jsonMode: true,
+        responseSchema: schema,
+        requestId: 'understanding_${reflection.id}',
+      ));
+
       final jsonString = response.text;
-      if (jsonString == null) throw Exception('Null response from Gemini');
 
       final Map<String, dynamic> data = jsonDecode(jsonString);
 
