@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import 'router/app_router.dart';
 import 'theme/app_theme.dart';
-import 'theme/theme_provider.dart';
-import '../features/auth/views/auth_gate.dart';
+import 'theme/theme_notifier.dart';
 
-/// Root widget for the Orbit application.
-///
-/// Consumes [ThemeProvider] to apply the correct light/dark theme
-/// and routes to [AuthGate] which handles auth-based navigation.
-class OrbitApp extends StatelessWidget {
+/// Root widget of the Orbit application.
+
+class OrbitApp extends ConsumerWidget {
   const OrbitApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeNotifierProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: themeProvider.themeMode,
-      home: const AuthGate(),
+      themeMode: themeMode,
+      routerConfig: router,
     );
   }
 }

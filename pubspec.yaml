@@ -1,5 +1,5 @@
 name: orbit
-description: "A new Flutter project."
+description: "Your AI-powered personal orbit — reflections, knowledge, and tasks."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -13,29 +13,57 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # Firebase
+  # ── Firebase ──
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.1
   cloud_firestore: ^5.4.4
 
-  # Google Sign-In
+  # ── Google Sign-In ──
   google_sign_in: ^6.2.1
 
-  # State Management
-  provider: ^6.1.2
+  # ── State Management (Riverpod) ──
+  flutter_riverpod: ^2.6.1
 
-  # Persistence
+  # ── Routing ──
+  go_router: ^14.6.2
+
+  # ── Immutable Models ──
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+
+  # ── AI ──
+  # The app depends only on the abstract AIProvider interface.
+  # To migrate to a backend proxy, implement a new AIProvider subclass
+  # and swap the Riverpod binding — no other code changes required.
+  google_generative_ai: ^0.4.6
+
+  # ── Voice-to-Text ──
+  speech_to_text: ^7.0.0
+
+  # ── Environment Variables ──
+  # Keys are loaded from .env (gitignored). See .env.example.
+  flutter_dotenv: ^5.2.1
+
+  # ── Persistence ──
   shared_preferences: ^2.3.3
 
-  # Typography
+  # ── Typography ──
   google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.13.1
 
-  flutter_lints: ^6.0.0
+  # ── Code Generation ──
+  build_runner: ^2.4.13
+  freezed: ^3.0.0
+  json_serializable: ^6.8.0
+
+  # ── Linting ──
+  custom_lint: ^0.7.5
+  riverpod_lint: ^2.6.1
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -48,5 +76,9 @@ flutter:
   assets:
     - assets/google_img.png
     - assets/app_logo_dark.png
-    - assets/app_logo_light.png    
+    - assets/app_logo_light.png
     - assets/black.png
+    # .env is bundled as a Flutter asset so flutter_dotenv can load it at runtime.
+    # NEVER commit your real .env file — it is listed in .gitignore.
+    # Copy .env.example → .env and fill in your keys before running.
+    - .env

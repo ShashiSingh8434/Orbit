@@ -1,37 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../app/theme/theme_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_routes.dart';
+import '../../../app/theme/theme_notifier.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../auth/provider/auth_provider.dart';
-import '../../auth/services/auth_service.dart';
+import '../../auth/controllers/auth_controller.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final user = AuthService.instance.currentUser;
+    final user = ref.watch(authStateProvider).value;
 
     return Drawer(
       child: Column(
         children: [
-          // ── Profile Header ──
+          // ── Profile Header ──────────────────────────────────────────────
           UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
-              color: colorScheme.primary,
-            ),
+            decoration: BoxDecoration(color: colorScheme.primary),
             currentAccountPicture: CircleAvatar(
               backgroundColor: colorScheme.onPrimary,
-              backgroundImage:
-                  user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+              backgroundImage: user?.photoURL != null
+                  ? NetworkImage(user!.photoURL!)
+                  : null,
               child: user?.photoURL == null
-                  ? Icon(
-                      Icons.person_rounded,
-                      size: 36,
-                      color: colorScheme.primary,
-                    )
+                  ? Icon(Icons.person_rounded, size: 36, color: colorScheme.primary)
                   : null,
             ),
             accountName: Text(
@@ -49,34 +45,85 @@ class AppDrawer extends StatelessWidget {
             ),
           ),
 
-          // ── Menu Items ──
+          // ── Navigation Items ────────────────────────────────────────────
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               children: [
+                // Core
                 _DrawerItem(
                   icon: Icons.home_rounded,
                   label: 'Home',
-                  selected: true,
-                  onTap: () => Navigator.pop(context),
+                  selected: GoRouterState.of(context).matchedLocation == AppRoutes.home,
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.go(AppRoutes.home);
+                  },
                 ),
+
+                const Divider(height: 24),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, bottom: 8),
+                  child: Text(
+                    'FEATURES',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+
+                _DrawerItem(
+                  icon: Icons.auto_awesome_rounded,
+                  label: 'Reflections',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.reflections);
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.psychology_rounded,
+                  label: 'Knowledge',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.knowledge);
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.task_alt_rounded,
+                  label: 'Tasks',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.tasks);
+                  },
+                ),
+
+                const Divider(height: 24),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, bottom: 8),
+                  child: Text(
+                    'MORE',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+
                 _DrawerItem(
                   icon: Icons.palette_rounded,
                   label: 'Appearance',
                   onTap: () {
                     Navigator.pop(context);
-                    _showThemeBottomSheet(context);
+                    _showThemeSheet(context, ref);
                   },
                 ),
-                const Divider(height: 32),
                 _DrawerItem(
                   icon: Icons.settings_rounded,
                   label: 'Settings',
                   onTap: () {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Coming Soon')),
-                    );
+                    context.push(AppRoutes.settings);
                   },
                 ),
                 _DrawerItem(
@@ -97,7 +144,7 @@ class AppDrawer extends StatelessWidget {
             ),
           ),
 
-          // ── Logout Button ──
+          // ── Logout ──────────────────────────────────────────────────────
           const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -106,7 +153,7 @@ class AppDrawer extends StatelessWidget {
               label: 'Logout',
               iconColor: colorScheme.error,
               textColor: colorScheme.error,
-              onTap: () => _confirmLogout(context),
+              onTap: () => _confirmLogout(context, ref),
             ),
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
@@ -115,16 +162,16 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  // ── Theme Selection Bottom Sheet ──
+  // ── Theme Picker ──────────────────────────────────────────────────────────
 
-  void _showThemeBottomSheet(BuildContext context) {
-    // Capture provider before opening the sheet — the drawer's context
-    // becomes deactivated when MaterialApp rebuilds on theme change.
-    final themeProvider = context.read<ThemeProvider>();
+  void _showThemeSheet(BuildContext context, WidgetRef ref) {
+    // Capture the notifier before the sheet opens — the drawer context may
+    // become invalid after the sheet triggers a MaterialApp rebuild.
+    final notifier = ref.read(themeNotifierProvider.notifier);
 
     showModalBottomSheet(
       context: context,
-      builder: (sheetContext) {
+      builder: (sheetCtx) {
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
@@ -136,39 +183,45 @@ class AppDrawer extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 8, bottom: 16),
                   child: Text(
                     'Appearance',
-                    style: Theme.of(sheetContext).textTheme.headlineSmall,
+                    style: Theme.of(sheetCtx).textTheme.headlineSmall,
                   ),
                 ),
-                // Use StatefulBuilder so the radio tiles update in the sheet.
                 StatefulBuilder(
-                  builder: (context, setSheetState) {
-                    final current = themeProvider.themeMode;
-                    return RadioGroup<ThemeMode>(
-                      groupValue: current,
-                      onChanged: (mode) {
-                        if (mode == null) return;
-                        themeProvider.setThemeMode(mode);
-                        setSheetState(() {});
-                      },
-                      child: Column(
-                        children: [
-                          _ThemeRadioTile(
-                            icon: Icons.brightness_auto_rounded,
-                            label: 'System',
-                            value: ThemeMode.system,
-                          ),
-                          _ThemeRadioTile(
-                            icon: Icons.light_mode_rounded,
-                            label: 'Light',
-                            value: ThemeMode.light,
-                          ),
-                          _ThemeRadioTile(
-                            icon: Icons.dark_mode_rounded,
-                            label: 'Dark',
-                            value: ThemeMode.dark,
-                          ),
-                        ],
-                      ),
+                  builder: (ctx, setSheetState) {
+                    ThemeMode current = ref.read(themeNotifierProvider);
+                    return Column(
+                      children: [
+                        _ThemeTile(
+                          icon: Icons.brightness_auto_rounded,
+                          label: 'System',
+                          value: ThemeMode.system,
+                          groupValue: current,
+                          onChanged: (m) {
+                            notifier.setThemeMode(m!);
+                            setSheetState(() => current = m);
+                          },
+                        ),
+                        _ThemeTile(
+                          icon: Icons.light_mode_rounded,
+                          label: 'Light',
+                          value: ThemeMode.light,
+                          groupValue: current,
+                          onChanged: (m) {
+                            notifier.setThemeMode(m!);
+                            setSheetState(() => current = m);
+                          },
+                        ),
+                        _ThemeTile(
+                          icon: Icons.dark_mode_rounded,
+                          label: 'Dark',
+                          value: ThemeMode.dark,
+                          groupValue: current,
+                          onChanged: (m) {
+                            notifier.setThemeMode(m!);
+                            setSheetState(() => current = m);
+                          },
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -180,24 +233,24 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  // ── Logout Confirmation ──
+  // ── Logout Confirmation ───────────────────────────────────────────────────
 
-  void _confirmLogout(BuildContext context) {
+  void _confirmLogout(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to sign out?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
+            onPressed: () => Navigator.pop(dialogCtx),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(dialogContext); // Close dialog
+              Navigator.pop(dialogCtx);
               Navigator.pop(context); // Close drawer
-              context.read<AuthProvider>().signOut();
+              ref.read(authControllerProvider.notifier).signOut();
             },
             child: Text(
               'Logout',
@@ -209,6 +262,8 @@ class AppDrawer extends StatelessWidget {
     );
   }
 }
+
+// ── Drawer Item ───────────────────────────────────────────────────────────────
 
 class _DrawerItem extends StatelessWidget {
   const _DrawerItem({
@@ -252,16 +307,22 @@ class _DrawerItem extends StatelessWidget {
   }
 }
 
-class _ThemeRadioTile extends StatelessWidget {
-  const _ThemeRadioTile({
+// ── Theme Radio Tile ──────────────────────────────────────────────────────────
+
+class _ThemeTile extends StatelessWidget {
+  const _ThemeTile({
     required this.icon,
     required this.label,
     required this.value,
+    required this.groupValue,
+    required this.onChanged,
   });
 
   final IconData icon;
   final String label;
   final ThemeMode value;
+  final ThemeMode groupValue;
+  final ValueChanged<ThemeMode?> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +335,8 @@ class _ThemeRadioTile extends StatelessWidget {
         ],
       ),
       value: value,
+      groupValue: groupValue,
+      onChanged: onChanged,
     );
   }
 }
-

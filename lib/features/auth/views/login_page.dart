@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/orbit_logo.dart';
-import '../provider/auth_provider.dart';
+import '../controllers/auth_controller.dart';
 import '../widgets/google_sign_in_button.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
+class _LoginPageState extends ConsumerState<LoginPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _logoFade;
@@ -78,7 +78,10 @@ class _LoginPageState extends State<LoginPage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final authProvider = context.watch<AuthProvider>();
+    // Watch the controller state for loading / error info
+    final controllerState = ref.watch(authControllerProvider);
+    final isLoading = controllerState.isLoading;
+    final errorMessage = controllerState.error?.toString();
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
@@ -146,8 +149,8 @@ class _LoginPageState extends State<LoginPage>
 
                       // ── Error Message ──
                       _ErrorBanner(
-                        message: authProvider.errorMessage,
-                        onDismiss: authProvider.clearError,
+                        message: errorMessage,
+                        onDismiss: () => ref.read(authControllerProvider.notifier).clearError(),
                       ),
 
                       // ── Google Sign-In Button ──
@@ -156,8 +159,8 @@ class _LoginPageState extends State<LoginPage>
                         child: FadeTransition(
                           opacity: _buttonFade,
                           child: GoogleSignInButton(
-                            isLoading: authProvider.isLoading,
-                            onPressed: () => authProvider.signInWithGoogle(),
+                            isLoading: isLoading,
+                            onPressed: () => ref.read(authControllerProvider.notifier).signInWithGoogle(),
                           ),
                         ),
                       ),
