@@ -7,7 +7,10 @@ abstract final class AppRoutes {
   // ── Authenticated sub-routes ──────────────────────────────────────────────
 
   /// Today's reflection list.
-  static const reflections = '/home/reflections';
+  static const String reflections = '/home/reflections';
+  static const String decisions = '/home/decisions';
+  static const String events = '/home/events';
+  static const String learnings = '/home/learnings';
 
   /// Reflections for a specific date (deep-linkable: `orbit://reflection/:date`)
   static String reflectionByDate(String date) => '/home/reflections/$date';
@@ -15,8 +18,7 @@ abstract final class AppRoutes {
   /// Weekly overview (future). Deep-link: `orbit://weekly`
   static const weekly = '/home/weekly';
 
-  /// AI knowledge view. Deep-link: `orbit://knowledge`
-  static const knowledge = '/home/knowledge';
+
 
   /// Task list. Deep-link: `orbit://task` (all tasks)
   static const tasks = '/home/tasks';

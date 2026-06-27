@@ -1,183 +1,184 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../app/router/app_routes.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../widgets/app_drawer.dart';
+import '../../day/widgets/day_summary_section.dart';
+import '../../tasks/widgets/task_section.dart';
+import '../../learning/widgets/learning_section.dart';
+import '../../decision/widgets/decision_section.dart';
+import '../../event/widgets/event_section.dart';
+import '../../mood/widgets/mood_section.dart';
+// Note: TaskSection, LearningSection, etc., will be added here in Phase 3.
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  late PageController _pageController;
+  late DateTime _initialDate;
+  int _currentIndex = 0;
+
+  // Assume 1000 pages, with 500 being "today".
+  static const int _initialPage = 500;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _initialPage);
+    _initialDate = DateTime.now();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  DateTime _dateForIndex(int index) {
+    final offset = index - _initialPage;
+    return _initialDate.add(Duration(days: offset));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).value;
-    final firstName = _extractFirstName(user?.displayName);
+    final creationTime = user?.metadata.creationTime ?? DateTime.now().subtract(const Duration(days: 30));
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppConstants.appName)),
+      appBar: AppBar(
+        title: const Text(AppConstants.appName),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month_rounded),
+            onPressed: () async {
+              final selectedDate = await showDatePicker(
+                context: context,
+                initialDate: _dateForIndex(_currentIndex),
+                firstDate: DateTime(creationTime.year, creationTime.month, creationTime.day),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+              );
+              if (selectedDate != null) {
+                final targetIndex = _initialPage + selectedDate.difference(_initialDate).inDays;
+                _pageController.animateToPage(
+                  targetIndex,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              }
+            },
+          ),
+        ],
+      ),
       drawer: const AppDrawer(),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Greeting ──────────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      firstName != null ? 'Hello, $firstName 👋' : 'Welcome 👋',
-                      style: theme.textTheme.headlineLarge,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Your personal orbit starts here.',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+        child: PageView.builder(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            final date = _dateForIndex(index);
+            
+            // Boundary logic
+            if (date.isBefore(DateTime(creationTime.year, creationTime.month, creationTime.day))) {
+              return const Center(child: Text("You weren't here yet! 😊"));
+            }
+
+            final isFuture = date.isAfter(DateTime.now());
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _GreetingSection(date: date, userDisplayName: user?.displayName),
+                  const SizedBox(height: 16),
+                  
+                  if (isFuture) ...[
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: Text("No reflections yet.", style: TextStyle(color: Colors.grey)),
                       ),
                     ),
+                    // Only Future Tasks/Events would go here
+                  ] else ...[
+                    DaySummarySection(date: date),
+                    const SizedBox(height: 16),
+                    TaskSection(date: date),
+                    const SizedBox(height: 16),
+                    LearningSection(date: date),
+                    const SizedBox(height: 16),
+                    DecisionSection(date: date),
+                    const SizedBox(height: 16),
+                    EventSection(date: date),
+                    const SizedBox(height: 16),
+                    MoodSection(date: date),
                   ],
-                ),
+                ],
               ),
-
-              const SizedBox(height: 8),
-
-              // ── Quick Actions Grid ────────────────────────────────────
-              _QuickActionsGrid(),
-            ],
-          ),
+            );
+          },
         ),
       ),
+      floatingActionButton: _dateForIndex(_currentIndex).isAfter(DateTime.now())
+          ? null // No FAB on future dates
+          : FloatingActionButton(
+              onPressed: () {
+                final dateKey = "${_dateForIndex(_currentIndex).year}-${_dateForIndex(_currentIndex).month.toString().padLeft(2, '0')}-${_dateForIndex(_currentIndex).day.toString().padLeft(2, '0')}";
+                context.push('${AppRoutes.reflections}/edit', extra: {'dateKey': dateKey});
+              },
+              child: const Icon(Icons.add),
+            ),
     );
   }
+}
+
+class _GreetingSection extends StatelessWidget {
+  final DateTime date;
+  final String? userDisplayName;
+
+  const _GreetingSection({required this.date, this.userDisplayName});
 
   static String? _extractFirstName(String? displayName) {
     if (displayName == null || displayName.trim().isEmpty) return null;
     return displayName.trim().split(' ').first;
   }
-}
-
-// ── Quick Actions Grid ────────────────────────────────────────────────────────
-
-class _QuickActionsGrid extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final actions = [
-      _QuickAction(
-        icon: Icons.auto_awesome_rounded,
-        label: 'Reflect',
-        subtitle: 'Capture thoughts',
-        color: const Color(0xFF6C63FF),
-        route: AppRoutes.reflections,
-      ),
-      _QuickAction(
-        icon: Icons.psychology_rounded,
-        label: 'Knowledge',
-        subtitle: 'AI insights',
-        color: const Color(0xFF00BCD4),
-        route: AppRoutes.knowledge,
-      ),
-      _QuickAction(
-        icon: Icons.task_alt_rounded,
-        label: 'Tasks',
-        subtitle: 'Stay on track',
-        color: const Color(0xFF4CAF50),
-        route: AppRoutes.tasks,
-      ),
-      _QuickAction(
-        icon: Icons.settings_rounded,
-        label: 'Settings',
-        subtitle: 'Preferences',
-        color: const Color(0xFFFF7043),
-        route: AppRoutes.settings,
-      ),
-    ];
-
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.3,
-      children: actions.map((a) => _QuickActionCard(action: a)).toList(),
-    );
-  }
-}
-
-class _QuickAction {
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.color,
-    required this.route,
-  });
-
-  final IconData icon;
-  final String label;
-  final String subtitle;
-  final Color color;
-  final String route;
-}
-
-class _QuickActionCard extends StatelessWidget {
-  const _QuickActionCard({required this.action});
-
-  final _QuickAction action;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final firstName = _extractFirstName(userDisplayName);
+    final isToday = date.day == DateTime.now().day && date.month == DateTime.now().month && date.year == DateTime.now().year;
 
-    return InkWell(
-      onTap: () => context.push(action.route),
-      borderRadius: BorderRadius.circular(16),
-      child: Card(
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: action.color.withAlpha(25),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(action.icon, color: action.color, size: 22),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    action.label,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    action.subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+    final dateLabel = isToday ? "Today" : "${date.day}/${date.month}/${date.year}";
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isToday 
+            ? (firstName != null ? 'Hello, $firstName 👋' : 'Welcome 👋')
+            : 'Your day on $dateLabel',
+          style: theme.textTheme.headlineLarge,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Your personal orbit starts here.',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-      ),
+      ],
     );
   }
 }

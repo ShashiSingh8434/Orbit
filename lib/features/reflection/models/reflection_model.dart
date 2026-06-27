@@ -8,8 +8,8 @@ part 'reflection_model.g.dart';
 /// Firestore path: `users/{uid}/reflections/{yyyy-MM-dd}/{id}`
 ///
 /// Reflection documents are intentionally kept separate from AI-generated
-/// knowledge in `dailyKnowledge`. The AI layer reads reflections but writes
-/// only to `dailyKnowledge`.
+/// data. The AI layer (Understanding Pipeline) reads reflections but writes
+/// to independent domain collections.
 @freezed
 abstract class ReflectionModel with _$ReflectionModel {
   const factory ReflectionModel({

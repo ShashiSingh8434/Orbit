@@ -38,9 +38,13 @@ class TaskController extends Notifier<void> {
     await _repo.saveTask(uid, task);
   }
 
-  Future<void> toggleDone(String taskId, bool isDone) async {
+  Future<void> toggleDone(TaskModel task, bool isDone) async {
     final uid = _requireUid();
-    await _repo.toggleDone(uid, taskId, isDone);
+    final updatedTask = task.copyWith(
+      status: isDone ? 'completed' : 'pending',
+      metadata: task.metadata?.copyWith(manualOverride: true),
+    );
+    await _repo.updateTask(uid, updatedTask);
   }
 
   Future<void> deleteTask(String taskId) async {

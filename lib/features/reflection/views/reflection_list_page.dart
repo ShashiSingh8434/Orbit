@@ -45,7 +45,7 @@ class ReflectionListPage extends ConsumerWidget {
                     reflection: r,
                     onEdit: () => context.push(
                       '/home/reflections/edit',
-                      extra: {'dateKey': resolvedDate, 'id': r.id},
+                      extra: {'dateKey': resolvedDate, 'reflectionId': r.id},
                     ),
                     onDelete: () => _confirmDelete(context, ref, r, resolvedDate),
                   );

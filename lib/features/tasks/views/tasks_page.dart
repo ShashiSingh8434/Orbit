@@ -29,7 +29,7 @@ class TasksPage extends ConsumerWidget {
                     task: task,
                     onToggle: (done) => ref
                         .read(taskControllerProvider.notifier)
-                        .toggleDone(task.id, done),
+                        .toggleDone(task, done),
                     onDelete: () => ref
                         .read(taskControllerProvider.notifier)
                         .deleteTask(task.id),

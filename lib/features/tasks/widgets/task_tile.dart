@@ -36,15 +36,15 @@ class TaskTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         child: ListTile(
           leading: Checkbox(
-            value: task.isDone,
+            value: task.status == 'completed',
             onChanged: (v) => onToggle(v ?? false),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
           ),
           title: Text(
             task.title,
             style: theme.textTheme.bodyLarge?.copyWith(
-              decoration: task.isDone ? TextDecoration.lineThrough : null,
-              color: task.isDone ? colorScheme.onSurfaceVariant : null,
+              decoration: task.status == 'completed' ? TextDecoration.lineThrough : null,
+              color: task.status == 'completed' ? colorScheme.onSurfaceVariant : null,
             ),
           ),
           subtitle: task.description.isNotEmpty
@@ -55,7 +55,7 @@ class TaskTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 )
               : null,
-          trailing: task.source == 'ai'
+          trailing: task.metadata?.createdBy == 'ai'
               ? Tooltip(
                   message: 'Extracted by AI',
                   child: Icon(

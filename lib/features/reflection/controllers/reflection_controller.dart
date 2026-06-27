@@ -5,6 +5,7 @@ import '../../auth/controllers/auth_controller.dart';
 import '../../reflection/data/reflection_repository.dart';
 import '../../reflection/data/reflection_local_draft_store.dart';
 import '../../reflection/models/reflection_model.dart';
+import '../../ai/engine/understanding_pipeline.dart';
 
 // ── Stream Provider ───────────────────────────────────────────────────────────
 
@@ -50,6 +51,9 @@ class ReflectionController extends Notifier<void> {
       source: source,
     );
     await _repo.saveReflection(uid, OrbitDateUtils.dateKey(now), reflection);
+
+    // Trigger understanding pipeline (temporarily directly invoked for Phase 2 demo)
+    ref.read(understandingPipelineProvider).onReflectionSaved(uid, reflection);
   }
 
   Future<void> editReflection({
@@ -66,6 +70,9 @@ class ReflectionController extends Notifier<void> {
       aiProcessed: false, // Re-queue for AI on next run
     );
     await _repo.saveReflection(uid, dateKey, updated);
+    
+    // Trigger understanding pipeline (temporarily directly invoked for Phase 2 demo)
+    ref.read(understandingPipelineProvider).onReflectionSaved(uid, updated);
   }
 
   Future<void> deleteReflection({

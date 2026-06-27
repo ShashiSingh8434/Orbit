@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/models/entity_metadata.dart';
 import '../models/task_model.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
@@ -15,7 +16,7 @@ abstract class TaskRepository {
   Future<void> saveTask(String uid, TaskModel task);
   Future<void> updateTask(String uid, TaskModel task);
   Future<void> deleteTask(String uid, String taskId);
-  Future<void> toggleDone(String uid, String taskId, bool isDone);
+  Future<void> changeStatus(String uid, String taskId, String status, {DateTime? completedAt});
 }
 
 // ── Firebase Implementation ───────────────────────────────────────────────────
@@ -50,8 +51,12 @@ class FirebaseTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<void> toggleDone(String uid, String taskId, bool isDone) async {
-    await _col(uid).doc(taskId).update({'isDone': isDone});
+  Future<void> changeStatus(String uid, String taskId, String status, {DateTime? completedAt}) async {
+    final Map<String, dynamic> data = {'status': status};
+    if (completedAt != null) {
+      data['completedAt'] = Timestamp.fromDate(completedAt);
+    }
+    await _col(uid).doc(taskId).update(data);
   }
 
   // ── Serialisation ──
@@ -62,10 +67,16 @@ class FirebaseTaskRepository implements TaskRepository {
       id: d['id'] as String,
       title: d['title'] as String,
       description: d['description'] as String? ?? '',
-      isDone: d['isDone'] as bool? ?? false,
       createdAt: (d['createdAt'] as Timestamp).toDate(),
+      updatedAt: d['updatedAt'] != null ? (d['updatedAt'] as Timestamp).toDate() : null,
       dueDate: d['dueDate'] != null ? (d['dueDate'] as Timestamp).toDate() : null,
-      source: d['source'] as String? ?? 'manual',
+      dueTime: d['dueTime'] as String?,
+      priority: d['priority'] as String? ?? 'medium',
+      status: d['status'] as String? ?? 'pending',
+      completedAt: d['completedAt'] != null ? (d['completedAt'] as Timestamp).toDate() : null,
+      metadata: d['metadata'] != null 
+          ? EntityMetadata.fromJson(Map<String, dynamic>.from(d['metadata'] as Map))
+          : null,
     );
   }
 
@@ -73,9 +84,13 @@ class FirebaseTaskRepository implements TaskRepository {
         'id': t.id,
         'title': t.title,
         'description': t.description,
-        'isDone': t.isDone,
         'createdAt': Timestamp.fromDate(t.createdAt),
+        'updatedAt': t.updatedAt != null ? Timestamp.fromDate(t.updatedAt!) : null,
         'dueDate': t.dueDate != null ? Timestamp.fromDate(t.dueDate!) : null,
-        'source': t.source,
+        'dueTime': t.dueTime,
+        'priority': t.priority,
+        'status': t.status,
+        'completedAt': t.completedAt != null ? Timestamp.fromDate(t.completedAt!) : null,
+        if (t.metadata != null) 'metadata': t.metadata!.toJson(),
       };
 }

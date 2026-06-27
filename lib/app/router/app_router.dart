@@ -7,8 +7,10 @@ import '../../features/auth/views/login_page.dart';
 import '../../features/home/views/home_page.dart';
 import '../../features/reflection/views/reflection_list_page.dart';
 import '../../features/reflection/views/reflection_edit_page.dart';
-import '../../features/knowledge/views/knowledge_page.dart';
 import '../../features/tasks/views/tasks_page.dart';
+import '../../features/decision/views/decision_list_page.dart';
+import '../../features/event/views/event_list_page.dart';
+import '../../features/learning/views/learning_list_page.dart';
 import '../../features/settings/views/settings_page.dart';
 import 'app_routes.dart';
 
@@ -69,16 +71,29 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Knowledge
-          GoRoute(
-            path: 'knowledge',
-            builder: (_, __) => const KnowledgePage(),
-          ),
 
           // Tasks
           GoRoute(
             path: 'tasks',
             builder: (_, __) => const TasksPage(),
+          ),
+
+          // Decisions
+          GoRoute(
+            path: 'decisions',
+            builder: (_, __) => const DecisionListPage(),
+          ),
+
+          // Events
+          GoRoute(
+            path: 'events',
+            builder: (_, __) => const EventListPage(),
+          ),
+
+          // Learnings
+          GoRoute(
+            path: 'learnings',
+            builder: (_, __) => const LearningListPage(),
           ),
 
           // Settings

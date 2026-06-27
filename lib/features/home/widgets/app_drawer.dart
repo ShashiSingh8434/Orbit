@@ -82,19 +82,35 @@ class AppDrawer extends ConsumerWidget {
                   },
                 ),
                 _DrawerItem(
-                  icon: Icons.psychology_rounded,
-                  label: 'Knowledge',
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push(AppRoutes.knowledge);
-                  },
-                ),
-                _DrawerItem(
                   icon: Icons.task_alt_rounded,
                   label: 'Tasks',
                   onTap: () {
                     Navigator.pop(context);
                     context.push(AppRoutes.tasks);
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.check_circle_outline,
+                  label: 'Decisions',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.decisions);
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.event,
+                  label: 'Events',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.events);
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.lightbulb_outline,
+                  label: 'Learnings',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.learnings);
                   },
                 ),
 
