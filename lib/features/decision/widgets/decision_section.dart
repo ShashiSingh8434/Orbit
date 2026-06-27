@@ -1,58 +1,118 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/controllers/auth_controller.dart';
-import '../data/decision_repository.dart';
-import '../../../core/utils/date_utils.dart';
+import '../../../core/widgets/pulsing_skeleton.dart';
+import '../models/decision_model.dart';
 
-final dayDecisionsProvider = StreamProvider.family<dynamic, DateTime>((ref, date) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return const Stream.empty();
-  
-  return ref.watch(decisionRepositoryProvider).watchDecisions(user.uid).map((decisions) {
-    final key = OrbitDateUtils.dateKey(date);
-    return decisions.where((d) => OrbitDateUtils.dateKey(d.createdAt) == key).toList();
+class DecisionSection extends StatelessWidget {
+  final List<DecisionModel>? decisions;
+  final bool isLoading;
+
+  const DecisionSection({
+    super.key,
+    required this.decisions,
+    required this.isLoading,
   });
-});
-
-class DecisionSection extends ConsumerWidget {
-  final DateTime date;
-
-  const DecisionSection({super.key, required this.date});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final decisionsAsync = ref.watch(dayDecisionsProvider(date));
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return decisionsAsync.when(
-      data: (decisions) {
-        if (decisions == null || decisions.isEmpty) return const SizedBox.shrink();
-        
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text('Decisions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
-            ...decisions.map((d) => ListTile(
-              leading: Icon(
-                d.status == 'Superseded' ? Icons.cancel_outlined : Icons.check,
-                color: d.status == 'Superseded' ? Colors.grey : Colors.blue,
-              ),
-              title: Text(
-                d.decision,
-                style: TextStyle(
-                  decoration: d.status == 'Superseded' ? TextDecoration.lineThrough : null,
-                  color: d.status == 'Superseded' ? Colors.grey : null,
+    if (isLoading) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: PulsingSkeleton(width: 90, height: 24),
+          ),
+          const SizedBox(height: 8),
+          ...List.generate(2, (index) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6.0),
+            child: Row(
+              children: [
+                const PulsingSkeleton(width: 24, height: 24, borderRadius: 12),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.5, height: 16),
+                      const SizedBox(height: 6),
+                      PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.3, height: 12),
+                    ],
+                  ),
                 ),
+              ],
+            ),
+          )),
+        ],
+      );
+    }
+
+    if (decisions == null || decisions!.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle_outline, color: colorScheme.onSurfaceVariant),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'No decisions made today',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Commitments or choices from your reflection will show up here.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
-              subtitle: d.reason.isNotEmpty ? Text(d.reason) : null,
-            )),
+            ),
           ],
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => Text('Error: $e'),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            'Decisions',
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        ...decisions!.map<Widget>((d) => ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Icon(
+            d.status == 'Superseded' ? Icons.cancel_outlined : Icons.check_circle_outline,
+            color: d.status == 'Superseded' ? colorScheme.onSurfaceVariant : colorScheme.primary,
+          ),
+          title: Text(
+            d.decision,
+            style: TextStyle(
+              decoration: d.status == 'Superseded' ? TextDecoration.lineThrough : null,
+              color: d.status == 'Superseded' ? colorScheme.onSurfaceVariant : null,
+            ),
+          ),
+          subtitle: d.reason.isNotEmpty ? Text(d.reason) : null,
+        )).toList(),
+      ],
     );
   }
 }

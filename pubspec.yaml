@@ -47,6 +47,9 @@ dependencies:
   # ── Persistence ──
   shared_preferences: ^2.3.3
 
+  # ── Utilities ──
+  uuid: ^4.3.3
+
   # ── Typography ──
   google_fonts: ^6.2.1
 

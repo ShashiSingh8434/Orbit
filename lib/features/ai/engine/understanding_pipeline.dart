@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import '../../../core/utils/date_utils.dart';
 import '../../reflection/models/reflection_model.dart';
 import '../models/dtos/summary_dto.dart';
 import '../models/dtos/task_dto.dart';
@@ -58,15 +59,19 @@ class UnderstandingPipeline {
       properties: {
         'summary': Schema.object(
           properties: {
-            'summary': Schema.string(description: 'A brief, encouraging summary of the reflection.'),
-            'aiConfidence': Schema.number(),
+            'summary': Schema.string(description: 'A brief, encouraging 1-2 sentence summary of the reflection.'),
+            'aiConfidence': Schema.number(description: 'Confidence score from 0.0 to 1.0'),
           },
         ),
         'tasks': Schema.array(
           items: Schema.object(
             properties: {
-              'title': Schema.string(),
-              'description': Schema.string(),
+              'title': Schema.string(description: 'Short actionable title for the task'),
+              'description': Schema.string(description: 'Additional detail about the task'),
+              'dueDate': Schema.string(description: 'YYYY-MM-DD format if mentioned, otherwise null', nullable: true),
+              'dueTime': Schema.string(description: 'HH:mm format if mentioned, otherwise null', nullable: true),
+              'priority': Schema.enumString(enumValues: ['low', 'medium', 'high'], description: 'Task priority'),
+              'status': Schema.enumString(enumValues: ['pending', 'completed'], description: 'Task status'),
               'aiConfidence': Schema.number(),
             },
           ),
@@ -74,9 +79,9 @@ class UnderstandingPipeline {
         'learnings': Schema.array(
           items: Schema.object(
             properties: {
-              'title': Schema.string(),
-              'description': Schema.string(),
-              'category': Schema.string(),
+              'title': Schema.string(description: 'Short title for the learning/insight'),
+              'description': Schema.string(description: 'Detail about what was learned'),
+              'category': Schema.string(description: 'Category like Life, Tech, Health, Academic, etc.'),
               'aiConfidence': Schema.number(),
             },
           ),
@@ -84,8 +89,8 @@ class UnderstandingPipeline {
         'decisions': Schema.array(
           items: Schema.object(
             properties: {
-              'title': Schema.string(),
-              'context': Schema.string(),
+              'decision': Schema.string(description: 'The decision that was made'),
+              'reason': Schema.string(description: 'Why this decision was made'),
               'aiConfidence': Schema.number(),
             },
           ),
@@ -93,10 +98,11 @@ class UnderstandingPipeline {
         'events': Schema.array(
           items: Schema.object(
             properties: {
-              'title': Schema.string(),
-              'description': Schema.string(),
-              'time': Schema.string(description: 'E.g., "6 a.m." or "Morning"', nullable: true),
-              'location': Schema.string(nullable: true),
+              'title': Schema.string(description: 'Short title for the event'),
+              'description': Schema.string(description: 'Additional detail about the event'),
+              'eventDate': Schema.string(description: 'YYYY-MM-DD format. Use the reflection date if not explicitly mentioned.'),
+              'time': Schema.string(description: 'Time of day like "6:00 AM" or "Morning"', nullable: true),
+              'location': Schema.string(description: 'Location if mentioned', nullable: true),
               'aiConfidence': Schema.number(),
             },
           ),
@@ -104,9 +110,8 @@ class UnderstandingPipeline {
         'moods': Schema.array(
           items: Schema.object(
             properties: {
-              'mood': Schema.string(description: 'A single word describing the emotion (e.g., happy, sad, focused)'),
-              'intensity': Schema.integer(description: '1 to 10'),
-              'notes': Schema.string(),
+              'timeOfDay': Schema.enumString(enumValues: ['Morning', 'Afternoon', 'Evening', 'Night', 'General'], description: 'When the mood was felt'),
+              'value': Schema.integer(description: 'Mood on a 1-5 scale: 1=Very Bad, 2=Bad, 3=Neutral, 4=Good, 5=Very Good'),
               'aiConfidence': Schema.number(),
             },
           ),
@@ -123,18 +128,33 @@ class UnderstandingPipeline {
       ),
     );
 
-    final prompt = '''
-You are the AI brain of Orbit, a student operating system. 
-Your job is to read the user's reflection and extract precise, structured data so that it can be synced to their modules. 
-Be analytical and highly accurate. If a section has no relevant data, return an empty array for it.
+    final reflectionDate = OrbitDateUtils.dateKey(reflection.createdAt);
 
-Extraction Guidelines:
-1. SUMMARY: Provide a brief (1-2 sentences), encouraging summary of the reflection in the third person (or addressing the user directly as "You").
-2. TASKS: Identify actionable items the user needs to do in the future. E.g., "I need to buy groceries tomorrow" -> Title: "Buy groceries".
-3. LEARNINGS: Extract new insights, facts, or realizations. E.g., "I realized that being happy is the best" -> Title: "Being happy is paramount", Category: "Life".
-4. DECISIONS: Extract any choices or commitments the user made. E.g., "I decided to wake up at 5am daily" -> Title: "Wake up at 5am daily", Context: "To be more productive". 
-5. EVENTS: Identify past occurrences or future scheduled events, including timelines or locations. E.g., "My project will be completed around Sept 5" -> Title: "Project Completion", Time: "Sept 5".
-6. MOODS: Infer the emotional state of the user. Choose a single descriptive word (e.g., Happy, Stressed, Motivated) and assign an intensity from 1-10.
+    final prompt = '''
+You are the AI brain of Orbit, a student operating system.
+Your job is to read the user's daily reflection and extract precise, structured data.
+Be analytical and highly accurate. If a section has no relevant data, return an empty array.
+
+Today's date is $reflectionDate.
+
+Extraction rules:
+1. SUMMARY: Write a brief (1-2 sentence), encouraging summary.
+2. TASKS: Only extract actionable items the user needs to do. Do NOT treat past activities as tasks.
+   - "I need to buy groceries" → task. "I went to the gym" → NOT a task.
+   - Set priority to "medium" unless urgency is implied.
+   - Set status to "pending" unless the user says they completed it.
+3. LEARNINGS: Extract insights, realizations, or new knowledge gained.
+   - "I learned that consistency matters" → learning.
+   - Category should be one of: Life, Tech, Health, Academic, Career, Finance, Relationships, or General.
+4. DECISIONS: Extract choices or commitments the user explicitly made.
+   - "I decided to wake up at 5am" → decision. "I went to the gym" → NOT a decision.
+5. EVENTS: Extract activities that happened or are scheduled.
+   - "I went to the gym at 6am" → event with eventDate="$reflectionDate", time="6:00 AM".
+   - "My project deadline is Sept 5" → event with eventDate="2026-09-05".
+   - Always provide eventDate in YYYY-MM-DD format. Default to "$reflectionDate" if no date is mentioned.
+6. MOODS: Infer the user's emotional state.
+   - Map to a 1-5 integer scale: 1=Very Bad, 2=Bad, 3=Neutral, 4=Good, 5=Very Good.
+   - timeOfDay should be one of: Morning, Afternoon, Evening, Night, General.
 
 Reflection text:
 "${reflection.text}"
@@ -193,9 +213,9 @@ Reflection text:
     // Parallelize synchronization where possible, except Day which might depend on completion
     await Future.wait([
       daySyncService.syncDaySummary(uid, dayDate, summary),
-      taskSyncService.syncTasks(uid, tasks, reflectionId),
-      learningSyncService.syncLearnings(uid, learnings, reflectionId),
-      decisionSyncService.syncDecisions(uid, decisions, reflectionId),
+      taskSyncService.syncTasks(uid, tasks, reflectionId, dayDate),
+      learningSyncService.syncLearnings(uid, learnings, reflectionId, dayDate),
+      decisionSyncService.syncDecisions(uid, decisions, reflectionId, dayDate),
       eventSyncService.syncEvents(uid, events, reflectionId),
       moodSyncService.syncMoods(uid, dayDate, moods, reflectionId),
     ]);

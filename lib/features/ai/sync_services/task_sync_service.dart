@@ -17,7 +17,7 @@ class TaskSyncService {
 
   String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
-  Future<void> syncTasks(String uid, List<TaskDto> extractedTasks, String reflectionId) async {
+  Future<void> syncTasks(String uid, List<TaskDto> extractedTasks, String reflectionId, DateTime dayDate) async {
     // Fetch existing tasks to perform duplicate and completion detection
     final existingTasksStream = _repository.watchTasks(uid).first;
     final existingTasks = await existingTasksStream;
@@ -62,7 +62,7 @@ class TaskSyncService {
           id: _uuid.v4(),
           title: dto.title,
           description: dto.description ?? '',
-          createdAt: DateTime.now(),
+          createdAt: dayDate,
           dueDate: dto.dueDate != null ? DateTime.tryParse(dto.dueDate!) : null,
           dueTime: dto.dueTime,
           priority: dto.priority,

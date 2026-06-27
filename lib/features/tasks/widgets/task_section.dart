@@ -1,59 +1,118 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/controllers/auth_controller.dart';
-import '../data/task_repository.dart';
-import '../../../core/utils/date_utils.dart';
+import '../../../core/widgets/pulsing_skeleton.dart';
+import '../models/task_model.dart';
 
-final dayTasksProvider = StreamProvider.family<dynamic, DateTime>((ref, date) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return const Stream.empty();
-  
-  // Naive filter for today's tasks in memory for Phase 3 UI demonstration.
-  // In a real app, query by `dueDate` directly in Firestore.
-  return ref.watch(taskRepositoryProvider).watchTasks(user.uid).map((tasks) {
-    final key = OrbitDateUtils.dateKey(date);
-    return tasks.where((t) => t.dueDate != null && OrbitDateUtils.dateKey(t.dueDate!) == key).toList();
+class TaskSection extends StatelessWidget {
+  final List<TaskModel>? tasks;
+  final bool isLoading;
+
+  const TaskSection({
+    super.key,
+    required this.tasks,
+    required this.isLoading,
   });
-});
-
-class TaskSection extends ConsumerWidget {
-  final DateTime date;
-
-  const TaskSection({super.key, required this.date});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tasksAsync = ref.watch(dayTasksProvider(date));
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return tasksAsync.when(
-      data: (tasks) {
-        if (tasks == null || tasks.isEmpty) return const SizedBox.shrink();
-        
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text('Tasks', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
-            ...tasks.map((t) => ListTile(
-              leading: Icon(
-                t.status == 'completed' ? Icons.check_circle : Icons.radio_button_unchecked,
-                color: t.status == 'completed' ? Colors.green : Colors.grey,
-              ),
-              title: Text(
-                t.title,
-                style: TextStyle(
-                  decoration: t.status == 'completed' ? TextDecoration.lineThrough : null,
+    if (isLoading) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: PulsingSkeleton(width: 80, height: 24),
+          ),
+          const SizedBox(height: 8),
+          ...List.generate(2, (index) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6.0),
+            child: Row(
+              children: [
+                const PulsingSkeleton(width: 24, height: 24, borderRadius: 12),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.5, height: 16),
+                      const SizedBox(height: 6),
+                      PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.3, height: 12),
+                    ],
+                  ),
                 ),
+              ],
+            ),
+          )),
+        ],
+      );
+    }
+
+    if (tasks == null || tasks!.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.task_alt_outlined, color: colorScheme.onSurfaceVariant),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'No tasks for today',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'AI will automatically capture items you need to work on from your reflection.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
-              subtitle: t.description.isNotEmpty ? Text(t.description) : null,
-            )),
+            ),
           ],
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => Text('Error: $e'),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            'Tasks',
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        ...tasks!.map<Widget>((t) => ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Icon(
+            t.status == 'completed' ? Icons.check_circle : Icons.radio_button_unchecked,
+            color: t.status == 'completed' ? Colors.green : colorScheme.onSurfaceVariant,
+          ),
+          title: Text(
+            t.title,
+            style: TextStyle(
+              decoration: t.status == 'completed' ? TextDecoration.lineThrough : null,
+              color: t.status == 'completed' ? colorScheme.onSurfaceVariant : null,
+            ),
+          ),
+          subtitle: t.description.isNotEmpty ? Text(t.description) : null,
+        )).toList(),
+      ],
     );
   }
 }

@@ -1,45 +1,98 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/controllers/auth_controller.dart';
-import '../data/day_repository.dart';
+import '../../../core/widgets/pulsing_skeleton.dart';
+import '../models/day_model.dart';
 
-final dayProvider = StreamProvider.family<dynamic, DateTime>((ref, date) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return const Stream.empty();
-  return ref.watch(dayRepositoryProvider).watchDay(user.uid, date);
-});
+class DaySummarySection extends StatelessWidget {
+  final DayModel? day;
+  final bool isLoading;
 
-class DaySummarySection extends ConsumerWidget {
-  final DateTime date;
-
-  const DaySummarySection({super.key, required this.date});
+  const DaySummarySection({
+    super.key,
+    required this.day,
+    required this.isLoading,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dayAsync = ref.watch(dayProvider(date));
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return dayAsync.when(
-      data: (day) {
-        if (day == null || day.summary.isEmpty) {
-          return const SizedBox.shrink();
-        }
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Summary', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(day.summary),
-              ],
-            ),
+    if (isLoading) {
+      return Card(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const PulsingSkeleton(width: 100, height: 24),
+              const SizedBox(height: 12),
+              PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.8, height: 16),
+              const SizedBox(height: 8),
+              PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.6, height: 16),
+            ],
           ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => Text('Error loading summary: $e'),
+        ),
+      );
+    }
+
+    if (day == null || day!.summary.isEmpty) {
+      return Card(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Summary',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No summary available for today. Write a reflection to capture your day!',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Summary',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              day!.summary,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

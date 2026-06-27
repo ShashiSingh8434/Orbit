@@ -11,6 +11,8 @@ import '../../learning/widgets/learning_section.dart';
 import '../../decision/widgets/decision_section.dart';
 import '../../event/widgets/event_section.dart';
 import '../../mood/widgets/mood_section.dart';
+import '../../day/providers/day_data_provider.dart';
+import '../widgets/day_skeleton_loader.dart';
 // Note: TaskSection, LearningSection, etc., will be added here in Phase 3.
 
 class HomePage extends ConsumerStatefulWidget {
@@ -87,6 +89,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           },
           itemBuilder: (context, index) {
             final date = _dateForIndex(index);
+            final dayDataAsync = ref.watch(dayDataProvider(date));
             
             // Boundary logic
             if (date.isBefore(DateTime(creationTime.year, creationTime.month, creationTime.day))) {
@@ -110,19 +113,27 @@ class _HomePageState extends ConsumerState<HomePage> {
                         child: Text("No reflections yet.", style: TextStyle(color: Colors.grey)),
                       ),
                     ),
-                    // Only Future Tasks/Events would go here
                   ] else ...[
-                    DaySummarySection(date: date),
-                    const SizedBox(height: 16),
-                    TaskSection(date: date),
-                    const SizedBox(height: 16),
-                    LearningSection(date: date),
-                    const SizedBox(height: 16),
-                    DecisionSection(date: date),
-                    const SizedBox(height: 16),
-                    EventSection(date: date),
-                    const SizedBox(height: 16),
-                    MoodSection(date: date),
+                    dayDataAsync.when(
+                      data: (data) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          DaySummarySection(day: data.day, isLoading: false),
+                          const SizedBox(height: 16),
+                          TaskSection(tasks: data.tasks, isLoading: false),
+                          const SizedBox(height: 16),
+                          LearningSection(learnings: data.learnings, isLoading: false),
+                          const SizedBox(height: 16),
+                          DecisionSection(decisions: data.decisions, isLoading: false),
+                          const SizedBox(height: 16),
+                          EventSection(events: data.events, isLoading: false),
+                          const SizedBox(height: 16),
+                          MoodSection(moods: data.moods, isLoading: false),
+                        ],
+                      ),
+                      loading: () => const DaySkeletonLoader(),
+                      error: (e, st) => Center(child: Text('Error: $e')),
+                    ),
                   ],
                 ],
               ),

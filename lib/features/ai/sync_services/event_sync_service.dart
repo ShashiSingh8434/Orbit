@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../event/data/event_repository.dart';
@@ -17,11 +18,20 @@ class EventSyncService {
 
   Future<void> syncEvents(String uid, List<EventDto> extractedEvents, String reflectionId) async {
     for (final dto in extractedEvents) {
+      // Parse eventDate safely, fallback to today
+      DateTime parsedDate;
+      try {
+        parsedDate = DateTime.parse(dto.eventDate);
+      } catch (_) {
+        debugPrint('EventSyncService: Could not parse eventDate "${dto.eventDate}", using today.');
+        parsedDate = DateTime.now();
+      }
+
       final event = EventModel(
         id: _uuid.v4(),
         title: dto.title,
         description: dto.description ?? '',
-        eventDate: DateTime.parse(dto.eventDate),
+        eventDate: parsedDate,
         time: dto.time,
         location: dto.location,
         createdAt: DateTime.now(),
