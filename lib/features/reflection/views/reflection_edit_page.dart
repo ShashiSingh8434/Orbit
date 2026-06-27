@@ -83,8 +83,23 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
     }
   }
 
+  String _textBeforeListening = '';
+
   Future<void> _initStt() async {
-    _sttAvailable = await _stt.initialize();
+    _sttAvailable = await _stt.initialize(
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
+          if (mounted && _isListening) {
+            setState(() => _isListening = false);
+          }
+        }
+      },
+      onError: (errorNotification) {
+        if (mounted && _isListening) {
+          setState(() => _isListening = false);
+        }
+      },
+    );
     if (mounted) setState(() {});
   }
 
@@ -103,17 +118,25 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
       await _stt.stop();
       setState(() => _isListening = false);
     } else {
-      setState(() => _isListening = true);
+      setState(() {
+        _isListening = true;
+        _textBeforeListening = _textCtrl.text;
+      });
       await _stt.listen(
         onResult: (result) {
+          final current = _textBeforeListening;
+          final appended = current.isEmpty
+              ? result.recognizedWords
+              : current.endsWith(' ') || current.endsWith('\n')
+                  ? '$current${result.recognizedWords}'
+                  : '$current ${result.recognizedWords}';
+          
+          _textCtrl.text = appended;
+          _textCtrl.selection =
+              TextSelection.collapsed(offset: _textCtrl.text.length);
+
           if (result.finalResult) {
-            final current = _textCtrl.text;
-            final appended = current.isEmpty
-                ? result.recognizedWords
-                : '$current ${result.recognizedWords}';
-            _textCtrl.text = appended;
-            _textCtrl.selection =
-                TextSelection.collapsed(offset: _textCtrl.text.length);
+            _textBeforeListening = _textCtrl.text;
           }
         },
         listenFor: const Duration(seconds: 60),
