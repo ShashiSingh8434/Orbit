@@ -11,21 +11,30 @@ import 'ai_request.dart';
 /// Free tier: 30 req/min, 14,400 req/day for most models.
 class GroqProvider extends AiProvider {
   final String _apiKey;
+  final String _id;
+  final String _name;
+  final int _priority;
   final String _model;
 
   static const _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
   GroqProvider({
     required String apiKey,
-    String model = 'llama-3.3-70b-versatile',
+    required String model,
+    required String id,
+    required String name,
+    required int priority,
   })  : _apiKey = apiKey,
-        _model = model;
+        _model = model,
+        _id = id,
+        _name = name,
+        _priority = priority;
 
   @override
-  String get id => 'groq';
+  String get id => _id;
 
   @override
-  String get name => 'Groq';
+  String get name => _name;
 
   @override
   String get model => _model;
@@ -34,7 +43,7 @@ class GroqProvider extends AiProvider {
   int get maxContextTokens => 128000; // llama-3.3-70b-versatile
 
   @override
-  int get priority => 2; // Fallback provider
+  int get priority => _priority;
 
   @override
   bool get supportsJsonMode => false; // No schema support, uses prompt instructions
@@ -193,7 +202,7 @@ class GroqProvider extends AiProvider {
       return AiException(
         type: AiErrorType.rateLimited,
         message: 'Groq rate limited: $detail',
-        providerId: 'groq',
+        providerId: _id,
         retryAfter: retryAfter,
       );
     }
@@ -203,7 +212,7 @@ class GroqProvider extends AiProvider {
       return AiException(
         type: AiErrorType.invalidApiKey,
         message: 'Groq auth error: $detail',
-        providerId: 'groq',
+        providerId: _id,
       );
     }
 
@@ -212,7 +221,7 @@ class GroqProvider extends AiProvider {
       return AiException(
         type: AiErrorType.serverError,
         message: 'Groq server error ($statusCode): $detail',
-        providerId: 'groq',
+        providerId: _id,
       );
     }
 
@@ -221,7 +230,7 @@ class GroqProvider extends AiProvider {
       return AiException(
         type: AiErrorType.badRequest,
         message: 'Groq bad request ($statusCode): $detail',
-        providerId: 'groq',
+        providerId: _id,
       );
     }
 

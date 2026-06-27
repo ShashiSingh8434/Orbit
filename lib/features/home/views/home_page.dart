@@ -203,7 +203,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
     if (widget.asyncValue.hasValue) {
       _minTimeElapsed = true;
     } else {
-      Future.delayed(const Duration(seconds: 5), () {
+      Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           setState(() => _minTimeElapsed = true);
         }

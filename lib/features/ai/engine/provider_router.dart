@@ -48,17 +48,23 @@ class ProviderRouter {
   ///
   /// Throws [AllProvidersExhaustedException] if none are available.
   AiProvider selectProvider() {
-    // 1. Try preferred
-    if (_preferredProviderId != null && _providers.containsKey(_preferredProviderId)) {
-      final preferred = _providers[_preferredProviderId]!;
-      if (_rateLimitManager.canUseProvider(preferred.id)) {
-        debugPrint('ProviderRouter: Using preferred provider "${preferred.id}"');
-        return preferred;
+    // 1. Try preferred (match by exact ID or prefix, e.g. "groq" matches "groq_llama_70b")
+    if (_preferredProviderId != null) {
+      final preferredMatches = _providers.values
+          .where((p) => p.id.startsWith(_preferredProviderId!))
+          .toList()
+        ..sort((a, b) => a.priority.compareTo(b.priority));
+
+      for (final preferred in preferredMatches) {
+        if (_rateLimitManager.canUseProvider(preferred.id)) {
+          debugPrint('ProviderRouter: Using preferred provider "${preferred.id}"');
+          return preferred;
+        }
+        debugPrint(
+          'ProviderRouter: Preferred "${preferred.id}" is cooling down '
+          '(${_rateLimitManager.cooldownRemaining(preferred.id).inSeconds}s remaining)',
+        );
       }
-      debugPrint(
-        'ProviderRouter: Preferred "${preferred.id}" is cooling down '
-        '(${_rateLimitManager.cooldownRemaining(preferred.id).inSeconds}s remaining)',
-      );
     }
 
     // 2. Try remaining providers sorted by priority
@@ -66,7 +72,7 @@ class ProviderRouter {
       ..sort((a, b) => a.priority.compareTo(b.priority));
 
     for (final provider in sorted) {
-      if (provider.id == _preferredProviderId) continue; // Already tried
+      if (_preferredProviderId != null && provider.id.startsWith(_preferredProviderId!)) continue; // Already tried
       if (_rateLimitManager.canUseProvider(provider.id)) {
         debugPrint('ProviderRouter: Falling back to "${provider.id}"');
         return provider;

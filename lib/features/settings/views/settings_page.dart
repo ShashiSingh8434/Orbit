@@ -142,31 +142,34 @@ class SettingsPage extends ConsumerWidget {
             ),
           ],
 
-          if (aiSettings.mode == AiMode.userKey) ...[
-            // Preferred provider
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: SegmentedButton<String>(
-                segments: aiSettings.providers.values.map((p) {
-                  return ButtonSegment(
-                    value: p.id,
-                    label: Text(p.name),
-                  );
-                }).toList(),
-                selected: {aiSettings.preferredProviderId},
-                onSelectionChanged: (selection) {
-                  ref
-                      .read(aiSettingsProvider.notifier)
-                      .setPreferredProvider(selection.first);
-                },
-              ),
+          // Preferred provider
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: SegmentedButton<String>(
+              segments: aiSettings.providers.values.map((p) {
+                return ButtonSegment(
+                  value: p.id,
+                  label: Text(p.name),
+                );
+              }).toList(),
+              selected: {aiSettings.preferredProviderId},
+              onSelectionChanged: (selection) {
+                ref
+                    .read(aiSettingsProvider.notifier)
+                    .setPreferredProvider(selection.first);
+              },
             ),
+          ),
 
+
+
+          if (aiSettings.mode == AiMode.userKey) ...[
             // Provider cards
             ...aiSettings.providers.values.map((provider) {
               return _ProviderCard(provider: provider);
             }),
           ],
+
 
           const Divider(),
 
@@ -302,8 +305,9 @@ class _ProviderCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final statusColor = _statusColor(provider.status, colorScheme);
-    final statusLabel = _statusLabel(provider.status);
+    final aiSettings = ref.watch(aiSettingsProvider);
+    final statusColor = _statusColor(provider.status, colorScheme, provider.hasUserKey, aiSettings.mode);
+    final statusLabel = _statusLabel(provider.status, provider.hasUserKey, aiSettings.mode);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -387,7 +391,8 @@ class _ProviderCard extends ConsumerWidget {
     );
   }
 
-  Color _statusColor(ProviderHealthStatus status, ColorScheme cs) {
+  Color _statusColor(ProviderHealthStatus status, ColorScheme cs, bool hasUserKey, AiMode mode) {
+    if (mode == AiMode.userKey && !hasUserKey) return cs.onSurfaceVariant;
     switch (status) {
       case ProviderHealthStatus.healthy:
         return Colors.green;
@@ -402,7 +407,8 @@ class _ProviderCard extends ConsumerWidget {
     }
   }
 
-  String _statusLabel(ProviderHealthStatus status) {
+  String _statusLabel(ProviderHealthStatus status, bool hasUserKey, AiMode mode) {
+    if (mode == AiMode.userKey && !hasUserKey) return 'Not Connected';
     switch (status) {
       case ProviderHealthStatus.healthy:
         return 'Connected';

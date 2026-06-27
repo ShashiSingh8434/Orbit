@@ -10,19 +10,28 @@ import 'ai_request.dart';
 /// entire codebase that imports that package directly.
 class GeminiProvider extends AiProvider {
   final String _apiKey;
+  final String _id;
+  final String _name;
+  final int _priority;
   final String _model;
 
   GeminiProvider({
     required String apiKey,
-    String model = 'gemini-2.5-flash',
+    required String model,
+    required String id,
+    required String name,
+    required int priority,
   })  : _apiKey = apiKey,
-        _model = model;
+        _model = model,
+        _id = id,
+        _name = name,
+        _priority = priority;
 
   @override
-  String get id => 'gemini';
+  String get id => _id;
 
   @override
-  String get name => 'Google Gemini';
+  String get name => _name;
 
   @override
   String get model => _model;
@@ -31,7 +40,7 @@ class GeminiProvider extends AiProvider {
   int get maxContextTokens => 1048576; // Gemini 2.5 Flash
 
   @override
-  int get priority => 1; // Primary provider
+  int get priority => _priority;
 
   @override
   bool get supportsJsonMode => true;
@@ -138,7 +147,7 @@ class GeminiProvider extends AiProvider {
       return AiException(
         type: AiErrorType.rateLimited,
         message: e.message,
-        providerId: 'gemini',
+        providerId: _id,
         retryAfter: retryAfter,
       );
     }
@@ -148,7 +157,7 @@ class GeminiProvider extends AiProvider {
       return AiException(
         type: AiErrorType.invalidApiKey,
         message: e.message,
-        providerId: 'gemini',
+        providerId: _id,
       );
     }
 
@@ -157,7 +166,7 @@ class GeminiProvider extends AiProvider {
       return AiException(
         type: AiErrorType.serverError,
         message: e.message,
-        providerId: 'gemini',
+        providerId: _id,
       );
     }
 

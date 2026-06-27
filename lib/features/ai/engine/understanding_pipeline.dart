@@ -77,7 +77,16 @@ class UnderstandingPipeline {
         requestId: 'understanding_${reflection.id}',
       ));
 
-      final jsonString = response.text;
+      var jsonString = response.text.trim();
+      if (jsonString.startsWith('```json')) {
+        jsonString = jsonString.substring(7);
+      } else if (jsonString.startsWith('```')) {
+        jsonString = jsonString.substring(3);
+      }
+      if (jsonString.endsWith('```')) {
+        jsonString = jsonString.substring(0, jsonString.length - 3);
+      }
+      jsonString = jsonString.trim();
 
       final Map<String, dynamic> data = jsonDecode(jsonString);
 
@@ -88,11 +97,30 @@ class UnderstandingPipeline {
         aiConfidence: (summaryMap['aiConfidence'] as num?)?.toDouble() ?? 1.0,
       );
 
-      final extractedTasks = (data['tasks'] as List<dynamic>? ?? []).map((e) => TaskDto.fromJson(e as Map<String, dynamic>)).toList();
-      final extractedLearnings = (data['learnings'] as List<dynamic>? ?? []).map((e) => LearningDto.fromJson(e as Map<String, dynamic>)).toList();
-      final extractedDecisions = (data['decisions'] as List<dynamic>? ?? []).map((e) => DecisionDto.fromJson(e as Map<String, dynamic>)).toList();
-      final extractedEvents = (data['events'] as List<dynamic>? ?? []).map((e) => EventDto.fromJson(e as Map<String, dynamic>)).toList();
-      final extractedMoods = (data['moods'] as List<dynamic>? ?? []).map((e) => MoodDto.fromJson(e as Map<String, dynamic>)).toList();
+      final extractedTasks = <TaskDto>[];
+      for (final e in (data['tasks'] as List<dynamic>? ?? [])) {
+        try { extractedTasks.add(TaskDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+      }
+
+      final extractedLearnings = <LearningDto>[];
+      for (final e in (data['learnings'] as List<dynamic>? ?? [])) {
+        try { extractedLearnings.add(LearningDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+      }
+
+      final extractedDecisions = <DecisionDto>[];
+      for (final e in (data['decisions'] as List<dynamic>? ?? [])) {
+        try { extractedDecisions.add(DecisionDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+      }
+
+      final extractedEvents = <EventDto>[];
+      for (final e in (data['events'] as List<dynamic>? ?? [])) {
+        try { extractedEvents.add(EventDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+      }
+
+      final extractedMoods = <MoodDto>[];
+      for (final e in (data['moods'] as List<dynamic>? ?? [])) {
+        try { extractedMoods.add(MoodDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+      }
 
       // Stage 4-7: Normalization, Merge, Synchronization, Repository Updates
       await _synchronize(

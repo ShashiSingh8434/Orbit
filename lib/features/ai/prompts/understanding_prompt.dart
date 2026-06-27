@@ -27,12 +27,14 @@ class UnderstandingPromptBuilder {
 
     return '''
 You are the AI brain of Orbit, a student operating system.
-Your job is to read the user's daily reflection and extract precise, structured data.
-Be analytical and highly accurate. If a section has no relevant data, return an empty array.
+Your job is to read the user's daily reflection and extract precise, structured data in STRICT JSON FORMAT.
+Be analytical and highly accurate. If a section has no relevant data, return an empty array `[]`.
 
+<context>
 Today's date is $reflectionDate.
+</context>
 
-Extraction rules:
+<extraction_rules>
 $summaryInstruction
 2. TASKS: Only extract actionable items the user needs to do. Do NOT treat past activities as tasks.
    - "I need to buy groceries" → task. "I went to the gym" → NOT a task.
@@ -56,9 +58,28 @@ $summaryInstruction
 6. MOODS: Infer the user's emotional state.
    - Map to a 1-5 integer scale: 1=Very Bad, 2=Bad, 3=Neutral, 4=Good, 5=Very Good.
    - timeOfDay should be one of: Morning, Afternoon, Evening, Night, General.
+</extraction_rules>
 
-Reflection text:
-"$reflectionText"
+CRITICAL JSON RULES:
+- NEVER output `null` for a string field. Use an empty string `""` if you don't have a value.
+- The `title`, `learning`, `category`, `decision`, `eventDate`, and `timeOfDay` fields MUST be strings, never null.
+
+<json_format_example>
+{
+  "summary": { "summary": "...", "aiConfidence": 0.9 },
+  "tasks": [ { "title": "Buy groceries", "originalId": null, "description": "", "dueDate": null, "dueTime": null, "priority": "medium", "status": "pending", "aiConfidence": 0.9 } ],
+  "learnings": [ { "learning": "I learned that consistency matters", "category": "Life", "aiConfidence": 0.9 } ],
+  "decisions": [ { "decision": "I decided to wake up at 5am", "aiConfidence": 0.9 } ],
+  "events": [ { "title": "Gym", "originalId": null, "eventDate": "YYYY-MM-DD", "time": "6:00 AM", "aiConfidence": 0.9 } ],
+  "moods": [ { "score": 4, "timeOfDay": "Morning", "aiConfidence": 0.9 } ]
+}
+</json_format_example>
+
+<reflection>
+$reflectionText
+</reflection>
+
+CRITICAL INSTRUCTION: You MUST output ONLY valid JSON matching the exact schema above. Do not include markdown code blocks like ```json or any other text before or after the JSON.
 ''';
   }
 
