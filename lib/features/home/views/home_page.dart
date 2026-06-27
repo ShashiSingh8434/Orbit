@@ -107,31 +107,24 @@ class _HomePageState extends ConsumerState<HomePage> {
                   _GreetingSection(date: date, userDisplayName: user?.displayName),
                   const SizedBox(height: 16),
                   
-                  if (isFuture) ...[
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32.0),
-                        child: Text("No reflections yet.", style: TextStyle(color: Colors.grey)),
-                      ),
-                    ),
-                  ] else ...[
-                    _DelayedDataView(asyncValue: dayDataAsync, date: date),
-                  ],
+                  _DelayedDataView(
+                    asyncValue: dayDataAsync,
+                    date: date,
+                    isFuture: isFuture,
+                  ),
                 ],
               ),
             );
           },
         ),
       ),
-      floatingActionButton: _dateForIndex(_currentIndex).isAfter(DateTime.now())
-          ? null // No FAB on future dates
-          : FloatingActionButton(
-              onPressed: () {
-                final dateKey = "${_dateForIndex(_currentIndex).year}-${_dateForIndex(_currentIndex).month.toString().padLeft(2, '0')}-${_dateForIndex(_currentIndex).day.toString().padLeft(2, '0')}";
-                context.push('${AppRoutes.reflections}/edit', extra: {'dateKey': dateKey});
-              },
-              child: const Icon(Icons.add),
-            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          final dateKey = "${_dateForIndex(_currentIndex).year}-${_dateForIndex(_currentIndex).month.toString().padLeft(2, '0')}-${_dateForIndex(_currentIndex).day.toString().padLeft(2, '0')}";
+          context.push('${AppRoutes.reflections}/edit', extra: {'dateKey': dateKey});
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
@@ -187,8 +180,13 @@ class _GreetingSection extends StatelessWidget {
 class _DelayedDataView extends StatefulWidget {
   final AsyncValue<DayData> asyncValue;
   final DateTime date;
+  final bool isFuture;
 
-  const _DelayedDataView({required this.asyncValue, required this.date});
+  const _DelayedDataView({
+    required this.asyncValue,
+    required this.date,
+    required this.isFuture,
+  });
 
   @override
   State<_DelayedDataView> createState() => _DelayedDataViewState();
@@ -200,11 +198,16 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted) {
-        setState(() => _minTimeElapsed = true);
-      }
-    });
+    // If we already have data loaded, skip the artificial delay!
+    if (widget.asyncValue.hasValue) {
+      _minTimeElapsed = true;
+    } else {
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) {
+          setState(() => _minTimeElapsed = true);
+        }
+      });
+    }
   }
 
   @override
@@ -214,20 +217,68 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
         if (!_minTimeElapsed) {
           return DaySkeletonLoader(date: widget.date);
         }
+        
+        if (data.isEmpty) {
+          final colorScheme = Theme.of(context).colorScheme;
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 64.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 64,
+                    color: colorScheme.primary.withAlpha(80),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "A blank canvas",
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Tap the + button to reflect on this day.",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DaySummarySection(day: data.day, isLoading: false, date: widget.date),
-            const SizedBox(height: 16),
-            TaskSection(tasks: data.tasks, isLoading: false, date: widget.date),
-            const SizedBox(height: 16),
-            LearningSection(learnings: data.learnings, isLoading: false, date: widget.date),
-            const SizedBox(height: 16),
-            DecisionSection(decisions: data.decisions, isLoading: false, date: widget.date),
-            const SizedBox(height: 16),
-            EventSection(events: data.events, isLoading: false, date: widget.date),
-            const SizedBox(height: 16),
-            MoodSection(moods: data.moods, isLoading: false, date: widget.date),
+            if (data.day != null && data.day!.summary.isNotEmpty) ...[
+              DaySummarySection(day: data.day, isLoading: false, date: widget.date),
+              const SizedBox(height: 16),
+            ],
+            if (data.tasks.isNotEmpty) ...[
+              TaskSection(tasks: data.tasks, isLoading: false, date: widget.date),
+              const SizedBox(height: 16),
+            ],
+            if (data.learnings.isNotEmpty) ...[
+              LearningSection(learnings: data.learnings, isLoading: false, date: widget.date),
+              const SizedBox(height: 16),
+            ],
+            if (data.decisions.isNotEmpty) ...[
+              DecisionSection(decisions: data.decisions, isLoading: false, date: widget.date),
+              const SizedBox(height: 16),
+            ],
+            if (data.events.isNotEmpty) ...[
+              EventSection(events: data.events, isLoading: false, date: widget.date),
+              const SizedBox(height: 16),
+            ],
+            if (data.moods.isNotEmpty) ...[
+              MoodSection(moods: data.moods, isLoading: false, date: widget.date),
+              const SizedBox(height: 16),
+            ],
           ],
         );
       },
