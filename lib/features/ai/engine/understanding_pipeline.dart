@@ -110,7 +110,13 @@ class UnderstandingPipeline {
 
       final extractedLearnings = <LearningDto>[];
       for (final e in (data['learnings'] as List<dynamic>? ?? [])) {
-        try { extractedLearnings.add(LearningDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+        try {
+          final map = Map<String, dynamic>.from(e as Map);
+          if (!map.containsKey('title') && map.containsKey('learning')) {
+            map['title'] = map['learning'];
+          }
+          extractedLearnings.add(LearningDto.fromJson(map));
+        } catch (_) {}
       }
 
       final extractedDecisions = <DecisionDto>[];
@@ -125,7 +131,13 @@ class UnderstandingPipeline {
 
       final extractedMoods = <MoodDto>[];
       for (final e in (data['moods'] as List<dynamic>? ?? [])) {
-        try { extractedMoods.add(MoodDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+        try {
+          final map = Map<String, dynamic>.from(e as Map);
+          if (!map.containsKey('value') && map.containsKey('score')) {
+            map['value'] = map['score'];
+          }
+          extractedMoods.add(MoodDto.fromJson(map));
+        } catch (_) {}
       }
 
       // Stage 4-7: Normalization, Merge, Synchronization, Repository Updates

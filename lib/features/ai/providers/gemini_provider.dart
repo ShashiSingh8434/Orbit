@@ -49,10 +49,9 @@ class GeminiProvider extends AiProvider {
       final generativeModel = GenerativeModel(
         model: _model,
         apiKey: _apiKey,
-        generationConfig: request.jsonMode && request.responseSchema != null
+        generationConfig: request.jsonMode
             ? GenerationConfig(
                 responseMimeType: 'application/json',
-                responseSchema: request.responseSchema as Schema,
               )
             : null,
       );

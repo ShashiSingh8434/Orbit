@@ -56,14 +56,12 @@ class DetailedSummaryPipeline {
 
     // 2. Fetch all data for this day
     final dateKey = OrbitDateUtils.dateKey(dayDate);
-    final reflectionsStream = reflectionRepository.watchReflections(
+    final reflections = await reflectionRepository.getReflections(
       uid,
       dateKey,
     );
-    final reflections = await reflectionsStream.first;
 
-    final tasksStream = taskRepository.watchTasks(uid);
-    final allTasks = await tasksStream.first;
+    final allTasks = await taskRepository.getTasks(uid);
     final dayTasks = allTasks.where((t) {
       final createdOnDay =
           t.createdAt.year == dayDate.year &&
@@ -82,8 +80,7 @@ class DetailedSummaryPipeline {
       return createdOnDay || dueOnDay || completedOnDay;
     }).toList();
 
-    final eventsStream = eventRepository.watchEvents(uid);
-    final allEvents = await eventsStream.first;
+    final allEvents = await eventRepository.getEvents(uid);
     final dayEvents = allEvents.where((e) {
       return e.eventDate.year == dayDate.year &&
           e.eventDate.month == dayDate.month &&
