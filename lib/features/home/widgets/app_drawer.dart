@@ -94,7 +94,7 @@ class AppDrawer extends ConsumerWidget {
                   },
                 ),
                 _DrawerItem(
-                  icon: Icons.check_circle_outline,
+                  icon: Icons.gavel_rounded,
                   label: 'Decisions',
                   onTap: () {
                     Navigator.pop(context);

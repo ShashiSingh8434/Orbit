@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/entity_metadata.dart';
+import '../../../core/models/paginated_result.dart';
 import '../models/learning_model.dart';
 
 final learningRepositoryProvider = Provider<LearningRepository>(
@@ -10,6 +11,7 @@ final learningRepositoryProvider = Provider<LearningRepository>(
 abstract class LearningRepository {
   Stream<List<LearningModel>> watchLearnings(String uid);
   Future<List<LearningModel>> getLearnings(String uid);
+  Future<PaginatedResult<LearningModel>> getLearningsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20});
   Future<void> saveLearning(String uid, LearningModel learning);
   Future<void> updateLearning(String uid, LearningModel learning);
   Future<void> deleteLearning(String uid, String learningId);
@@ -33,6 +35,19 @@ class FirebaseLearningRepository implements LearningRepository {
   Future<List<LearningModel>> getLearnings(String uid) async {
     final snap = await _col(uid).orderBy('createdAt', descending: true).get();
     return snap.docs.map(_fromDoc).toList();
+  }
+
+  @override
+  Future<PaginatedResult<LearningModel>> getLearningsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20}) async {
+    Query<Map<String, dynamic>> query = _col(uid).orderBy('createdAt', descending: true).limit(limit);
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+    final snap = await query.get();
+    final items = snap.docs.map(_fromDoc).toList();
+    final lastDoc = snap.docs.isNotEmpty ? snap.docs.last : null;
+    final hasMore = snap.docs.length == limit;
+    return PaginatedResult(items: items, lastDoc: lastDoc, hasMore: hasMore);
   }
 
   @override

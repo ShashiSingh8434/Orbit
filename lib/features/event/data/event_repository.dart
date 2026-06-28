@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/entity_metadata.dart';
+import '../../../core/models/paginated_result.dart';
 import '../models/event_model.dart';
 
 final eventRepositoryProvider = Provider<EventRepository>(
@@ -10,6 +11,7 @@ final eventRepositoryProvider = Provider<EventRepository>(
 abstract class EventRepository {
   Stream<List<EventModel>> watchEvents(String uid);
   Future<List<EventModel>> getEvents(String uid);
+  Future<PaginatedResult<EventModel>> getEventsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20});
   Future<void> saveEvent(String uid, EventModel event);
   Future<void> updateEvent(String uid, EventModel event);
   Future<void> deleteEvent(String uid, String eventId);
@@ -33,6 +35,19 @@ class FirebaseEventRepository implements EventRepository {
   Future<List<EventModel>> getEvents(String uid) async {
     final snap = await _col(uid).orderBy('eventDate', descending: true).get();
     return snap.docs.map(_fromDoc).toList();
+  }
+
+  @override
+  Future<PaginatedResult<EventModel>> getEventsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20}) async {
+    Query<Map<String, dynamic>> query = _col(uid).orderBy('eventDate', descending: true).limit(limit);
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+    final snap = await query.get();
+    final items = snap.docs.map(_fromDoc).toList();
+    final lastDoc = snap.docs.isNotEmpty ? snap.docs.last : null;
+    final hasMore = snap.docs.length == limit;
+    return PaginatedResult(items: items, lastDoc: lastDoc, hasMore: hasMore);
   }
 
   @override

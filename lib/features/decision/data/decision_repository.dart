@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/entity_metadata.dart';
+import '../../../core/models/paginated_result.dart';
 import '../models/decision_model.dart';
 
 final decisionRepositoryProvider = Provider<DecisionRepository>(
@@ -10,6 +11,7 @@ final decisionRepositoryProvider = Provider<DecisionRepository>(
 abstract class DecisionRepository {
   Stream<List<DecisionModel>> watchDecisions(String uid);
   Future<List<DecisionModel>> getDecisions(String uid);
+  Future<PaginatedResult<DecisionModel>> getDecisionsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20});
   Future<void> saveDecision(String uid, DecisionModel decision);
   Future<void> updateDecision(String uid, DecisionModel decision);
   Future<void> deleteDecision(String uid, String decisionId);
@@ -33,6 +35,19 @@ class FirebaseDecisionRepository implements DecisionRepository {
   Future<List<DecisionModel>> getDecisions(String uid) async {
     final snap = await _col(uid).orderBy('createdAt', descending: true).get();
     return snap.docs.map(_fromDoc).toList();
+  }
+
+  @override
+  Future<PaginatedResult<DecisionModel>> getDecisionsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20}) async {
+    Query<Map<String, dynamic>> query = _col(uid).orderBy('createdAt', descending: true).limit(limit);
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+    final snap = await query.get();
+    final items = snap.docs.map(_fromDoc).toList();
+    final lastDoc = snap.docs.isNotEmpty ? snap.docs.last : null;
+    final hasMore = snap.docs.length == limit;
+    return PaginatedResult(items: items, lastDoc: lastDoc, hasMore: hasMore);
   }
 
   @override
