@@ -83,4 +83,16 @@ class PaginatedListNotifier<T> extends StateNotifier<PaginatedState<T>> {
       items: state.items.map(mapper).toList(),
     );
   }
+
+  void removeItem(bool Function(T) test) {
+    state = state.copyWith(
+      items: state.items.where((item) => !test(item)).toList(),
+    );
+  }
+
+  void addItem(T item) {
+    state = state.copyWith(
+      items: [item, ...state.items],
+    );
+  }
 }

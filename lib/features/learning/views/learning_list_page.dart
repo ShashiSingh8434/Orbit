@@ -6,6 +6,7 @@ import '../models/learning_model.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
 import '../../../core/widgets/paginated_list_notifier.dart';
+import 'learning_edit_sheet.dart';
 
 final paginatedLearningsProvider = StateNotifierProvider<PaginatedListNotifier<LearningModel>, PaginatedState<LearningModel>>((ref) {
   final user = ref.watch(authStateProvider).value;
@@ -32,6 +33,16 @@ class LearningListPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Learnings'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => const LearningEditSheet(),
+          );
+        },
+        child: const Icon(Icons.add_rounded),
       ),
       body: Builder(
         builder: (context) {
@@ -122,17 +133,11 @@ class LearningListPage extends ConsumerWidget {
                             ],
                           ),
                           onTap: () {
-                            final user = ref.read(authStateProvider).value;
-                            if (user != null) {
-                              showDialog(
-                                context: context,
-                                builder: (context) => _EditLearningDialog(
-                                  learning: l,
-                                  userId: user.uid,
-                                  repository: ref.read(learningRepositoryProvider),
-                                ),
-                              );
-                            }
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) => LearningEditSheet(learning: l),
+                            );
                           },
                         );
                       }),
@@ -145,127 +150,6 @@ class LearningListPage extends ConsumerWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class _EditLearningDialog extends ConsumerStatefulWidget {
-  final LearningModel learning;
-  final String userId;
-  final LearningRepository repository;
-
-  const _EditLearningDialog({
-    required this.learning,
-    required this.userId,
-    required this.repository,
-  });
-
-  @override
-  ConsumerState<_EditLearningDialog> createState() => _EditLearningDialogState();
-}
-
-class _EditLearningDialogState extends ConsumerState<_EditLearningDialog> {
-  late TextEditingController _titleCtrl;
-  late TextEditingController _descriptionCtrl;
-  late TextEditingController _categoryCtrl;
-  late DateTime _selectedDate;
-
-  @override
-  void initState() {
-    super.initState();
-    _titleCtrl = TextEditingController(text: widget.learning.title);
-    _descriptionCtrl = TextEditingController(text: widget.learning.description);
-    _categoryCtrl = TextEditingController(text: widget.learning.category);
-    _selectedDate = widget.learning.createdAt;
-  }
-
-  @override
-  void dispose() {
-    _titleCtrl.dispose();
-    _descriptionCtrl.dispose();
-    _categoryCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Edit Learning'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _titleCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Learning',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _descriptionCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Description / Context',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _categoryCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.calendar_month_rounded),
-              title: const Text('Date'),
-              subtitle: Text(OrbitDateUtils.friendlyLabel(OrbitDateUtils.dateKey(_selectedDate))),
-              trailing: TextButton(
-                onPressed: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDate,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (date != null) {
-                    setState(() => _selectedDate = date);
-                  }
-                },
-                child: const Text('Change'),
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            if (_titleCtrl.text.trim().isEmpty) return;
-            final updated = widget.learning.copyWith(
-              title: _titleCtrl.text.trim(),
-              description: _descriptionCtrl.text.trim(),
-              category: _categoryCtrl.text.trim(),
-              createdAt: _selectedDate,
-              updatedAt: DateTime.now(),
-            );
-            await widget.repository.updateLearning(widget.userId, updated);
-            ref.read(paginatedLearningsProvider.notifier).updateItem((l) => l.id == updated.id ? updated : l);
-            if (context.mounted) Navigator.pop(context);
-          },
-          child: const Text('Save'),
-        ),
-      ],
     );
   }
 }

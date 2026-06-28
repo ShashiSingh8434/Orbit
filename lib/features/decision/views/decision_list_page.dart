@@ -6,6 +6,7 @@ import '../models/decision_model.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
 import '../../../core/widgets/paginated_list_notifier.dart';
+import 'decision_edit_sheet.dart';
 
 final paginatedDecisionsProvider = StateNotifierProvider<PaginatedListNotifier<DecisionModel>, PaginatedState<DecisionModel>>((ref) {
   final user = ref.watch(authStateProvider).value;
@@ -32,6 +33,16 @@ class DecisionListPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Decisions'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => const DecisionEditSheet(),
+          );
+        },
+        child: const Icon(Icons.add_rounded),
       ),
       body: Builder(
         builder: (context) {
@@ -117,17 +128,11 @@ class DecisionListPage extends ConsumerWidget {
                                 )
                               : null,
                           onTap: () {
-                            final user = ref.read(authStateProvider).value;
-                            if (user != null) {
-                              showDialog(
-                                context: context,
-                                builder: (context) => _EditDecisionDialog(
-                                  decision: d,
-                                  userId: user.uid,
-                                  repository: ref.read(decisionRepositoryProvider),
-                                ),
-                              );
-                            }
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) => DecisionEditSheet(decision: d),
+                            );
                           },
                         );
                       }),
@@ -140,134 +145,6 @@ class DecisionListPage extends ConsumerWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class _EditDecisionDialog extends ConsumerStatefulWidget {
-  final DecisionModel decision;
-  final String userId;
-  final DecisionRepository repository;
-
-  const _EditDecisionDialog({
-    required this.decision,
-    required this.userId,
-    required this.repository,
-  });
-
-  @override
-  ConsumerState<_EditDecisionDialog> createState() => _EditDecisionDialogState();
-}
-
-class _EditDecisionDialogState extends ConsumerState<_EditDecisionDialog> {
-  late TextEditingController _decisionCtrl;
-  late TextEditingController _reasonCtrl;
-  late DateTime _selectedDate;
-  late String _status;
-
-  @override
-  void initState() {
-    super.initState();
-    _decisionCtrl = TextEditingController(text: widget.decision.decision);
-    _reasonCtrl = TextEditingController(text: widget.decision.reason);
-    _selectedDate = widget.decision.createdAt;
-    _status = widget.decision.status;
-  }
-
-  @override
-  void dispose() {
-    _decisionCtrl.dispose();
-    _reasonCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Edit Decision'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _decisionCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Decision',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _reasonCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Reason / Details',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              initialValue: _status,
-              decoration: const InputDecoration(
-                labelText: 'Status',
-                border: OutlineInputBorder(),
-              ),
-              items: ['Active', 'Completed', 'Cancelled', 'Superseded']
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                  .toList(),
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() => _status = val);
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.calendar_month_rounded),
-              title: const Text('Date'),
-              subtitle: Text(OrbitDateUtils.friendlyLabel(OrbitDateUtils.dateKey(_selectedDate))),
-              trailing: TextButton(
-                onPressed: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDate,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (date != null) {
-                    setState(() => _selectedDate = date);
-                  }
-                },
-                child: const Text('Change'),
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            if (_decisionCtrl.text.trim().isEmpty) return;
-            final updated = widget.decision.copyWith(
-              decision: _decisionCtrl.text.trim(),
-              reason: _reasonCtrl.text.trim(),
-              status: _status,
-              createdAt: _selectedDate,
-              updatedAt: DateTime.now(),
-            );
-            await widget.repository.updateDecision(widget.userId, updated);
-            ref.read(paginatedDecisionsProvider.notifier).updateItem((d) => d.id == updated.id ? updated : d);
-            if (context.mounted) Navigator.pop(context);
-          },
-          child: const Text('Save'),
-        ),
-      ],
     );
   }
 }

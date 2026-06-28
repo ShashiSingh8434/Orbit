@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/controllers/auth_controller.dart';
+import '../../day/data/day_repository.dart';
 import '../data/task_repository.dart';
 import '../models/task_model.dart';
 
@@ -43,6 +44,7 @@ class TaskController extends Notifier<void> {
       dueTime: dueTime,
     );
     await _repo.saveTask(uid, task);
+    await ref.read(dayRepositoryProvider).invalidateDayCache(uid, dueDate ?? task.createdAt);
   }
 
   Future<void> editTask(
@@ -62,6 +64,10 @@ class TaskController extends Notifier<void> {
       metadata: task.metadata?.copyWith(manualOverride: true),
     );
     await _repo.updateTask(uid, updatedTask);
+    await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.dueDate ?? task.createdAt);
+    if (dueDate != null && dueDate != task.dueDate) {
+      await ref.read(dayRepositoryProvider).invalidateDayCache(uid, dueDate);
+    }
   }
 
   Future<void> toggleDone(TaskModel task, bool isDone) async {
@@ -72,11 +78,22 @@ class TaskController extends Notifier<void> {
       metadata: task.metadata?.copyWith(manualOverride: true),
     );
     await _repo.updateTask(uid, updatedTask);
+    await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.dueDate ?? task.createdAt);
+    if (task.completedAt != null) {
+      await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.completedAt!);
+    }
+    if (isDone) {
+      await ref.read(dayRepositoryProvider).invalidateDayCache(uid, DateTime.now());
+    }
   }
 
-  Future<void> deleteTask(String taskId) async {
+  Future<void> deleteTask(TaskModel task) async {
     final uid = _requireUid();
-    await _repo.deleteTask(uid, taskId);
+    await _repo.deleteTask(uid, task.id);
+    await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.dueDate ?? task.createdAt);
+    if (task.completedAt != null) {
+      await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.completedAt!);
+    }
   }
 
   // ── Private ──

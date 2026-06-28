@@ -14,6 +14,7 @@ import '../../mood/widgets/mood_section.dart';
 import '../../day/providers/day_data_provider.dart';
 import '../widgets/day_skeleton_loader.dart';
 import '../../ai/engine/ai_queue_manager.dart';
+import '../widgets/arc_action_fab.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -139,8 +140,8 @@ class _HomePageState extends ConsumerState<HomePage> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
+      floatingActionButton: ArcActionFab(
+        onTap: () {
           final dateKey =
               "${_dateForIndex(_currentIndex).year}-${_dateForIndex(_currentIndex).month.toString().padLeft(2, '0')}-${_dateForIndex(_currentIndex).day.toString().padLeft(2, '0')}";
           context.push(
@@ -148,7 +149,6 @@ class _HomePageState extends ConsumerState<HomePage> {
             extra: {'dateKey': dateKey},
           );
         },
-        child: const Icon(Icons.add),
       ),
     );
   }
