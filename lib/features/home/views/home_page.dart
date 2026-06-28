@@ -108,7 +108,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               }
             },
           ),
-          const SizedBox(width:10),
+          const SizedBox(width: 10),
         ],
       ),
       drawer: const AppDrawer(),

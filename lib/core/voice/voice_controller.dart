@@ -179,13 +179,18 @@ class VoiceController extends StateNotifier<VoiceState> {
 
         // If the recognized words decrease in length or do not start with the
         // previously recognized words, it indicates the native engine reset its phrase buffer.
-        final isReset = lastNormalized.isNotEmpty &&
+        final isReset =
+            lastNormalized.isNotEmpty &&
             (newNormalized.length < lastNormalized.length ||
                 !newNormalized.startsWith(lastNormalized));
 
         if (isReset) {
           // Commit the last phrase into the session text accumulator
-          _sessionText = _buildText(_sessionText, _lastRecognizedWords, appendMode: true);
+          _sessionText = _buildText(
+            _sessionText,
+            _lastRecognizedWords,
+            appendMode: true,
+          );
         }
 
         _lastRecognizedWords = words;
@@ -193,10 +198,16 @@ class VoiceController extends StateNotifier<VoiceState> {
         // Combine segments spoken within this session, then append/replace to the initial baseline text.
         final currentWords = _buildText(_sessionText, words, appendMode: true);
         final base = _activeAppendMode ? _textBeforeListening : '';
-        final updated = _buildText(base, currentWords, appendMode: _activeAppendMode);
+        final updated = _buildText(
+          base,
+          currentWords,
+          appendMode: _activeAppendMode,
+        );
 
         _activeController!.text = updated;
-        _activeController!.selection = TextSelection.collapsed(offset: updated.length);
+        _activeController!.selection = TextSelection.collapsed(
+          offset: updated.length,
+        );
         _activeOnTextChanged?.call(updated);
       },
     );

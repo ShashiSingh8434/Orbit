@@ -356,6 +356,4 @@ class _TaskEditPageState extends ConsumerState<TaskEditPage>
       ],
     );
   }
-
-
 }

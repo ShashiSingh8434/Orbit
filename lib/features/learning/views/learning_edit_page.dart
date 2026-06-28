@@ -303,7 +303,8 @@ class _LearningEditPageState extends ConsumerState<LearningEditPage>
               hintText:
                   'e.g., Today I realized that debugging is easier if I write clear logs. Category is Tech.',
               onSubmit: _submitAi,
-              infoText: 'Describe your learning in plain language — Orbit AI will extract and structure it for you.',
+              infoText:
+                  'Describe your learning in plain language — Orbit AI will extract and structure it for you.',
             ),
         ],
       ),

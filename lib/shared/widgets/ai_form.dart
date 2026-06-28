@@ -79,7 +79,8 @@ class _AiFormState extends State<AiForm> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  widget.infoText ?? 'Describe it in plain language — Orbit AI will extract and structure it for you.',
+                  widget.infoText ??
+                      'Describe it in plain language — Orbit AI will extract and structure it for you.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -89,7 +90,7 @@ class _AiFormState extends State<AiForm> {
           ),
         ),
         const SizedBox(height: 20),
-        
+
         TextField(
           controller: widget.promptCtrl,
           scrollController: _scrollController,
@@ -161,7 +162,10 @@ class _AiFormState extends State<AiForm> {
                         icon: const Icon(Icons.auto_awesome_rounded),
                         label: Text(
                           widget.buttonLabel ?? 'Extract with AI',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
               ),

@@ -333,7 +333,10 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
                         textAlignVertical: TextAlignVertical.center,
                         decoration: const InputDecoration(
                           hintText: 'Add custom tag…',
-                          prefixIcon: Icon(Icons.label_outline_rounded, size: 18),
+                          prefixIcon: Icon(
+                            Icons.label_outline_rounded,
+                            size: 18,
+                          ),
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,

@@ -315,7 +315,8 @@ class _EventEditPageState extends ConsumerState<EventEditPage>
               hintText:
                   'e.g., Schedule a Team Meeting tomorrow at 3:00 PM in Conference Room B.',
               onSubmit: _submitAi,
-              infoText: 'Describe your event in plain language — Orbit AI will extract and schedule it for you.',
+              infoText:
+                  'Describe your event in plain language — Orbit AI will extract and schedule it for you.',
             ),
         ],
       ),

@@ -29,10 +29,6 @@ class VoiceService {
 
   // ── Initialisation ────────────────────────────────────────────────────────
 
-  /// Initialises the speech engine and requests microphone permission.
-  ///
-  /// Safe to call multiple times — subsequent calls are no-ops if already
-  /// initialised. Returns [true] if the device supports speech recognition.
   Future<bool> initialize({
     VoiceStatusCallback? onStatus,
     VoiceErrorCallback? onError,

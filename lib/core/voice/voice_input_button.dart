@@ -254,7 +254,7 @@ class _AnimatedMicButtonState extends State<_AnimatedMicButton>
             color: widget.disabled
                 ? Theme.of(
                     context,
-                  ).colorScheme.surfaceContainerHighest.withOpacity(0.5)
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
                 : widget.backgroundColor,
             shape: BoxShape.circle,
           ),
@@ -262,7 +262,7 @@ class _AnimatedMicButtonState extends State<_AnimatedMicButton>
             widget.listening ? Icons.mic_rounded : Icons.mic_none_rounded,
             size: widget.iconSize,
             color: widget.disabled
-                ? Theme.of(context).colorScheme.onSurface.withOpacity(0.3)
+                ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)
                 : widget.iconColor,
           ),
         ),
