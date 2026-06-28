@@ -91,7 +91,4 @@ flutter:
     - assets/app_logo_dark.png
     - assets/app_logo_light.png
     - assets/black.png
-    # .env is bundled as a Flutter asset so flutter_dotenv can load it at runtime.
-    # NEVER commit your real .env file — it is listed in .gitignore.
-    # Copy .env.example → .env and fill in your keys before running.
     - .env

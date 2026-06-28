@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../shared/widgets/ai_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/controllers/auth_controller.dart';
@@ -251,7 +252,21 @@ class _TaskEditPageState extends ConsumerState<TaskEditPage>
       body: TabBarView(
         controller: _tabController,
         physics: const NeverScrollableScrollPhysics(),
-        children: [_buildManualForm(), if (!_isEditing) _buildAiForm()],
+        children: [
+          _buildManualForm(),
+          if (!_isEditing)
+            AiForm(
+              promptCtrl: _aiPromptCtrl,
+              isLoading: _isAiLoading,
+              error: _aiError,
+              hintText:
+                  'e.g., Create a task to buy groceries for tomorrow and complete the project review task.',
+              onSubmit: _submitAi,
+              infoText:
+                  'Manage tasks in natural language. Orbit AI can create new tasks or update, prioritize, or complete existing pending ones.',
+              buttonLabel: 'Execute with AI',
+            ),
+        ],
       ),
     );
   }
@@ -342,43 +357,5 @@ class _TaskEditPageState extends ConsumerState<TaskEditPage>
     );
   }
 
-  Widget _buildAiForm() {
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        Text(
-          'Manage tasks in natural language. Orbit AI can create new tasks or update, prioritize, or complete existing pending ones.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _aiPromptCtrl,
-          decoration: const InputDecoration(
-            hintText:
-                'e.g., Create a task to buy groceries for tomorrow and complete the project review task.',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 5,
-        ),
-        const SizedBox(height: 16),
-        if (_aiError != null) ...[
-          Text(_aiError!, style: const TextStyle(color: Colors.red)),
-          const SizedBox(height: 16),
-        ],
-        SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: _isAiLoading
-              ? const Center(child: CircularProgressIndicator())
-              : FilledButton.icon(
-                  onPressed: _submitAi,
-                  icon: const Icon(Icons.auto_awesome_rounded),
-                  label: const Text('Execute with AI'),
-                ),
-        ),
-      ],
-    );
-  }
+
 }

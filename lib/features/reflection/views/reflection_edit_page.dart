@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:speech_to_text/speech_to_text.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../core/voice/voice_input_button.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../controllers/reflection_controller.dart';
 import '../models/reflection_model.dart';
@@ -37,11 +37,7 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
   final List<String> _tags = [];
   final _tagInputCtrl = TextEditingController();
   bool _isSaving = false;
-
-  // ── Voice-to-Text ──
-  final SpeechToText _stt = SpeechToText();
-  bool _sttAvailable = false;
-  bool _isListening = false;
+  bool _usedVoice = false;
 
   late String _resolvedDate;
   ReflectionModel? _existingReflection;
@@ -66,12 +62,10 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
     _resolvedDate = widget.dateKey ?? OrbitDateUtils.todayKey();
     _textCtrl = TextEditingController();
     _initPage();
-    _initStt();
   }
 
   Future<void> _initPage() async {
     if (widget.existingReflectionId != null) {
-      // Editing an existing reflection — load it from the stream's cached value
       final reflections =
           ref.read(reflectionsProvider(_resolvedDate)).value ?? [];
       _existingReflection = reflections
@@ -83,7 +77,6 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
         setState(() {});
       }
     } else {
-      // New reflection — restore offline draft if present
       final draft = ref.read(reflectionControllerProvider.notifier).loadDraft();
       if (draft != null) {
         _textCtrl.text = draft.text;
@@ -93,67 +86,11 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
     }
   }
 
-  String _textBeforeListening = '';
-
-  Future<void> _initStt() async {
-    _sttAvailable = await _stt.initialize(
-      onStatus: (status) {
-        if (status == 'done' || status == 'notListening') {
-          if (mounted && _isListening) {
-            setState(() => _isListening = false);
-          }
-        }
-      },
-      onError: (errorNotification) {
-        if (mounted && _isListening) {
-          setState(() => _isListening = false);
-        }
-      },
-    );
-    if (mounted) setState(() {});
-  }
-
   @override
   void dispose() {
     _textCtrl.dispose();
     _tagInputCtrl.dispose();
-    _stt.stop();
     super.dispose();
-  }
-
-  // ── Voice to Text ──────────────────────────────────────────────────────────
-
-  Future<void> _toggleListening() async {
-    if (_isListening) {
-      await _stt.stop();
-      setState(() => _isListening = false);
-    } else {
-      setState(() {
-        _isListening = true;
-        _textBeforeListening = _textCtrl.text;
-      });
-      await _stt.listen(
-        onResult: (result) {
-          final current = _textBeforeListening;
-          final appended = current.isEmpty
-              ? result.recognizedWords
-              : current.endsWith(' ') || current.endsWith('\n')
-              ? '$current${result.recognizedWords}'
-              : '$current ${result.recognizedWords}';
-
-          _textCtrl.text = appended;
-          _textCtrl.selection = TextSelection.collapsed(
-            offset: _textCtrl.text.length,
-          );
-
-          if (result.finalResult) {
-            _textBeforeListening = _textCtrl.text;
-          }
-        },
-        listenFor: const Duration(seconds: 60),
-        pauseFor: const Duration(seconds: 5),
-      );
-    }
   }
 
   // ── Save ──────────────────────────────────────────────────────────────────
@@ -198,7 +135,7 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
         await controller.addReflection(
           text: text,
           tags: List.from(_tags),
-          source: _isListening ? 'voice' : 'manual',
+          source: _usedVoice ? 'voice' : 'manual',
           date: finalDate,
         );
         await controller.clearDraft();
@@ -223,7 +160,7 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
     }
   }
 
-  // ── Add Tag ───────────────────────────────────────────────────────────────
+  // ── Tags ──────────────────────────────────────────────────────────────────
 
   void _addTag(String tag) {
     final normalised = tag.toLowerCase().trim();
@@ -306,7 +243,7 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
       ),
       body: Column(
         children: [
-          // ── Text Input ──────────────────────────────────────────────
+          // ── Text Input ────────────────────────────────────────────────
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -332,13 +269,12 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
 
           const Divider(height: 1),
 
-          // ── Tags ────────────────────────────────────────────────────
+          // ── Tags ──────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Selected tags
                 if (_tags.isNotEmpty)
                   Wrap(
                     spacing: 6,
@@ -354,7 +290,6 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
                         .toList(),
                   ),
                 const SizedBox(height: 6),
-                // Preset tag suggestions
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -376,57 +311,56 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
             ),
           ),
 
-          // ── Bottom Toolbar ──────────────────────────────────────────
+          // ── Bottom Toolbar ────────────────────────────────────────────
           SafeArea(
             top: false,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Voice-to-text button
-                  if (_sttAvailable)
-                    IconButton(
-                      onPressed: _toggleListening,
-                      icon: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        child: Icon(
-                          _isListening
-                              ? Icons.mic_rounded
-                              : Icons.mic_none_rounded,
-                          key: ValueKey(_isListening),
-                          color: _isListening
-                              ? colorScheme.error
-                              : colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      tooltip: _isListening ? 'Stop listening' : 'Voice input',
-                    ),
-
-                  // Custom tag input
                   Expanded(
-                    child: TextField(
-                      controller: _tagInputCtrl,
-                      decoration: InputDecoration(
-                        hintText: 'Add custom tag…',
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        filled: false,
-                        prefixIcon: Icon(
-                          Icons.label_outline_rounded,
-                          size: 18,
-                          color: colorScheme.onSurfaceVariant,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant,
                         ),
-                        contentPadding: EdgeInsets.zero,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      style: theme.textTheme.bodyMedium,
-                      onSubmitted: (v) {
-                        _addTag(v);
-                        _tagInputCtrl.clear();
-                      },
-                      textInputAction: TextInputAction.done,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: TextField(
+                        controller: _tagInputCtrl,
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: const InputDecoration(
+                          hintText: 'Add custom tag…',
+                          prefixIcon: Icon(Icons.label_outline_rounded, size: 18),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          filled: false,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        onSubmitted: (v) {
+                          _addTag(v);
+                          _tagInputCtrl.clear();
+                        },
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 10),
+
+                  // ── Voice Input Button ──────────────────────────────
+                  // All STT logic lives inside VoiceInputButton. This page
+                  // only passes its controller and a callback to track
+                  // whether voice was used (for the 'source' field on save).
+                  VoiceInputButton(
+                    controller: _textCtrl,
+                    appendMode: true,
+                    onListeningStarted: () => setState(() => _usedVoice = true),
+                    onTextChanged: _onTextChanged,
+                  ),
+                  const SizedBox(width: 10),
                 ],
               ),
             ),

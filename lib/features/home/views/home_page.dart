@@ -84,8 +84,6 @@ class _HomePageState extends ConsumerState<HomePage> {
             onPressed: () => context.push(AppRoutes.guide),
           ),
 
-          const SizedBox(width: 10),
-
           IconButton(
             icon: const Icon(Icons.calendar_month_rounded),
             onPressed: () async {
@@ -110,6 +108,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               }
             },
           ),
+          const SizedBox(width:10),
         ],
       ),
       drawer: const AppDrawer(),

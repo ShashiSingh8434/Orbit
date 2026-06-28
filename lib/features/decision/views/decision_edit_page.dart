@@ -307,12 +307,17 @@ class _DecisionEditPageState extends ConsumerState<DecisionEditPage>
               hintText:
                   'e.g., I decided to quit drinking coffee because it makes me anxious and will start tomorrow.',
               onSubmit: _submitAi,
+              infoText: 'Describe your decision and reasoning in plain language — Orbit AI will extract and structure it for you.',
             ),
         ],
       ),
     );
   }
 }
+
+
+
+// ── Manual form (unchanged) ───────────────────────────────────────────────────
 
 class _ManualForm extends StatelessWidget {
   final TextEditingController decisionCtrl;
