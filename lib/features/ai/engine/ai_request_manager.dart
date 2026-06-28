@@ -49,14 +49,11 @@ class AiRequestManager {
   final AiAnalyticsService _analytics;
 
   static const int _maxRetries = 8;
-  static const String _prefKeyAiMode = 'ai_mode'; // 'orbit_default' | 'user_key'
+  static const String _prefKeyAiMode =
+      'ai_mode'; // 'orbit_default' | 'user_key'
   static const String _prefKeyProvider = 'preferred_provider';
 
-  AiRequestManager({
-    required SharedPreferences prefs,
-    required AiAnalyticsService analytics,
-  })  : _prefs = prefs,
-        _analytics = analytics {
+  AiRequestManager({required this._prefs, required this._analytics}) {
     _rateLimitManager = RateLimitManager();
     _providerRouter = ProviderRouter(rateLimitManager: _rateLimitManager);
     _requestQueue = RequestQueue();
@@ -92,7 +89,8 @@ class AiRequestManager {
   String get aiMode => _prefs.getString(_prefKeyAiMode) ?? 'orbit_default';
 
   /// Current preferred provider ID.
-  String get preferredProvider => _prefs.getString(_prefKeyProvider) ?? 'gemini';
+  String get preferredProvider =>
+      _prefs.getString(_prefKeyProvider) ?? 'gemini';
 
   /// Update the AI mode and reinitialize providers.
   Future<void> setAiMode(String mode) async {
@@ -115,7 +113,7 @@ class AiRequestManager {
       debugPrint('AiRequestManager: Unknown provider "$providerId"');
       return;
     }
-    
+
     // We don't reset rates for the top-level 'gemini' id anymore since they are now 'gemini_flash', etc.
     // Instead we reset all of them.
     for (final id in _providerRouter.registeredProviderIds) {
@@ -129,7 +127,9 @@ class AiRequestManager {
 
   /// Unregister a provider (e.g. when user removes their key).
   void unregisterProvider(String providerId) {
-    final toRemove = _providerRouter.registeredProviderIds.where((id) => id.startsWith(providerId)).toList();
+    final toRemove = _providerRouter.registeredProviderIds
+        .where((id) => id.startsWith(providerId))
+        .toList();
     for (final id in toRemove) {
       _providerRouter.unregisterProvider(id);
       _rateLimitManager.resetProvider(id);
@@ -142,10 +142,22 @@ class AiRequestManager {
     late AiProvider testProvider;
     switch (providerId) {
       case 'gemini':
-        testProvider = GeminiProvider(apiKey: apiKey, model: 'gemini-2.5-flash', id: 'test', name: 'test', priority: 1);
+        testProvider = GeminiProvider(
+          apiKey: apiKey,
+          model: 'gemini-2.5-flash',
+          id: 'test',
+          name: 'test',
+          priority: 1,
+        );
         break;
       case 'groq':
-        testProvider = GroqProvider(apiKey: apiKey, model: 'llama-3.1-8b-instant', id: 'test', name: 'test', priority: 1);
+        testProvider = GroqProvider(
+          apiKey: apiKey,
+          model: 'llama-3.1-8b-instant',
+          id: 'test',
+          name: 'test',
+          priority: 1,
+        );
         break;
       default:
         return false;
@@ -175,22 +187,103 @@ class AiRequestManager {
     final preferred = _prefs.getString(_prefKeyProvider) ?? 'groq_llama_70b';
     _providerRouter.setPreferred(preferred);
 
-    debugPrint('AiRequestManager: Initialized. Mode=$aiMode, preferred=$preferred');
+    debugPrint(
+      'AiRequestManager: Initialized. Mode=$aiMode, preferred=$preferred',
+    );
   }
 
   void _registerGroqModels(String apiKey) {
-    _providerRouter.registerProvider(GroqProvider(apiKey: apiKey, model: 'llama-3.3-70b-versatile', id: 'groq_llama_70b', name: 'Llama 3.3 70B', priority: 1));
-    _providerRouter.registerProvider(GroqProvider(apiKey: apiKey, model: 'llama-3.1-8b-instant', id: 'groq_llama_8b', name: 'Llama 3.1 8B', priority: 2));
-    _providerRouter.registerProvider(GroqProvider(apiKey: apiKey, model: 'llama-3.3-70b-specdec', id: 'groq_llama_4_17b', name: 'Llama 4 17B', priority: 3)); // Fallback approximation if Llama 4 not strictly available
-    _providerRouter.registerProvider(GroqProvider(apiKey: apiKey, model: 'qwen-2.5-32b', id: 'groq_qwen_32b', name: 'Qwen 32B', priority: 4)); // Fallback approximation
+    _providerRouter.registerProvider(
+      GroqProvider(
+        apiKey: apiKey,
+        model: 'llama-3.1-8b-instant',
+        id: 'groq_llama_3_1_8b',
+        name: 'Llama 3.1 8B Instant',
+        priority: 1,
+      ),
+    );
+
+    _providerRouter.registerProvider(
+      GroqProvider(
+        apiKey: apiKey,
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        id: 'groq_llama_4_scout',
+        name: 'Llama 4 Scout 17B',
+        priority: 2,
+      ),
+    );
+
+    _providerRouter.registerProvider(
+      GroqProvider(
+        apiKey: apiKey,
+        model: 'qwen/qwen3-32b',
+        id: 'groq_qwen3_32b',
+        name: 'Qwen3 32B',
+        priority: 3,
+      ),
+    );
+
+    _providerRouter.registerProvider(
+      GroqProvider(
+        apiKey: apiKey,
+        model: 'llama-3.3-70b-versatile',
+        id: 'groq_llama_3_3_70b',
+        name: 'Llama 3.3 70B',
+        priority: 4,
+      ),
+    );
+
+    _providerRouter.registerProvider(
+      GroqProvider(
+        apiKey: apiKey,
+        model: 'qwen/qwen3.6-27b',
+        id: 'groq_qwen3_6_27b',
+        name: 'Qwen3.6 27B',
+        priority: 5,
+      ),
+    );
   }
 
   void _registerGeminiModels(String apiKey) {
-    _providerRouter.registerProvider(GeminiProvider(apiKey: apiKey, model: 'gemini-2.5-flash', id: 'gemini_2_5_flash', name: 'Gemini 2.5 Flash', priority: 6));
-    _providerRouter.registerProvider(GeminiProvider(apiKey: apiKey, model: 'gemini-2.5-pro', id: 'gemini_2_5_pro', name: 'Gemini 2.5 Pro', priority: 7));
-    _providerRouter.registerProvider(GeminiProvider(apiKey: apiKey, model: 'gemini-2.0-flash-exp', id: 'gemini_2_0_flash', name: 'Gemini 2.0 Flash', priority: 8));
-    _providerRouter.registerProvider(GeminiProvider(apiKey: apiKey, model: 'gemini-1.5-flash', id: 'gemini_1_5_flash', name: 'Gemini 1.5 Flash', priority: 9));
-    _providerRouter.registerProvider(GeminiProvider(apiKey: apiKey, model: 'gemini-1.5-pro', id: 'gemini_1_5_pro', name: 'Gemini 1.5 Pro', priority: 10));
+    _providerRouter.registerProvider(
+      GeminiProvider(
+        apiKey: apiKey,
+        model: 'gemini-3.1-flash-lite',
+        id: 'gemini_3_1_flash_lite',
+        name: 'Gemini 3.1 Flash Lite',
+        priority: 6,
+      ),
+    );
+
+    _providerRouter.registerProvider(
+      GeminiProvider(
+        apiKey: apiKey,
+        model: 'gemini-2.5-flash-lite',
+        id: 'gemini_2_5_flash_lite',
+        name: 'Gemini 2.5 Flash Lite',
+        priority: 7,
+      ),
+    );
+
+    _providerRouter.registerProvider(
+      GeminiProvider(
+        apiKey: apiKey,
+        model: 'gemini-2.5-flash',
+        id: 'gemini_2_5_flash',
+        name: 'Gemini 2.5 Flash',
+        priority: 8,
+      ),
+    );
+
+    _providerRouter.registerProvider(
+      GeminiProvider(
+        apiKey: apiKey,
+        model: 'gemini-3-flash',
+        id: 'gemini_3_flash',
+        name: 'Gemini 3 Flash',
+        priority: 9,
+      ),
+    );
   }
 
   Future<AiResponse> _generateWithRetry(AiRequest request) async {
@@ -232,24 +325,29 @@ class AiRequestManager {
           _responseCache.put(request.prompt, provider.id, response.text);
         }
 
-        _analytics.logRequest(AiUsageLog(
-          provider: provider.name,
-          model: provider.model,
-          apiMode: aiMode,
-          inputTokens: response.inputTokens,
-          outputTokens: response.outputTokens,
-          totalTokens: (response.inputTokens ?? 0) + (response.outputTokens ?? 0),
-          timestamp: DateTime.now(),
-          latencyMs: response.latency.inMilliseconds,
-          retryCount: attempt,
-          fallbackTriggered: attempt > 0 || provider.id != preferredProvider,
-          status: 'success',
-        ));
+        _analytics.logRequest(
+          AiUsageLog(
+            provider: provider.name,
+            model: provider.model,
+            apiMode: aiMode,
+            inputTokens: response.inputTokens,
+            outputTokens: response.outputTokens,
+            totalTokens:
+                (response.inputTokens ?? 0) + (response.outputTokens ?? 0),
+            timestamp: DateTime.now(),
+            latencyMs: response.latency.inMilliseconds,
+            retryCount: attempt,
+            fallbackTriggered: attempt > 0 || provider.id != preferredProvider,
+            status: 'success',
+          ),
+        );
 
         return response;
       } on AiException catch (e) {
         lastError = e;
-        debugPrint('AiRequestManager: ${e.type} from ${e.providerId}: ${e.message}');
+        debugPrint(
+          'AiRequestManager: ${e.type} from ${e.providerId}: ${e.message}',
+        );
 
         // Update health & rate limit state
         if (e.providerId != null) {
@@ -263,31 +361,42 @@ class AiRequestManager {
           } else if (e.isRetriable) {
             _rateLimitManager.recordFailure(e.providerId!);
           }
-          
+
           final providerObj = _providerRouter.getProvider(e.providerId!);
-          
-          _analytics.logRequest(AiUsageLog(
-            provider: providerObj?.name ?? e.providerId!,
-            model: providerObj?.model ?? 'unknown',
-            apiMode: aiMode,
-            inputTokens: null,
-            outputTokens: null,
-            totalTokens: null,
-            timestamp: DateTime.now(),
-            latencyMs: 0,
-            retryCount: attempt,
-            fallbackTriggered: attempt > 0 || e.providerId != preferredProvider,
-            status: e.type == AiErrorType.rateLimited ? 'rate_limited' : (e.type == AiErrorType.invalidApiKey ? 'invalid_key' : 'failed'),
-          ));
+
+          _analytics.logRequest(
+            AiUsageLog(
+              provider: providerObj?.name ?? e.providerId!,
+              model: providerObj?.model ?? 'unknown',
+              apiMode: aiMode,
+              inputTokens: null,
+              outputTokens: null,
+              totalTokens: null,
+              timestamp: DateTime.now(),
+              latencyMs: 0,
+              retryCount: attempt,
+              fallbackTriggered:
+                  attempt > 0 || e.providerId != preferredProvider,
+              status: e.type == AiErrorType.rateLimited
+                  ? 'rate_limited'
+                  : (e.type == AiErrorType.invalidApiKey
+                        ? 'invalid_key'
+                        : 'failed'),
+            ),
+          );
         }
 
-        // Don't retry non-retriable errors
-        if (!e.isRetriable) rethrow;
+        // We do not rethrow non-retriable errors immediately.
+        // Even if a specific provider returns an invalid API key, we want to
+        // try the NEXT fallback provider in the router.
+        // We only fail if we've exhausted all retries or all providers.
 
         // Small backoff between retries
         if (attempt < _maxRetries - 1) {
           final backoff = Duration(milliseconds: 500 * (attempt + 1));
-          debugPrint('AiRequestManager: Backing off ${backoff.inMilliseconds}ms');
+          debugPrint(
+            'AiRequestManager: Backing off ${backoff.inMilliseconds}ms',
+          );
           await Future.delayed(backoff);
         }
       } on AllProvidersExhaustedException {

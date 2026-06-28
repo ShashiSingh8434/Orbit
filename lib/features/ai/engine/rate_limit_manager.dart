@@ -53,7 +53,10 @@ class RateLimitManager {
     state.consecutiveFailures++;
 
     // Use provider hint if available, otherwise escalate via the ladder.
-    final ladderIndex = (state.consecutiveFailures - 1).clamp(0, _cooldownLadder.length - 1);
+    final ladderIndex = (state.consecutiveFailures - 1).clamp(
+      0,
+      _cooldownLadder.length - 1,
+    );
     final cooldown = retryAfter ?? _cooldownLadder[ladderIndex];
 
     state.cooldownExpiry = DateTime.now().add(cooldown);
@@ -67,7 +70,9 @@ class RateLimitManager {
   void recordFailure(String providerId) {
     final state = _getOrCreate(providerId);
     state.consecutiveFailures++;
-    debugPrint('RateLimitManager: $providerId failure #${state.consecutiveFailures}');
+    debugPrint(
+      'RateLimitManager: $providerId failure #${state.consecutiveFailures}',
+    );
   }
 
   /// Number of consecutive failures for a provider.

@@ -19,16 +19,12 @@ class GroqProvider extends AiProvider {
   static const _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
   GroqProvider({
-    required String apiKey,
-    required String model,
-    required String id,
-    required String name,
-    required int priority,
-  })  : _apiKey = apiKey,
-        _model = model,
-        _id = id,
-        _name = name,
-        _priority = priority;
+    required this._apiKey,
+    required this._model,
+    required this._id,
+    required this._name,
+    required this._priority,
+  });
 
   @override
   String get id => _id;
@@ -68,14 +64,16 @@ class GroqProvider extends AiProvider {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_apiKey',
-        },
-        body: body,
-      ).timeout(const Duration(seconds: 60));
+      final response = await http
+          .post(
+            Uri.parse(_baseUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_apiKey',
+            },
+            body: body,
+          )
+          .timeout(const Duration(seconds: 60));
 
       stopwatch.stop();
 
@@ -131,20 +129,22 @@ class GroqProvider extends AiProvider {
   @override
   Future<bool> validateApiKey(String apiKey) async {
     try {
-      final response = await http.post(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          'model': _model,
-          'messages': [
-            {'role': 'user', 'content': 'Hello'},
-          ],
-          'max_tokens': 5,
-        }),
-      ).timeout(const Duration(seconds: 15));
+      final response = await http
+          .post(
+            Uri.parse(_baseUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $apiKey',
+            },
+            body: jsonEncode({
+              'model': _model,
+              'messages': [
+                {'role': 'user', 'content': 'Hello'},
+              ],
+              'max_tokens': 5,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
 
       return response.statusCode == 200;
     } catch (e) {
@@ -156,20 +156,22 @@ class GroqProvider extends AiProvider {
   @override
   Future<bool> healthCheck() async {
     try {
-      final response = await http.post(
-        Uri.parse(_baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_apiKey',
-        },
-        body: jsonEncode({
-          'model': _model,
-          'messages': [
-            {'role': 'user', 'content': 'ping'},
-          ],
-          'max_tokens': 5,
-        }),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            Uri.parse(_baseUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_apiKey',
+            },
+            body: jsonEncode({
+              'model': _model,
+              'messages': [
+                {'role': 'user', 'content': 'ping'},
+              ],
+              'max_tokens': 5,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
 
       return response.statusCode == 200;
     } catch (e) {

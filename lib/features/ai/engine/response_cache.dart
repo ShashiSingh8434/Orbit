@@ -12,10 +12,7 @@ class ResponseCache {
 
   final LinkedHashMap<String, _CacheEntry> _cache = LinkedHashMap();
 
-  ResponseCache({
-    this.maxEntries = 50,
-    this.ttl = const Duration(minutes: 5),
-  });
+  ResponseCache({this.maxEntries = 50, this.ttl = const Duration(minutes: 5)});
 
   /// Generate a cache key from the prompt and provider.
   String _makeKey(String prompt, String providerId) {
@@ -51,10 +48,7 @@ class ResponseCache {
       _cache.remove(_cache.keys.first);
     }
 
-    _cache[key] = _CacheEntry(
-      response: response,
-      timestamp: DateTime.now(),
-    );
+    _cache[key] = _CacheEntry(response: response, timestamp: DateTime.now());
   }
 
   /// Clear the entire cache.

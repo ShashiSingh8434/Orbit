@@ -20,7 +20,7 @@ class ReflectionListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final resolvedDate = dateKey ?? OrbitDateUtils.todayKey();
     final reflectionsAsync = ref.watch(reflectionsProvider(resolvedDate));
-    final theme = Theme.of(context);
+    Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +45,12 @@ class ReflectionListPage extends ConsumerWidget {
                       width: double.infinity,
                       child: FilledButton.tonalIcon(
                         onPressed: () {
-                          context.push(AppRoutes.detailedSummary, extra: {'date': OrbitDateUtils.parseKey(resolvedDate)});
+                          context.push(
+                            AppRoutes.detailedSummary,
+                            extra: {
+                              'date': OrbitDateUtils.parseKey(resolvedDate),
+                            },
+                          );
                         },
                         icon: const Icon(Icons.auto_awesome),
                         label: const Text('See detailed summary'),
@@ -54,7 +59,10 @@ class ReflectionListPage extends ConsumerWidget {
                   ),
                   Expanded(
                     child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       itemCount: reflections.length,
                       itemBuilder: (_, i) {
                         final r = reflections[i];
@@ -62,9 +70,13 @@ class ReflectionListPage extends ConsumerWidget {
                           reflection: r,
                           onEdit: () => context.push(
                             '/home/reflections/edit',
-                            extra: {'dateKey': resolvedDate, 'reflectionId': r.id},
+                            extra: {
+                              'dateKey': resolvedDate,
+                              'reflectionId': r.id,
+                            },
                           ),
-                          onDelete: () => _confirmDelete(context, ref, r, resolvedDate),
+                          onDelete: () =>
+                              _confirmDelete(context, ref, r, resolvedDate),
                         );
                       },
                     ),
@@ -85,13 +97,23 @@ class ReflectionListPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _pickDate(BuildContext context, WidgetRef ref, String current) async {
+  Future<void> _pickDate(
+    BuildContext context,
+    WidgetRef ref,
+    String current,
+  ) async {
     final auth = ref.read(authStateProvider).value;
-    final creationTime = auth?.metadata.creationTime ?? DateTime.now().subtract(const Duration(days: 30));
+    final creationTime =
+        auth?.metadata.creationTime ??
+        DateTime.now().subtract(const Duration(days: 30));
     final picked = await showDatePicker(
       context: context,
       initialDate: OrbitDateUtils.parseKey(current),
-      firstDate: DateTime(creationTime.year, creationTime.month, creationTime.day),
+      firstDate: DateTime(
+        creationTime.year,
+        creationTime.month,
+        creationTime.day,
+      ),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null && context.mounted) {
@@ -118,10 +140,9 @@ class ReflectionListPage extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              ref.read(reflectionControllerProvider.notifier).deleteReflection(
-                    reflectionId: r.id,
-                    dateKey: dateKey,
-                  );
+              ref
+                  .read(reflectionControllerProvider.notifier)
+                  .deleteReflection(reflectionId: r.id, dateKey: dateKey);
             },
             child: Text(
               'Delete',
@@ -144,7 +165,11 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.edit_note_rounded, size: 64, color: colorScheme.primary.withAlpha(80)),
+          Icon(
+            Icons.edit_note_rounded,
+            size: 64,
+            color: colorScheme.primary.withAlpha(80),
+          ),
           const SizedBox(height: 16),
           Text(
             'No reflections yet',

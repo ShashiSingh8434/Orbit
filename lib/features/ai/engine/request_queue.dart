@@ -17,9 +17,9 @@ class RequestQueue {
   final Duration timeout;
 
   RequestQueue({
-    int maxConcurrency = 1,
+    this._maxConcurrency = 1,
     this.timeout = const Duration(seconds: 60),
-  }) : _maxConcurrency = maxConcurrency;
+  });
 
   /// Number of items currently waiting in the queue.
   int get queueLength => _queue.length;
@@ -42,18 +42,20 @@ class RequestQueue {
     }
 
     final completer = Completer<T>();
-    _queue.add(_QueuedTask(
-      execute: () async {
-        try {
-          final result = await task().timeout(timeout);
-          completer.complete(result);
-        } catch (e, s) {
-          completer.completeError(e, s);
-        }
-      },
-      completer: completer,
-      requestId: requestId,
-    ));
+    _queue.add(
+      _QueuedTask(
+        execute: () async {
+          try {
+            final result = await task().timeout(timeout);
+            completer.complete(result);
+          } catch (e, s) {
+            completer.completeError(e, s);
+          }
+        },
+        completer: completer,
+        requestId: requestId,
+      ),
+    );
 
     _processNext();
     return completer.future;
@@ -78,9 +80,5 @@ class _QueuedTask {
   final Completer completer;
   final String? requestId;
 
-  _QueuedTask({
-    required this.execute,
-    required this.completer,
-    this.requestId,
-  });
+  _QueuedTask({required this.execute, required this.completer, this.requestId});
 }

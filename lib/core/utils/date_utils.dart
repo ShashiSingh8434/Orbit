@@ -20,15 +20,27 @@ abstract final class OrbitDateUtils {
     final date = parseKey(dateKey);
     final today = DateTime.now();
     final todayKey = OrbitDateUtils.dateKey(today);
-    final yesterdayKey = OrbitDateUtils.dateKey(today.subtract(const Duration(days: 1)));
+    final yesterdayKey = OrbitDateUtils.dateKey(
+      today.subtract(const Duration(days: 1)),
+    );
 
     if (dateKey == todayKey) return 'Today';
     if (dateKey == yesterdayKey) return 'Yesterday';
 
     final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${weekdays[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
   }

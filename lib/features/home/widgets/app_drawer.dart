@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/router/app_routes.dart';
-import '../../../app/theme/theme_notifier.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../auth/controllers/auth_controller.dart';
 
 class AppDrawer extends ConsumerWidget {
@@ -27,7 +25,11 @@ class AppDrawer extends ConsumerWidget {
                   ? NetworkImage(user!.photoURL!)
                   : null,
               child: user?.photoURL == null
-                  ? Icon(Icons.person_rounded, size: 36, color: colorScheme.primary)
+                  ? Icon(
+                      Icons.person_rounded,
+                      size: 36,
+                      color: colorScheme.primary,
+                    )
                   : null,
             ),
             accountName: Text(
@@ -54,7 +56,9 @@ class AppDrawer extends ConsumerWidget {
                 _DrawerItem(
                   icon: Icons.home_rounded,
                   label: 'Home',
-                  selected: GoRouterState.of(context).matchedLocation == AppRoutes.home,
+                  selected:
+                      GoRouterState.of(context).matchedLocation ==
+                      AppRoutes.home,
                   onTap: () {
                     Navigator.pop(context);
                     context.go(AppRoutes.home);
@@ -151,7 +155,6 @@ class AppDrawer extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 // ── Drawer Item ───────────────────────────────────────────────────────────────
@@ -162,16 +165,12 @@ class _DrawerItem extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.selected = false,
-    this.iconColor,
-    this.textColor,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final bool selected;
-  final Color? iconColor;
-  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -180,54 +179,18 @@ class _DrawerItem extends StatelessWidget {
     return ListTile(
       leading: Icon(
         icon,
-        color: iconColor ??
-            (selected ? colorScheme.primary : colorScheme.onSurfaceVariant),
+        color: (selected ? colorScheme.primary : colorScheme.onSurfaceVariant),
       ),
       title: Text(
         label,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: textColor ??
-                  (selected ? colorScheme.primary : colorScheme.onSurface),
-              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            ),
+          color: (selected ? colorScheme.primary : colorScheme.onSurface),
+          fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+        ),
       ),
       selected: selected,
       selectedTileColor: colorScheme.primary.withAlpha(20),
       onTap: onTap,
-    );
-  }
-}
-
-// ── Theme Radio Tile ──────────────────────────────────────────────────────────
-
-class _ThemeTile extends StatelessWidget {
-  const _ThemeTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
-
-  final IconData icon;
-  final String label;
-  final ThemeMode value;
-  final ThemeMode groupValue;
-  final ValueChanged<ThemeMode?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return RadioListTile<ThemeMode>(
-      title: Row(
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 12),
-          Text(label),
-        ],
-      ),
-      value: value,
-      groupValue: groupValue,
-      onChanged: onChanged,
     );
   }
 }

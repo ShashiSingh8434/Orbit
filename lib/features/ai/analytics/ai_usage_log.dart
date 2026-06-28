@@ -1,7 +1,3 @@
-/// Data model for a single AI request log entry.
-///
-/// Stores metadata about each AI request for analytics purposes.
-/// NEVER stores raw prompts or API keys — only metadata and token counts.
 class AiUsageLog {
   final String provider;
   final String model;

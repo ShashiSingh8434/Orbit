@@ -23,7 +23,8 @@ class AiRequest {
   });
 
   @override
-  String toString() => 'AiRequest(jsonMode=$jsonMode, requestId=$requestId, promptLen=${prompt.length})';
+  String toString() =>
+      'AiRequest(jsonMode=$jsonMode, requestId=$requestId, promptLen=${prompt.length})';
 }
 
 /// The result returned by any AI provider after a successful generation.
@@ -37,8 +38,9 @@ class AiResponse {
   /// Token counts (may be null if the provider doesn't report them).
   final int? inputTokens;
   final int? outputTokens;
-  int? get totalTokens =>
-      (inputTokens != null && outputTokens != null) ? inputTokens! + outputTokens! : null;
+  int? get totalTokens => (inputTokens != null && outputTokens != null)
+      ? inputTokens! + outputTokens!
+      : null;
 
   /// Wall-clock time the generation took.
   final Duration latency;
@@ -78,7 +80,8 @@ class AiException implements Exception {
   final AiErrorType type;
   final String message;
   final String? providerId;
-  final Duration? retryAfter; // Hint from the provider (e.g. Retry-After header)
+  final Duration?
+  retryAfter; // Hint from the provider (e.g. Retry-After header)
 
   const AiException({
     required this.type,

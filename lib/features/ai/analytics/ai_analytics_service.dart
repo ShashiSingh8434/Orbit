@@ -16,7 +16,7 @@ class AiAnalyticsService {
   static const String _storageKey = 'ai_analytics_logs';
   static const int _maxLogs = 500; // Keep last 500 logs
 
-  AiAnalyticsService({required SharedPreferences prefs}) : _prefs = prefs;
+  AiAnalyticsService({required this._prefs});
 
   /// Log a request.
   Future<void> logRequest(AiUsageLog log) async {
@@ -81,25 +81,25 @@ class AiAnalyticsService {
       final parts = e.key.split('-');
       return DailyAggregate(
         date: DateTime(
-            int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2])),
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        ),
         requests: e.value.requests,
         tokens: e.value.tokens,
         avgLatencyMs: e.value.requests > 0
             ? e.value.totalLatency / e.value.requests
             : 0,
       );
-    }).toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    }).toList()..sort((a, b) => a.date.compareTo(b.date));
 
     return AiAnalyticsStats(
       totalRequests: filtered.length,
       totalTokens: totalTokens,
       totalInputTokens: totalInput,
       totalOutputTokens: totalOutput,
-      avgLatencyMs:
-          filtered.isNotEmpty ? totalLatency / filtered.length : 0,
-      successRate:
-          filtered.isNotEmpty ? successCount / filtered.length : 0,
+      avgLatencyMs: filtered.isNotEmpty ? totalLatency / filtered.length : 0,
+      successRate: filtered.isNotEmpty ? successCount / filtered.length : 0,
       requestsByProvider: reqByProvider,
       tokensByProvider: tokByProvider,
       rateLimitOccurrences: rateLimitCount,

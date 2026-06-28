@@ -3,13 +3,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'reflection_model.freezed.dart';
 part 'reflection_model.g.dart';
 
-/// Represents a single reflection entry created by the user.
-///
-/// Firestore path: `users/{uid}/reflections/{yyyy-MM-dd}/{id}`
-///
-/// Reflection documents are intentionally kept separate from AI-generated
-/// data. The AI layer (Understanding Pipeline) reads reflections but writes
-/// to independent domain collections.
+// Represents a single reflection entry created by the user.
+// Firestore path: `users/{uid}/reflections/{yyyy-MM-dd}/{id}`
+
 @freezed
 abstract class ReflectionModel with _$ReflectionModel {
   const factory ReflectionModel({

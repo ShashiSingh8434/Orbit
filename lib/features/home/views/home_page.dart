@@ -13,7 +13,7 @@ import '../../event/widgets/event_section.dart';
 import '../../mood/widgets/mood_section.dart';
 import '../../day/providers/day_data_provider.dart';
 import '../widgets/day_skeleton_loader.dart';
-// Note: TaskSection, LearningSection, etc., will be added here in Phase 3.
+import '../../ai/engine/ai_queue_manager.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -35,6 +35,13 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.initState();
     _pageController = PageController(initialPage: _initialPage);
     _initialDate = DateTime.now();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = ref.read(authStateProvider).value;
+      if (user != null) {
+        ref.read(aiQueueManagerProvider).scanAndProcessUnextracted(user.uid);
+      }
+    });
   }
 
   @override
@@ -51,11 +58,16 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).value;
-    final creationTime = user?.metadata.creationTime ?? DateTime.now().subtract(const Duration(days: 30));
+    final creationTime =
+        user?.metadata.creationTime ??
+        DateTime.now().subtract(const Duration(days: 30));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppConstants.appName,style: Theme.of(context).textTheme.headlineLarge,),
+        title: Text(
+          AppConstants.appName,
+          style: Theme.of(context).textTheme.headlineLarge,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_month_rounded),
@@ -63,12 +75,16 @@ class _HomePageState extends ConsumerState<HomePage> {
               final selectedDate = await showDatePicker(
                 context: context,
                 initialDate: _dateForIndex(_currentIndex),
-                firstDate: DateTime(creationTime.year, creationTime.month, creationTime.day),
+                firstDate: DateTime(
+                  creationTime.year,
+                  creationTime.month,
+                  creationTime.day,
+                ),
                 lastDate: DateTime.now().add(const Duration(days: 365)),
-
               );
               if (selectedDate != null) {
-                final targetIndex = _initialPage + selectedDate.difference(_initialDate).inDays;
+                final targetIndex =
+                    _initialPage + selectedDate.difference(_initialDate).inDays;
                 _pageController.animateToPage(
                   targetIndex,
                   duration: const Duration(milliseconds: 300),
@@ -91,9 +107,11 @@ class _HomePageState extends ConsumerState<HomePage> {
           itemBuilder: (context, index) {
             final date = _dateForIndex(index);
             final dayDataAsync = ref.watch(dayDataProvider(date));
-            
+
             // Boundary logic
-            if (date.isBefore(DateTime(creationTime.year, creationTime.month, creationTime.day))) {
+            if (date.isBefore(
+              DateTime(creationTime.year, creationTime.month, creationTime.day),
+            )) {
               return const Center(child: Text("You weren't here yet! 😊"));
             }
 
@@ -104,9 +122,12 @@ class _HomePageState extends ConsumerState<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _GreetingSection(date: date, userDisplayName: user?.displayName),
+                  _GreetingSection(
+                    date: date,
+                    userDisplayName: user?.displayName,
+                  ),
                   const SizedBox(height: 16),
-                  
+
                   _DelayedDataView(
                     asyncValue: dayDataAsync,
                     date: date,
@@ -120,8 +141,12 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final dateKey = "${_dateForIndex(_currentIndex).year}-${_dateForIndex(_currentIndex).month.toString().padLeft(2, '0')}-${_dateForIndex(_currentIndex).day.toString().padLeft(2, '0')}";
-          context.push('${AppRoutes.reflections}/edit', extra: {'dateKey': dateKey});
+          final dateKey =
+              "${_dateForIndex(_currentIndex).year}-${_dateForIndex(_currentIndex).month.toString().padLeft(2, '0')}-${_dateForIndex(_currentIndex).day.toString().padLeft(2, '0')}";
+          context.push(
+            '${AppRoutes.reflections}/edit',
+            extra: {'dateKey': dateKey},
+          );
         },
         child: const Icon(Icons.add),
       ),
@@ -142,8 +167,18 @@ class _GreetingSection extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -152,7 +187,10 @@ class _GreetingSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final firstName = _extractFirstName(userDisplayName);
-    final isToday = date.day == DateTime.now().day && date.month == DateTime.now().month && date.year == DateTime.now().year;
+    final isToday =
+        date.day == DateTime.now().day &&
+        date.month == DateTime.now().month &&
+        date.year == DateTime.now().year;
 
     final dateLabel = isToday ? "Today" : _formatDate(date);
 
@@ -160,11 +198,10 @@ class _GreetingSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isToday 
-            ? (firstName != null ? 'Hello, $firstName 👋' : 'Welcome 👋')
-            : 'Your day on $dateLabel',
+          isToday
+              ? (firstName != null ? 'Hello, $firstName' : 'Welcome')
+              : dateLabel,
           style: theme.textTheme.headlineMedium,
-
         ),
         const SizedBox(height: 6),
         Text(
@@ -218,7 +255,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
         if (!_minTimeElapsed) {
           return DaySkeletonLoader(date: widget.date);
         }
-        
+
         if (data.isEmpty) {
           final colorScheme = Theme.of(context).colorScheme;
           return Center(
@@ -232,7 +269,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
                     size: 64,
                     color: colorScheme.primary.withAlpha(80),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 36),
                   Text(
                     "A blank canvas",
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -257,34 +294,59 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (data.day != null && data.day!.summary.isNotEmpty) ...[
-              DaySummarySection(day: data.day, isLoading: false, date: widget.date),
+              DaySummarySection(
+                day: data.day,
+                isLoading: false,
+                date: widget.date,
+              ),
               const SizedBox(height: 16),
             ],
             if (data.tasks.isNotEmpty) ...[
-              TaskSection(tasks: data.tasks, isLoading: false, date: widget.date),
+              TaskSection(
+                tasks: data.tasks,
+                isLoading: false,
+                date: widget.date,
+              ),
               const SizedBox(height: 16),
             ],
             if (data.learnings.isNotEmpty) ...[
-              LearningSection(learnings: data.learnings, isLoading: false, date: widget.date),
+              LearningSection(
+                learnings: data.learnings,
+                isLoading: false,
+                date: widget.date,
+              ),
               const SizedBox(height: 16),
             ],
             if (data.decisions.isNotEmpty) ...[
-              DecisionSection(decisions: data.decisions, isLoading: false, date: widget.date),
+              DecisionSection(
+                decisions: data.decisions,
+                isLoading: false,
+                date: widget.date,
+              ),
               const SizedBox(height: 16),
             ],
             if (data.events.isNotEmpty) ...[
-              EventSection(events: data.events, isLoading: false, date: widget.date),
+              EventSection(
+                events: data.events,
+                isLoading: false,
+                date: widget.date,
+              ),
               const SizedBox(height: 16),
             ],
             if (data.moods.isNotEmpty) ...[
-              MoodSection(moods: data.moods, isLoading: false, date: widget.date),
+              MoodSection(
+                moods: data.moods,
+                isLoading: false,
+                date: widget.date,
+              ),
               const SizedBox(height: 16),
             ],
           ],
         );
       },
       loading: () => DaySkeletonLoader(date: widget.date),
-      error: (err, stack) => Center(child: Text('Error loading day data: $err')),
+      error: (err, stack) =>
+          Center(child: Text('Error loading day data: $err')),
     );
   }
 }

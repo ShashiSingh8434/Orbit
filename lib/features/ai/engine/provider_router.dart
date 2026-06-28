@@ -13,14 +13,14 @@ class ProviderRouter {
   final Map<String, AiProvider> _providers = {};
   String? _preferredProviderId;
 
-  ProviderRouter({
-    required RateLimitManager rateLimitManager,
-  }) : _rateLimitManager = rateLimitManager;
+  ProviderRouter({required this._rateLimitManager});
 
   /// Register a provider. Can be called multiple times to add/replace providers.
   void registerProvider(AiProvider provider) {
     _providers[provider.id] = provider;
-    debugPrint('ProviderRouter: Registered provider "${provider.id}" (${provider.name})');
+    debugPrint(
+      'ProviderRouter: Registered provider "${provider.id}" (${provider.name})',
+    );
   }
 
   /// Remove a provider (e.g. when user disconnects their key).
@@ -50,14 +50,17 @@ class ProviderRouter {
   AiProvider selectProvider() {
     // 1. Try preferred (match by exact ID or prefix, e.g. "groq" matches "groq_llama_70b")
     if (_preferredProviderId != null) {
-      final preferredMatches = _providers.values
-          .where((p) => p.id.startsWith(_preferredProviderId!))
-          .toList()
-        ..sort((a, b) => a.priority.compareTo(b.priority));
+      final preferredMatches =
+          _providers.values
+              .where((p) => p.id.startsWith(_preferredProviderId!))
+              .toList()
+            ..sort((a, b) => a.priority.compareTo(b.priority));
 
       for (final preferred in preferredMatches) {
         if (_rateLimitManager.canUseProvider(preferred.id)) {
-          debugPrint('ProviderRouter: Using preferred provider "${preferred.id}"');
+          debugPrint(
+            'ProviderRouter: Using preferred provider "${preferred.id}"',
+          );
           return preferred;
         }
         debugPrint(
@@ -72,7 +75,9 @@ class ProviderRouter {
       ..sort((a, b) => a.priority.compareTo(b.priority));
 
     for (final provider in sorted) {
-      if (_preferredProviderId != null && provider.id.startsWith(_preferredProviderId!)) continue; // Already tried
+      if (_preferredProviderId != null &&
+          provider.id.startsWith(_preferredProviderId!))
+        continue; // Already tried
       if (_rateLimitManager.canUseProvider(provider.id)) {
         debugPrint('ProviderRouter: Falling back to "${provider.id}"');
         return provider;

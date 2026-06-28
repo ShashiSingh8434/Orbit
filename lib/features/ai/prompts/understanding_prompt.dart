@@ -12,17 +12,23 @@ class UnderstandingPromptBuilder {
     required List<EventModel> upcomingEvents,
   }) {
     final reflectionDate = OrbitDateUtils.dateKey(createdAt);
-    
-    final summaryInstruction = existingSummary != null && existingSummary.isNotEmpty
+
+    final summaryInstruction =
+        existingSummary != null && existingSummary.isNotEmpty
         ? '1. SUMMARY: The existing summary for this day is "$existingSummary". Merge this new reflection into the summary to create a comprehensive, cohesive, and encouraging 1-2 sentence summary of the entire day.'
         : '1. SUMMARY: Write a brief (1-2 sentence), encouraging summary.';
 
-    final pendingTasksStr = pendingTasks.isNotEmpty 
+    final pendingTasksStr = pendingTasks.isNotEmpty
         ? pendingTasks.map((t) => '- [ID: ${t.id}] "${t.title}"').join('\n   ')
         : 'None';
-    
-    final upcomingEventsStr = upcomingEvents.isNotEmpty 
-        ? upcomingEvents.map((e) => '- [ID: ${e.id}] "${e.title}" on ${OrbitDateUtils.dateKey(e.eventDate)}').join('\n   ')
+
+    final upcomingEventsStr = upcomingEvents.isNotEmpty
+        ? upcomingEvents
+              .map(
+                (e) =>
+                    '- [ID: ${e.id}] "${e.title}" on ${OrbitDateUtils.dateKey(e.eventDate)}',
+              )
+              .join('\n   ')
         : 'None';
 
     return '''
@@ -80,6 +86,22 @@ CRITICAL JSON RULES:
 }
 </json_format_example>
 
+<few_shot_example>
+User Reflection: "Today was great! I learned about Flutter Riverpod. Add a task to finish the UI tomorrow. I decided to eat healthier. Mark 'Buy groceries' as complete."
+Output:
+{
+  "summary": { "summary": "A productive day focusing on Flutter development and healthy choices.", "aiConfidence": 0.95 },
+  "tasks": [ 
+    { "title": "Finish the UI", "originalId": null, "description": "", "dueDate": null, "dueTime": null, "priority": "medium", "status": "pending", "aiConfidence": 0.95 },
+    { "title": "Buy groceries", "originalId": "example_id_123", "description": "", "dueDate": null, "dueTime": null, "priority": "medium", "status": "completed", "aiConfidence": 0.95 }
+  ],
+  "learnings": [ { "learning": "Flutter Riverpod for state management", "category": "Tech", "aiConfidence": 0.9 } ],
+  "decisions": [ { "decision": "Eat healthier", "aiConfidence": 0.9 } ],
+  "events": [],
+  "moods": [ { "score": 5, "timeOfDay": "General", "aiConfidence": 0.9 } ]
+}
+</few_shot_example>
+
 <reflection>
 $reflectionText
 </reflection>
@@ -93,20 +115,45 @@ CRITICAL INSTRUCTION: You MUST output ONLY valid JSON matching the exact schema 
       properties: {
         'summary': Schema.object(
           properties: {
-            'summary': Schema.string(description: 'A brief, encouraging 1-2 sentence summary of the reflection.'),
-            'aiConfidence': Schema.number(description: 'Confidence score from 0.0 to 1.0'),
+            'summary': Schema.string(
+              description:
+                  'A brief, encouraging 1-2 sentence summary of the reflection.',
+            ),
+            'aiConfidence': Schema.number(
+              description: 'Confidence score from 0.0 to 1.0',
+            ),
           },
         ),
         'tasks': Schema.array(
           items: Schema.object(
             properties: {
-              'title': Schema.string(description: 'Short actionable title for the task'),
-              'originalId': Schema.string(description: 'The internal ID if this matches an existing pending task', nullable: true),
-              'description': Schema.string(description: 'Additional detail about the task'),
-              'dueDate': Schema.string(description: 'YYYY-MM-DD format if mentioned, otherwise null', nullable: true),
-              'dueTime': Schema.string(description: 'HH:mm format if mentioned, otherwise null', nullable: true),
-              'priority': Schema.enumString(enumValues: ['low', 'medium', 'high'], description: 'Task priority'),
-              'status': Schema.enumString(enumValues: ['pending', 'completed'], description: 'Task status'),
+              'title': Schema.string(
+                description: 'Short actionable title for the task',
+              ),
+              'originalId': Schema.string(
+                description:
+                    'The internal ID if this matches an existing pending task',
+                nullable: true,
+              ),
+              'description': Schema.string(
+                description: 'Additional detail about the task',
+              ),
+              'dueDate': Schema.string(
+                description: 'YYYY-MM-DD format if mentioned, otherwise null',
+                nullable: true,
+              ),
+              'dueTime': Schema.string(
+                description: 'HH:mm format if mentioned, otherwise null',
+                nullable: true,
+              ),
+              'priority': Schema.enumString(
+                enumValues: ['low', 'medium', 'high'],
+                description: 'Task priority',
+              ),
+              'status': Schema.enumString(
+                enumValues: ['pending', 'completed'],
+                description: 'Task status',
+              ),
               'aiConfidence': Schema.number(),
             },
           ),
@@ -114,9 +161,15 @@ CRITICAL INSTRUCTION: You MUST output ONLY valid JSON matching the exact schema 
         'learnings': Schema.array(
           items: Schema.object(
             properties: {
-              'title': Schema.string(description: 'Short title for the learning/insight'),
-              'description': Schema.string(description: 'Detail about what was learned'),
-              'category': Schema.string(description: 'Category like Life, Tech, Health, Academic, etc.'),
+              'title': Schema.string(
+                description: 'Short title for the learning/insight',
+              ),
+              'description': Schema.string(
+                description: 'Detail about what was learned',
+              ),
+              'category': Schema.string(
+                description: 'Category like Life, Tech, Health, Academic, etc.',
+              ),
               'aiConfidence': Schema.number(),
             },
           ),
@@ -124,8 +177,12 @@ CRITICAL INSTRUCTION: You MUST output ONLY valid JSON matching the exact schema 
         'decisions': Schema.array(
           items: Schema.object(
             properties: {
-              'decision': Schema.string(description: 'The decision that was made'),
-              'reason': Schema.string(description: 'Why this decision was made'),
+              'decision': Schema.string(
+                description: 'The decision that was made',
+              ),
+              'reason': Schema.string(
+                description: 'Why this decision was made',
+              ),
               'aiConfidence': Schema.number(),
             },
           ),
@@ -134,11 +191,26 @@ CRITICAL INSTRUCTION: You MUST output ONLY valid JSON matching the exact schema 
           items: Schema.object(
             properties: {
               'title': Schema.string(description: 'Short title for the event'),
-              'originalId': Schema.string(description: 'The internal ID if this matches an existing upcoming event', nullable: true),
-              'description': Schema.string(description: 'Additional detail about the event'),
-              'eventDate': Schema.string(description: 'YYYY-MM-DD format. Use the reflection date if not explicitly mentioned.'),
-              'time': Schema.string(description: 'Time of day like "6:00 AM" or "Morning"', nullable: true),
-              'location': Schema.string(description: 'Location if mentioned', nullable: true),
+              'originalId': Schema.string(
+                description:
+                    'The internal ID if this matches an existing upcoming event',
+                nullable: true,
+              ),
+              'description': Schema.string(
+                description: 'Additional detail about the event',
+              ),
+              'eventDate': Schema.string(
+                description:
+                    'YYYY-MM-DD format. Use the reflection date if not explicitly mentioned.',
+              ),
+              'time': Schema.string(
+                description: 'Time of day like "6:00 AM" or "Morning"',
+                nullable: true,
+              ),
+              'location': Schema.string(
+                description: 'Location if mentioned',
+                nullable: true,
+              ),
               'aiConfidence': Schema.number(),
             },
           ),
@@ -146,8 +218,20 @@ CRITICAL INSTRUCTION: You MUST output ONLY valid JSON matching the exact schema 
         'moods': Schema.array(
           items: Schema.object(
             properties: {
-              'timeOfDay': Schema.enumString(enumValues: ['Morning', 'Afternoon', 'Evening', 'Night', 'General'], description: 'When the mood was felt'),
-              'value': Schema.integer(description: 'Mood on a 1-5 scale: 1=Very Bad, 2=Bad, 3=Neutral, 4=Good, 5=Very Good'),
+              'timeOfDay': Schema.enumString(
+                enumValues: [
+                  'Morning',
+                  'Afternoon',
+                  'Evening',
+                  'Night',
+                  'General',
+                ],
+                description: 'When the mood was felt',
+              ),
+              'value': Schema.integer(
+                description:
+                    'Mood on a 1-5 scale: 1=Very Bad, 2=Bad, 3=Neutral, 4=Good, 5=Very Good',
+              ),
               'aiConfidence': Schema.number(),
             },
           ),

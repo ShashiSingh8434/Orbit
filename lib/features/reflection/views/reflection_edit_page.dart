@@ -48,8 +48,16 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
 
   // Preset tags for quick selection
   static const _presetTags = [
-    'grateful', 'learning', 'focus', 'energy', 'mood',
-    'decision', 'challenge', 'win', 'idea', 'social',
+    'grateful',
+    'learning',
+    'focus',
+    'energy',
+    'mood',
+    'decision',
+    'challenge',
+    'win',
+    'idea',
+    'social',
   ];
 
   @override
@@ -64,7 +72,8 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
   Future<void> _initPage() async {
     if (widget.existingReflectionId != null) {
       // Editing an existing reflection — load it from the stream's cached value
-      final reflections = ref.read(reflectionsProvider(_resolvedDate)).value ?? [];
+      final reflections =
+          ref.read(reflectionsProvider(_resolvedDate)).value ?? [];
       _existingReflection = reflections
           .where((r) => r.id == widget.existingReflectionId)
           .firstOrNull;
@@ -129,12 +138,13 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
           final appended = current.isEmpty
               ? result.recognizedWords
               : current.endsWith(' ') || current.endsWith('\n')
-                  ? '$current${result.recognizedWords}'
-                  : '$current ${result.recognizedWords}';
-          
+              ? '$current${result.recognizedWords}'
+              : '$current ${result.recognizedWords}';
+
           _textCtrl.text = appended;
-          _textCtrl.selection =
-              TextSelection.collapsed(offset: _textCtrl.text.length);
+          _textCtrl.selection = TextSelection.collapsed(
+            offset: _textCtrl.text.length,
+          );
 
           if (result.finalResult) {
             _textBeforeListening = _textCtrl.text;
@@ -175,7 +185,14 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
           finalDate = DateTime.now();
         } else {
           final now = DateTime.now();
-          finalDate = DateTime(baseDate.year, baseDate.month, baseDate.day, now.hour, now.minute, now.second);
+          finalDate = DateTime(
+            baseDate.year,
+            baseDate.month,
+            baseDate.day,
+            now.hour,
+            now.minute,
+            now.second,
+          );
         }
 
         await controller.addReflection(
@@ -189,9 +206,9 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -227,12 +244,18 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
         title: GestureDetector(
           onTap: () async {
             final auth = ref.read(authStateProvider).value;
-            final creationTime = auth?.metadata.creationTime ?? DateTime.now().subtract(const Duration(days: 30));
+            final creationTime =
+                auth?.metadata.creationTime ??
+                DateTime.now().subtract(const Duration(days: 30));
             final initialDate = OrbitDateUtils.parseKey(_resolvedDate);
             final selectedDate = await showDatePicker(
               context: context,
               initialDate: initialDate,
-              firstDate: DateTime(creationTime.year, creationTime.month, creationTime.day),
+              firstDate: DateTime(
+                creationTime.year,
+                creationTime.month,
+                creationTime.day,
+              ),
               lastDate: DateTime.now().add(const Duration(days: 365)),
             );
             if (selectedDate != null && mounted) {
@@ -256,7 +279,11 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(Icons.edit_calendar_rounded, size: 12, color: colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.edit_calendar_rounded,
+                    size: 12,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ],
               ),
             ],
@@ -274,10 +301,7 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
               ),
             )
           else
-            TextButton(
-              onPressed: _save,
-              child: const Text('Save'),
-            ),
+            TextButton(onPressed: _save, child: const Text('Save')),
         ],
       ),
       body: Column(
@@ -320,11 +344,13 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
                     spacing: 6,
                     runSpacing: 4,
                     children: _tags
-                        .map((t) => ReflectionTagChip(
-                              label: t,
-                              selected: true,
-                              onDeleted: () => _removeTag(t),
-                            ))
+                        .map(
+                          (t) => ReflectionTagChip(
+                            label: t,
+                            selected: true,
+                            onDeleted: () => _removeTag(t),
+                          ),
+                        )
                         .toList(),
                   ),
                 const SizedBox(height: 6),
@@ -334,13 +360,15 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
                   child: Row(
                     children: _presetTags
                         .where((t) => !_tags.contains(t))
-                        .map((t) => Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: ReflectionTagChip(
-                                label: t,
-                                onTap: () => _addTag(t),
-                              ),
-                            ))
+                        .map(
+                          (t) => Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: ReflectionTagChip(
+                              label: t,
+                              onTap: () => _addTag(t),
+                            ),
+                          ),
+                        )
                         .toList(),
                   ),
                 ),
@@ -362,7 +390,9 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
                       icon: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         child: Icon(
-                          _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+                          _isListening
+                              ? Icons.mic_rounded
+                              : Icons.mic_none_rounded,
                           key: ValueKey(_isListening),
                           color: _isListening
                               ? colorScheme.error

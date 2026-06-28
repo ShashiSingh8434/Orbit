@@ -14,9 +14,11 @@ import '../sync_services/learning_sync_service.dart';
 import '../sync_services/decision_sync_service.dart';
 import '../sync_services/event_sync_service.dart';
 import '../sync_services/mood_sync_service.dart';
+import '../../reflection/data/reflection_repository.dart';
 import '../prompts/understanding_prompt.dart';
 import '../providers/ai_request.dart';
 import '../engine/ai_request_manager.dart';
+import '../../../core/utils/date_utils.dart';
 
 final understandingPipelineProvider = Provider<UnderstandingPipeline>((ref) {
   return UnderstandingPipeline(
@@ -27,6 +29,7 @@ final understandingPipelineProvider = Provider<UnderstandingPipeline>((ref) {
     decisionSyncService: ref.read(decisionSyncServiceProvider),
     eventSyncService: ref.read(eventSyncServiceProvider),
     moodSyncService: ref.read(moodSyncServiceProvider),
+    reflectionRepository: ref.read(reflectionRepositoryProvider),
   );
 });
 
@@ -38,6 +41,7 @@ class UnderstandingPipeline {
   final DecisionSyncService decisionSyncService;
   final EventSyncService eventSyncService;
   final MoodSyncService moodSyncService;
+  final ReflectionRepository reflectionRepository;
 
   UnderstandingPipeline({
     required this.aiRequestManager,
@@ -47,6 +51,7 @@ class UnderstandingPipeline {
     required this.decisionSyncService,
     required this.eventSyncService,
     required this.moodSyncService,
+    required this.reflectionRepository,
   });
 
   Future<void> onReflectionSaved(String uid, ReflectionModel reflection) async {
@@ -134,6 +139,9 @@ class UnderstandingPipeline {
         events: extractedEvents,
         moods: extractedMoods,
       );
+      
+      // Mark as processed so the QueueManager doesn't retry it
+      await reflectionRepository.markAiProcessed(uid, OrbitDateUtils.dateKey(reflection.createdAt), reflection.id);
       
       debugPrint('UnderstandingPipeline completed for reflection: ${reflection.id}');
     } catch (e) {

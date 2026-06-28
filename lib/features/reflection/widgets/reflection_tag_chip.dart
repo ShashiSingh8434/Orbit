@@ -23,16 +23,20 @@ class ReflectionTagChip extends StatelessWidget {
       label: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: selected ? colorScheme.onPrimary : colorScheme.onSurface,
-              fontWeight: FontWeight.w500,
-            ),
+          color: selected ? colorScheme.onPrimary : colorScheme.onSurface,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       selected: selected,
       selectedColor: colorScheme.primary,
       backgroundColor: colorScheme.surfaceContainerHighest,
       onSelected: onTap != null ? (_) => onTap!() : null,
       deleteIcon: onDeleted != null
-          ? Icon(Icons.close, size: 14, color: colorScheme.onSurface.withAlpha(120))
+          ? Icon(
+              Icons.close,
+              size: 14,
+              color: colorScheme.onSurface.withAlpha(120),
+            )
           : null,
       onDeleted: onDeleted,
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),

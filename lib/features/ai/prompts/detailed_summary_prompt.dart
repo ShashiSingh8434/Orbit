@@ -12,25 +12,34 @@ class DetailedSummaryPromptBuilder {
     required bool isBulletPoint,
   }) {
     final dateKey = OrbitDateUtils.dateKey(date);
-    
-    final reflectionsStr = reflections.isNotEmpty 
-        ? reflections.map((r) => '- [${r.createdAt.hour.toString().padLeft(2, '0')}:${r.createdAt.minute.toString().padLeft(2, '0')}] ${r.text}').join('\n')
+
+    final reflectionsStr = reflections.isNotEmpty
+        ? reflections
+              .map(
+                (r) =>
+                    '- [${r.createdAt.hour.toString().padLeft(2, '0')}:${r.createdAt.minute.toString().padLeft(2, '0')}] ${r.text}',
+              )
+              .join('\n')
         : 'No reflections for this day.';
 
-    final tasksStr = tasks.isNotEmpty 
-        ? tasks.map((t) => '- [${t.status.toUpperCase()}] ${t.title}').join('\n')
+    final tasksStr = tasks.isNotEmpty
+        ? tasks
+              .map((t) => '- [${t.status.toUpperCase()}] ${t.title}')
+              .join('\n')
         : 'No tasks for this day.';
 
-    final eventsStr = events.isNotEmpty 
-        ? events.map((e) => '- ${e.title} (Time: ${e.time ?? "Unknown"})').join('\n')
+    final eventsStr = events.isNotEmpty
+        ? events
+              .map((e) => '- ${e.title} (Time: ${e.time ?? "Unknown"})')
+              .join('\n')
         : 'No events for this day.';
 
-    final styleInstruction = isBulletPoint 
-      ? '''
+    final styleInstruction = isBulletPoint
+        ? '''
 4. Format: Use ONLY concise, punchy bullet points. Group them under headers like "The Vibe", "Wins", and "Insights". Avoid long paragraphs.
 5. Tone & Length: Keep it ultra-compact, modern, and highly readable.
-''' 
-      : '''
+'''
+        : '''
 4. Format: Write 2-3 short, engaging paragraphs. Use headers to separate thoughts if needed, but the core should be beautifully written prose.
 5. Tone & Length: Keep it compact, human-like, and highly readable. Avoid overly lengthy blocks of text.
 ''';

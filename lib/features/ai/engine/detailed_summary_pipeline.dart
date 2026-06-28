@@ -10,7 +10,9 @@ import '../engine/ai_request_manager.dart';
 
 import '../../../core/utils/date_utils.dart';
 
-final detailedSummaryPipelineProvider = Provider<DetailedSummaryPipeline>((ref) {
+final detailedSummaryPipelineProvider = Provider<DetailedSummaryPipeline>((
+  ref,
+) {
   return DetailedSummaryPipeline(
     aiRequestManager: ref.read(aiRequestManagerProvider),
     reflectionRepository: ref.read(reflectionRepositoryProvider),
@@ -35,37 +37,62 @@ class DetailedSummaryPipeline {
     required this.dayRepository,
   });
 
-  Future<({String? paragraph, String? bullet})> generateDetailedSummaries(String uid, DateTime dayDate) async {
+  Future<({String? paragraph, String? bullet})> generateDetailedSummaries(
+    String uid,
+    DateTime dayDate,
+  ) async {
     // 1. Check if we already have it cached
     final existingDay = await dayRepository.getDay(uid, dayDate);
-    if (existingDay != null && 
-        existingDay.detailedSummary != null && existingDay.detailedSummary!.isNotEmpty &&
-        existingDay.detailedSummaryBullet != null && existingDay.detailedSummaryBullet!.isNotEmpty) {
-      return (paragraph: existingDay.detailedSummary, bullet: existingDay.detailedSummaryBullet);
+    if (existingDay != null &&
+        existingDay.detailedSummary != null &&
+        existingDay.detailedSummary!.isNotEmpty &&
+        existingDay.detailedSummaryBullet != null &&
+        existingDay.detailedSummaryBullet!.isNotEmpty) {
+      return (
+        paragraph: existingDay.detailedSummary,
+        bullet: existingDay.detailedSummaryBullet,
+      );
     }
 
     // 2. Fetch all data for this day
     final dateKey = OrbitDateUtils.dateKey(dayDate);
-    final reflectionsStream = reflectionRepository.watchReflections(uid, dateKey);
+    final reflectionsStream = reflectionRepository.watchReflections(
+      uid,
+      dateKey,
+    );
     final reflections = await reflectionsStream.first;
-    
+
     final tasksStream = taskRepository.watchTasks(uid);
     final allTasks = await tasksStream.first;
     final dayTasks = allTasks.where((t) {
-      final createdOnDay = t.createdAt.year == dayDate.year && t.createdAt.month == dayDate.month && t.createdAt.day == dayDate.day;
-      final dueOnDay = t.dueDate != null && t.dueDate!.year == dayDate.year && t.dueDate!.month == dayDate.month && t.dueDate!.day == dayDate.day;
-      final completedOnDay = t.completedAt != null && t.completedAt!.year == dayDate.year && t.completedAt!.month == dayDate.month && t.completedAt!.day == dayDate.day;
+      final createdOnDay =
+          t.createdAt.year == dayDate.year &&
+          t.createdAt.month == dayDate.month &&
+          t.createdAt.day == dayDate.day;
+      final dueOnDay =
+          t.dueDate != null &&
+          t.dueDate!.year == dayDate.year &&
+          t.dueDate!.month == dayDate.month &&
+          t.dueDate!.day == dayDate.day;
+      final completedOnDay =
+          t.completedAt != null &&
+          t.completedAt!.year == dayDate.year &&
+          t.completedAt!.month == dayDate.month &&
+          t.completedAt!.day == dayDate.day;
       return createdOnDay || dueOnDay || completedOnDay;
     }).toList();
 
     final eventsStream = eventRepository.watchEvents(uid);
     final allEvents = await eventsStream.first;
     final dayEvents = allEvents.where((e) {
-      return e.eventDate.year == dayDate.year && e.eventDate.month == dayDate.month && e.eventDate.day == dayDate.day;
+      return e.eventDate.year == dayDate.year &&
+          e.eventDate.month == dayDate.month &&
+          e.eventDate.day == dayDate.day;
     }).toList();
 
     if (reflections.isEmpty && dayTasks.isEmpty && dayEvents.isEmpty) {
-      final msg = "No data available for this day to generate a detailed summary.";
+      final msg =
+          "No data available for this day to generate a detailed summary.";
       return (paragraph: msg, bullet: msg);
     }
 
@@ -77,7 +104,7 @@ class DetailedSummaryPipeline {
       events: dayEvents,
       isBulletPoint: false,
     );
-    
+
     final promptBullet = DetailedSummaryPromptBuilder.buildPrompt(
       date: dayDate,
       reflections: reflections,
@@ -88,16 +115,17 @@ class DetailedSummaryPipeline {
 
     try {
       // Both requests go through the AI Request Manager (queued, retried, fallback-aware)
-      final responseParagraph = await aiRequestManager.generate(AiRequest(
-        prompt: promptParagraph,
-        requestId: 'detailed_paragraph_${dateKey}',
-      ));
+      final responseParagraph = await aiRequestManager.generate(
+        AiRequest(
+          prompt: promptParagraph,
+          requestId: 'detailed_paragraph_$dateKey',
+        ),
+      );
       final paragraph = responseParagraph.text;
 
-      final responseBullet = await aiRequestManager.generate(AiRequest(
-        prompt: promptBullet,
-        requestId: 'detailed_bullet_${dateKey}',
-      ));
+      final responseBullet = await aiRequestManager.generate(
+        AiRequest(prompt: promptBullet, requestId: 'detailed_bullet_$dateKey'),
+      );
       final bullet = responseBullet.text;
 
       if (existingDay != null) {
@@ -108,7 +136,7 @@ class DetailedSummaryPipeline {
         );
         await dayRepository.saveDay(uid, updatedDay);
       }
-      
+
       return (paragraph: paragraph, bullet: bullet);
     } catch (e) {
       debugPrint('DetailedSummaryPipeline error: $e');

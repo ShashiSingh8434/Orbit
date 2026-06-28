@@ -16,16 +16,12 @@ class GeminiProvider extends AiProvider {
   final String _model;
 
   GeminiProvider({
-    required String apiKey,
-    required String model,
-    required String id,
-    required String name,
-    required int priority,
-  })  : _apiKey = apiKey,
-        _model = model,
-        _id = id,
-        _name = name,
-        _priority = priority;
+    required this._apiKey,
+    required this._model,
+    required this._id,
+    required this._name,
+    required this._priority,
+  });
 
   @override
   String get id => _id;
@@ -61,9 +57,9 @@ class GeminiProvider extends AiProvider {
             : null,
       );
 
-      final response = await generativeModel.generateContent(
-        [Content.text(request.prompt)],
-      );
+      final response = await generativeModel.generateContent([
+        Content.text(request.prompt),
+      ]);
 
       stopwatch.stop();
 
@@ -103,10 +99,7 @@ class GeminiProvider extends AiProvider {
   @override
   Future<bool> validateApiKey(String apiKey) async {
     try {
-      final testModel = GenerativeModel(
-        model: _model,
-        apiKey: apiKey,
-      );
+      final testModel = GenerativeModel(model: _model, apiKey: apiKey);
       await testModel.generateContent([Content.text('Hello')]);
       return true;
     } catch (e) {
@@ -118,10 +111,7 @@ class GeminiProvider extends AiProvider {
   @override
   Future<bool> healthCheck() async {
     try {
-      final testModel = GenerativeModel(
-        model: _model,
-        apiKey: _apiKey,
-      );
+      final testModel = GenerativeModel(model: _model, apiKey: _apiKey);
       await testModel.generateContent([Content.text('ping')]);
       return true;
     } catch (e) {
@@ -134,7 +124,10 @@ class GeminiProvider extends AiProvider {
     final msg = e.message.toLowerCase();
 
     // Rate limit
-    if (msg.contains('quota') || msg.contains('rate') || msg.contains('429') || msg.contains('resource has been exhausted')) {
+    if (msg.contains('quota') ||
+        msg.contains('rate') ||
+        msg.contains('429') ||
+        msg.contains('resource has been exhausted')) {
       // Try to extract retry-after duration
       Duration? retryAfter;
       final retryMatch = RegExp(r'retry in (\d+\.?\d*)s').firstMatch(msg);
@@ -153,7 +146,10 @@ class GeminiProvider extends AiProvider {
     }
 
     // Invalid API key
-    if (msg.contains('api key') || msg.contains('permission') || msg.contains('401') || msg.contains('403')) {
+    if (msg.contains('api key') ||
+        msg.contains('permission') ||
+        msg.contains('401') ||
+        msg.contains('403')) {
       return AiException(
         type: AiErrorType.invalidApiKey,
         message: e.message,
@@ -162,7 +158,9 @@ class GeminiProvider extends AiProvider {
     }
 
     // Server error
-    if (msg.contains('500') || msg.contains('503') || msg.contains('internal')) {
+    if (msg.contains('500') ||
+        msg.contains('503') ||
+        msg.contains('internal')) {
       return AiException(
         type: AiErrorType.serverError,
         message: e.message,

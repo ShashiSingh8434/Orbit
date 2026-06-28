@@ -47,17 +47,28 @@ class ReflectionCard extends StatelessWidget {
                 ),
                 if (reflection.aiProcessed) ...[
                   const SizedBox(width: 8),
-                  Icon(Icons.auto_awesome_rounded, size: 14, color: colorScheme.primary.withAlpha(150)),
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 14,
+                    color: colorScheme.primary.withAlpha(150),
+                  ),
                 ],
                 const Spacer(),
                 if (onEdit != null || onDelete != null)
                   PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert_rounded, size: 18, color: colorScheme.onSurfaceVariant),
+                    icon: Icon(
+                      Icons.more_vert_rounded,
+                      size: 18,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                     itemBuilder: (_) => [
                       if (onEdit != null)
                         const PopupMenuItem(value: 'edit', child: Text('Edit')),
                       if (onDelete != null)
-                        const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text('Delete'),
+                        ),
                     ],
                     onSelected: (v) {
                       if (v == 'edit') onEdit?.call();
