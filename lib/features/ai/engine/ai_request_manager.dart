@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +34,9 @@ class AiStatus {
   const AiStatus({required this.isProcessing, this.message});
 }
 
-final aiStatusProvider = StateProvider<AiStatus>((ref) => const AiStatus(isProcessing: false));
+final aiStatusProvider = StateProvider<AiStatus>(
+  (ref) => const AiStatus(isProcessing: false),
+);
 
 // ── Model Configurations ─────────────────────────────────────────────────────
 
@@ -127,17 +128,16 @@ class AiRequestManager {
   final AiAnalyticsService _analytics;
 
   static const int _maxRetries = 8;
-  static const String _prefKeyAiMode = 'ai_mode'; // 'orbit_default' | 'user_key'
+  static const String _prefKeyAiMode =
+      'ai_mode'; // 'orbit_default' | 'user_key'
 
   Future<void>? _initFuture;
 
   AiRequestManager({
-    required SharedPreferences prefs,
-    required AiAnalyticsService analytics,
-    required Ref ref,
-  })  : _prefs = prefs,
-        _analytics = analytics,
-        _ref = ref {
+    required this._prefs,
+    required this._analytics,
+    required this._ref,
+  }) {
     _rateLimitManager = RateLimitManager();
     _healthMonitor = AiHealthMonitor();
     _providerRouter = ProviderRouter(
@@ -259,7 +259,10 @@ class AiRequestManager {
         .where((id) => id.startsWith(providerId))
         .toList();
     if (providerIds.isEmpty) return false;
-    final userProviderId = providerIds.firstWhere((id) => id.endsWith('_user'), orElse: () => providerIds.first);
+    final userProviderId = providerIds.firstWhere(
+      (id) => id.endsWith('_user'),
+      orElse: () => providerIds.first,
+    );
     final provider = _providerRouter.getProvider(userProviderId);
     if (provider == null) return false;
     return provider.healthCheck();
@@ -272,7 +275,9 @@ class AiRequestManager {
 
   Future<void> _initializeProviders() async {
     // Clear currently registered providers
-    final existingIds = List<String>.from(_providerRouter.registeredProviderIds);
+    final existingIds = List<String>.from(
+      _providerRouter.registeredProviderIds,
+    );
     for (final id in existingIds) {
       _providerRouter.unregisterProvider(id);
     }
@@ -288,7 +293,11 @@ class AiRequestManager {
       if (userGeminiKey != null && userGeminiKey.trim().isNotEmpty) {
         _registerGeminiModels(userGeminiKey.trim(), isUser: true);
         if (orbitGeminiKey.isNotEmpty) {
-          _registerGeminiModels(orbitGeminiKey, isUser: false, priorityOffset: 10);
+          _registerGeminiModels(
+            orbitGeminiKey,
+            isUser: false,
+            priorityOffset: 10,
+          );
         }
       } else {
         if (orbitGeminiKey.isNotEmpty) {
@@ -317,10 +326,16 @@ class AiRequestManager {
       }
     }
 
-    debugPrint('AiRequestManager: Provider registration completed. Mode=$aiMode');
+    debugPrint(
+      'AiRequestManager: Provider registration completed. Mode=$aiMode',
+    );
   }
 
-  void _registerGroqModels(String apiKey, {required bool isUser, int priorityOffset = 0}) {
+  void _registerGroqModels(
+    String apiKey, {
+    required bool isUser,
+    int priorityOffset = 0,
+  }) {
     for (final cfg in _groqModels) {
       final suffix = isUser ? '_user' : '_orbit';
       _providerRouter.registerProvider(
@@ -335,7 +350,11 @@ class AiRequestManager {
     }
   }
 
-  void _registerGeminiModels(String apiKey, {required bool isUser, int priorityOffset = 0}) {
+  void _registerGeminiModels(
+    String apiKey, {
+    required bool isUser,
+    int priorityOffset = 0,
+  }) {
     for (final cfg in _geminiModels) {
       final suffix = isUser ? '_user' : '_orbit';
       _providerRouter.registerProvider(
@@ -359,7 +378,10 @@ class AiRequestManager {
     });
   }
 
-  Future<AiResponse> _generateWithRetry(AiRequest request, Duration queueWaitTime) async {
+  Future<AiResponse> _generateWithRetry(
+    AiRequest request,
+    Duration queueWaitTime,
+  ) async {
     AiException? lastError;
     final failedIds = <String>{};
     final processingStart = DateTime.now();
@@ -368,7 +390,9 @@ class AiRequestManager {
       // Check cache first (only for non-JSON mode)
       if (!request.jsonMode) {
         try {
-          final candidate = _providerRouter.selectProvider(excludeIds: failedIds);
+          final candidate = _providerRouter.selectProvider(
+            excludeIds: failedIds,
+          );
           final cached = _responseCache.get(request.prompt, candidate.id);
           if (cached != null) {
             debugPrint('AiRequestManager: Cache hit');
@@ -381,7 +405,9 @@ class AiRequestManager {
                 modelName: candidate.name,
                 modelId: candidate.id,
                 aiMode: aiMode == 'user_key' ? 'User' : 'Orbit',
-                apiSource: candidate.id.endsWith('_user') ? 'My API' : 'Orbit API',
+                apiSource: candidate.id.endsWith('_user')
+                    ? 'My API'
+                    : 'Orbit API',
                 timestamp: DateTime.now(),
                 success: true,
                 retryCount: attempt,
@@ -473,7 +499,9 @@ class AiRequestManager {
               modelName: providerObj?.name ?? 'unknown',
               modelId: failedProviderId,
               aiMode: aiMode == 'user_key' ? 'User' : 'Orbit',
-              apiSource: failedProviderId.endsWith('_user') ? 'My API' : 'Orbit API',
+              apiSource: failedProviderId.endsWith('_user')
+                  ? 'My API'
+                  : 'Orbit API',
               timestamp: DateTime.now(),
               responseTimeMs: totalTime.inMilliseconds,
               retryCount: attempt,
@@ -509,9 +537,11 @@ class AiRequestManager {
 
 class NoApiKeyException implements Exception {
   final String message;
-  const NoApiKeyException([this.message = 'No API keys configured. Please configure your Google Gemini or Groq API key in Settings.']);
+  const NoApiKeyException([
+    this.message =
+        'No API keys configured. Please configure your Google Gemini or Groq API key in Settings.',
+  ]);
 
   @override
   String toString() => message;
 }
-

@@ -15,7 +15,7 @@ abstract class EventModel with _$EventModel {
     String? location,
     required DateTime createdAt,
     DateTime? updatedAt,
-    
+
     EntityMetadata? metadata,
   }) = _EventModel;
 

@@ -7,18 +7,17 @@ import '../models/task_model.dart';
 // ── Stream Provider ───────────────────────────────────────────────────────────
 
 /// Streams all tasks for the current user.
-final tasksProvider = StreamProvider<List<TaskModel>>(
-  (ref) {
-    final user = ref.watch(authStateProvider).value;
-    if (user == null) return const Stream.empty();
-    return ref.watch(taskRepositoryProvider).watchTasks(user.uid);
-  },
-);
+final tasksProvider = StreamProvider<List<TaskModel>>((ref) {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return const Stream.empty();
+  return ref.watch(taskRepositoryProvider).watchTasks(user.uid);
+});
 
 // ── Action Controller ─────────────────────────────────────────────────────────
 
-final taskControllerProvider =
-    NotifierProvider<TaskController, void>(TaskController.new);
+final taskControllerProvider = NotifierProvider<TaskController, void>(
+  TaskController.new,
+);
 
 class TaskController extends Notifier<void> {
   late TaskRepository _repo;
@@ -44,7 +43,9 @@ class TaskController extends Notifier<void> {
       dueTime: dueTime,
     );
     await _repo.saveTask(uid, task);
-    await ref.read(dayRepositoryProvider).invalidateDayCache(uid, dueDate ?? task.createdAt);
+    await ref
+        .read(dayRepositoryProvider)
+        .invalidateDayCache(uid, dueDate ?? task.createdAt);
   }
 
   Future<void> editTask(
@@ -64,7 +65,9 @@ class TaskController extends Notifier<void> {
       metadata: task.metadata?.copyWith(manualOverride: true),
     );
     await _repo.updateTask(uid, updatedTask);
-    await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.dueDate ?? task.createdAt);
+    await ref
+        .read(dayRepositoryProvider)
+        .invalidateDayCache(uid, task.dueDate ?? task.createdAt);
     if (dueDate != null && dueDate != task.dueDate) {
       await ref.read(dayRepositoryProvider).invalidateDayCache(uid, dueDate);
     }
@@ -78,21 +81,31 @@ class TaskController extends Notifier<void> {
       metadata: task.metadata?.copyWith(manualOverride: true),
     );
     await _repo.updateTask(uid, updatedTask);
-    await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.dueDate ?? task.createdAt);
+    await ref
+        .read(dayRepositoryProvider)
+        .invalidateDayCache(uid, task.dueDate ?? task.createdAt);
     if (task.completedAt != null) {
-      await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.completedAt!);
+      await ref
+          .read(dayRepositoryProvider)
+          .invalidateDayCache(uid, task.completedAt!);
     }
     if (isDone) {
-      await ref.read(dayRepositoryProvider).invalidateDayCache(uid, DateTime.now());
+      await ref
+          .read(dayRepositoryProvider)
+          .invalidateDayCache(uid, DateTime.now());
     }
   }
 
   Future<void> deleteTask(TaskModel task) async {
     final uid = _requireUid();
     await _repo.deleteTask(uid, task.id);
-    await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.dueDate ?? task.createdAt);
+    await ref
+        .read(dayRepositoryProvider)
+        .invalidateDayCache(uid, task.dueDate ?? task.createdAt);
     if (task.completedAt != null) {
-      await ref.read(dayRepositoryProvider).invalidateDayCache(uid, task.completedAt!);
+      await ref
+          .read(dayRepositoryProvider)
+          .invalidateDayCache(uid, task.completedAt!);
     }
   }
 

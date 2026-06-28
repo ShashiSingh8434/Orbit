@@ -14,19 +14,21 @@ class DetailedSummaryPage extends ConsumerStatefulWidget {
   const DetailedSummaryPage({super.key, required this.date});
 
   @override
-  ConsumerState<DetailedSummaryPage> createState() => _DetailedSummaryPageState();
+  ConsumerState<DetailedSummaryPage> createState() =>
+      _DetailedSummaryPageState();
 }
 
-class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage> with TickerProviderStateMixin {
+class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage>
+    with TickerProviderStateMixin {
   late AnimationController _orbitController;
   late AnimationController _pulseController;
   late AnimationController _starController;
-  
+
   SummaryState _state = SummaryState.loading;
   String? _paragraphText;
   String? _bulletText;
   bool _isBulletMode = false;
-  
+
   int _loadingTextIndex = 0;
   Timer? _loadingTextTimer;
   final List<String> _loadingMessages = [
@@ -36,7 +38,7 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage> with 
     "Synthesizing events...",
     "Crafting your story...",
     "Adding some magic...",
-    "Almost there..."
+    "Almost there...",
   ];
 
   @override
@@ -92,8 +94,11 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage> with 
     }
 
     final pipeline = ref.read(detailedSummaryPipelineProvider);
-    final summaries = await pipeline.generateDetailedSummaries(uid, widget.date);
-    
+    final summaries = await pipeline.generateDetailedSummaries(
+      uid,
+      widget.date,
+    );
+
     if (mounted) {
       _loadingTextTimer?.cancel();
       setState(() {
@@ -109,11 +114,19 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage> with 
     }
   }
 
-  Widget _buildLoadingState(ThemeData theme, ColorScheme colorScheme, bool isDark) {
+  Widget _buildLoadingState(
+    ThemeData theme,
+    ColorScheme colorScheme,
+    bool isDark,
+  ) {
     return Stack(
       children: [
         AnimatedBuilder(
-          animation: Listenable.merge([_orbitController, _pulseController, _starController]),
+          animation: Listenable.merge([
+            _orbitController,
+            _pulseController,
+            _starController,
+          ]),
           builder: (context, child) {
             return CustomPaint(
               size: const Size(double.infinity, double.infinity),
@@ -187,13 +200,22 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage> with 
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
                 child: MarkdownBody(
                   data: _isBulletMode ? _bulletText! : _paragraphText!,
                   styleSheet: MarkdownStyleSheet(
                     p: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
-                    h1: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, height: 1.5),
-                    h2: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, height: 1.5),
+                    h1: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      height: 1.5,
+                    ),
+                    h2: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      height: 1.5,
+                    ),
                     listBullet: theme.textTheme.bodyLarge,
                   ),
                 ),
@@ -208,9 +230,7 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage> with 
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detailed Summary'),
-      ),
+      appBar: AppBar(title: const Text('Detailed Summary')),
       body: body,
     );
   }

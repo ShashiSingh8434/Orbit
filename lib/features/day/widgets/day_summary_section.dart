@@ -31,17 +31,28 @@ class DaySummarySection extends StatelessWidget {
             children: [
               const PulsingSkeleton(width: 100, height: 24),
               const SizedBox(height: 12),
-              PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.8, height: 16),
+              PulsingSkeleton(
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: 16,
+              ),
               const SizedBox(height: 8),
-              PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.6, height: 16),
+              PulsingSkeleton(
+                width: MediaQuery.of(context).size.width * 0.6,
+                height: 16,
+              ),
             ],
           ),
         ),
       );
     }
 
-    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
-    final emptyText = isToday ? 'No summary available for today. Write a reflection to capture your day!' : 'No summary available for this day.';
+    final isToday =
+        date.year == DateTime.now().year &&
+        date.month == DateTime.now().month &&
+        date.day == DateTime.now().day;
+    final emptyText = isToday
+        ? 'No summary available for today. Write a reflection to capture your day!'
+        : 'No summary available for this day.';
 
     if (day == null || day!.summary.isEmpty) {
       return Card(
@@ -93,16 +104,17 @@ class DaySummarySection extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               day!.summary,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                height: 1.5,
-              ),
+              style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
             ),
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerRight,
               child: FilledButton.tonalIcon(
                 onPressed: () {
-                  context.push(AppRoutes.detailedSummary, extra: {'date': date});
+                  context.push(
+                    AppRoutes.detailedSummary,
+                    extra: {'date': date},
+                  );
                 },
                 icon: const Icon(Icons.auto_awesome),
                 label: const Text('See detailed summary'),

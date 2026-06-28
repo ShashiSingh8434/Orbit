@@ -16,7 +16,8 @@ class PulsingSkeleton extends StatefulWidget {
   State<PulsingSkeleton> createState() => _PulsingSkeletonState();
 }
 
-class _PulsingSkeletonState extends State<PulsingSkeleton> with SingleTickerProviderStateMixin {
+class _PulsingSkeletonState extends State<PulsingSkeleton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -41,7 +42,9 @@ class _PulsingSkeletonState extends State<PulsingSkeleton> with SingleTickerProv
       animation: _controller,
       builder: (context, child) {
         return Opacity(
-          opacity: 0.3 + (_controller.value * 0.3), // pulse opacity between 0.3 and 0.6
+          opacity:
+              0.3 +
+              (_controller.value * 0.3), // pulse opacity between 0.3 and 0.6
           child: Container(
             width: widget.width,
             height: widget.height,

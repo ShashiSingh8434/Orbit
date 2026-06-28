@@ -10,10 +10,7 @@ import '../../mood/widgets/mood_section.dart';
 class DaySkeletonLoader extends StatelessWidget {
   final DateTime date;
 
-  const DaySkeletonLoader({
-    super.key,
-    required this.date,
-  });
+  const DaySkeletonLoader({super.key, required this.date});
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +41,8 @@ class HorizontalTextLoader extends StatefulWidget {
   State<HorizontalTextLoader> createState() => _HorizontalTextLoaderState();
 }
 
-class _HorizontalTextLoaderState extends State<HorizontalTextLoader> with SingleTickerProviderStateMixin {
+class _HorizontalTextLoaderState extends State<HorizontalTextLoader>
+    with SingleTickerProviderStateMixin {
   late AnimationController _progressController;
   late Timer _timer;
   int _textIndex = 0;
@@ -125,10 +123,7 @@ class _HorizontalTextLoaderState extends State<HorizontalTextLoader> with Single
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           transitionBuilder: (child, animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
+            return FadeTransition(opacity: animation, child: child);
           },
           child: Text(
             _loadingTexts[_textIndex],

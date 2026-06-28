@@ -42,73 +42,98 @@ class DayData {
 
 // Keep the individual day stream providers for clean dependency matching, but return typed lists:
 
-final daySummaryStreamProvider = StreamProvider.family<DayModel?, DateTime>((ref, date) {
+final daySummaryStreamProvider = StreamProvider.family<DayModel?, DateTime>((
+  ref,
+  date,
+) {
   final user = ref.watch(authStateProvider).value;
   if (user == null) return const Stream.empty();
   return ref.watch(dayRepositoryProvider).watchDay(user.uid, date);
 });
 
-final dayTasksStreamProvider = StreamProvider.family<List<TaskModel>, DateTime>((ref, date) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return const Stream.empty();
-  return ref.watch(taskRepositoryProvider).watchTasks(user.uid).map((tasks) {
-    final key = OrbitDateUtils.dateKey(date);
-    final todayKey = OrbitDateUtils.todayKey();
-    final isPageToday = key == todayKey;
+final dayTasksStreamProvider = StreamProvider.family<List<TaskModel>, DateTime>(
+  (ref, date) {
+    final user = ref.watch(authStateProvider).value;
+    if (user == null) return const Stream.empty();
+    return ref.watch(taskRepositoryProvider).watchTasks(user.uid).map((tasks) {
+      final key = OrbitDateUtils.dateKey(date);
+      final todayKey = OrbitDateUtils.todayKey();
+      final isPageToday = key == todayKey;
 
-    return tasks.where((t) {
-      if (t.dueDate != null) {
-        return OrbitDateUtils.dateKey(t.dueDate!) == key;
-      }
-      // Unplanned tasks
-      if (t.status == 'pending') {
-        return isPageToday;
-      } else {
-        final completedDate = t.completedAt ?? t.createdAt;
-        return OrbitDateUtils.dateKey(completedDate) == key;
-      }
-    }).toList();
-  });
-});
+      return tasks.where((t) {
+        if (t.dueDate != null) {
+          return OrbitDateUtils.dateKey(t.dueDate!) == key;
+        }
+        // Unplanned tasks
+        if (t.status == 'pending') {
+          return isPageToday;
+        } else {
+          final completedDate = t.completedAt ?? t.createdAt;
+          return OrbitDateUtils.dateKey(completedDate) == key;
+        }
+      }).toList();
+    });
+  },
+);
 
-final dayLearningsStreamProvider = StreamProvider.family<List<LearningModel>, DateTime>((ref, date) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return const Stream.empty();
-  return ref.watch(learningRepositoryProvider).watchLearnings(user.uid).map((learnings) {
-    final key = OrbitDateUtils.dateKey(date);
-    return learnings.where((l) => OrbitDateUtils.dateKey(l.createdAt) == key).toList();
-  });
-});
+final dayLearningsStreamProvider =
+    StreamProvider.family<List<LearningModel>, DateTime>((ref, date) {
+      final user = ref.watch(authStateProvider).value;
+      if (user == null) return const Stream.empty();
+      return ref.watch(learningRepositoryProvider).watchLearnings(user.uid).map(
+        (learnings) {
+          final key = OrbitDateUtils.dateKey(date);
+          return learnings
+              .where((l) => OrbitDateUtils.dateKey(l.createdAt) == key)
+              .toList();
+        },
+      );
+    });
 
-final dayDecisionsStreamProvider = StreamProvider.family<List<DecisionModel>, DateTime>((ref, date) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return const Stream.empty();
-  return ref.watch(decisionRepositoryProvider).watchDecisions(user.uid).map((decisions) {
-    final key = OrbitDateUtils.dateKey(date);
-    return decisions.where((d) => OrbitDateUtils.dateKey(d.createdAt) == key).toList();
-  });
-});
+final dayDecisionsStreamProvider =
+    StreamProvider.family<List<DecisionModel>, DateTime>((ref, date) {
+      final user = ref.watch(authStateProvider).value;
+      if (user == null) return const Stream.empty();
+      return ref.watch(decisionRepositoryProvider).watchDecisions(user.uid).map(
+        (decisions) {
+          final key = OrbitDateUtils.dateKey(date);
+          return decisions
+              .where((d) => OrbitDateUtils.dateKey(d.createdAt) == key)
+              .toList();
+        },
+      );
+    });
 
-final dayEventsStreamProvider = StreamProvider.family<List<EventModel>, DateTime>((ref, date) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return const Stream.empty();
-  return ref.watch(eventRepositoryProvider).watchEvents(user.uid).map((events) {
-    final key = OrbitDateUtils.dateKey(date);
-    return events.where((e) => OrbitDateUtils.dateKey(e.eventDate) == key).toList();
-  });
-});
+final dayEventsStreamProvider =
+    StreamProvider.family<List<EventModel>, DateTime>((ref, date) {
+      final user = ref.watch(authStateProvider).value;
+      if (user == null) return const Stream.empty();
+      return ref.watch(eventRepositoryProvider).watchEvents(user.uid).map((
+        events,
+      ) {
+        final key = OrbitDateUtils.dateKey(date);
+        return events
+            .where((e) => OrbitDateUtils.dateKey(e.eventDate) == key)
+            .toList();
+      });
+    });
 
-final dayMoodsStreamProvider = StreamProvider.family<List<MoodModel>, DateTime>((ref, date) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return const Stream.empty();
-  return ref.watch(moodRepositoryProvider).watchMoods(user.uid).map((moods) {
-    final key = OrbitDateUtils.dateKey(date);
-    return moods.where((m) => OrbitDateUtils.dateKey(m.date) == key).toList();
-  });
-});
+final dayMoodsStreamProvider = StreamProvider.family<List<MoodModel>, DateTime>(
+  (ref, date) {
+    final user = ref.watch(authStateProvider).value;
+    if (user == null) return const Stream.empty();
+    return ref.watch(moodRepositoryProvider).watchMoods(user.uid).map((moods) {
+      final key = OrbitDateUtils.dateKey(date);
+      return moods.where((m) => OrbitDateUtils.dateKey(m.date) == key).toList();
+    });
+  },
+);
 
 // Unified Day Data Provider
-final dayDataProvider = Provider.family<AsyncValue<DayData>, DateTime>((ref, date) {
+final dayDataProvider = Provider.family<AsyncValue<DayData>, DateTime>((
+  ref,
+  date,
+) {
   final dayAsync = ref.watch(daySummaryStreamProvider(date));
   final tasksAsync = ref.watch(dayTasksStreamProvider(date));
   final learningsAsync = ref.watch(dayLearningsStreamProvider(date));
@@ -125,19 +150,33 @@ final dayDataProvider = Provider.family<AsyncValue<DayData>, DateTime>((ref, dat
     return const AsyncValue.loading();
   }
 
-  if (dayAsync.hasError) return AsyncValue.error(dayAsync.error!, dayAsync.stackTrace!);
-  if (tasksAsync.hasError) return AsyncValue.error(tasksAsync.error!, tasksAsync.stackTrace!);
-  if (learningsAsync.hasError) return AsyncValue.error(learningsAsync.error!, learningsAsync.stackTrace!);
-  if (decisionsAsync.hasError) return AsyncValue.error(decisionsAsync.error!, decisionsAsync.stackTrace!);
-  if (eventsAsync.hasError) return AsyncValue.error(eventsAsync.error!, eventsAsync.stackTrace!);
-  if (moodsAsync.hasError) return AsyncValue.error(moodsAsync.error!, moodsAsync.stackTrace!);
+  if (dayAsync.hasError) {
+    return AsyncValue.error(dayAsync.error!, dayAsync.stackTrace!);
+  }
+  if (tasksAsync.hasError) {
+    return AsyncValue.error(tasksAsync.error!, tasksAsync.stackTrace!);
+  }
+  if (learningsAsync.hasError) {
+    return AsyncValue.error(learningsAsync.error!, learningsAsync.stackTrace!);
+  }
+  if (decisionsAsync.hasError) {
+    return AsyncValue.error(decisionsAsync.error!, decisionsAsync.stackTrace!);
+  }
+  if (eventsAsync.hasError) {
+    return AsyncValue.error(eventsAsync.error!, eventsAsync.stackTrace!);
+  }
+  if (moodsAsync.hasError) {
+    return AsyncValue.error(moodsAsync.error!, moodsAsync.stackTrace!);
+  }
 
-  return AsyncValue.data(DayData(
-    day: dayAsync.value,
-    tasks: tasksAsync.value ?? [],
-    learnings: learningsAsync.value ?? [],
-    decisions: decisionsAsync.value ?? [],
-    events: eventsAsync.value ?? [],
-    moods: moodsAsync.value ?? [],
-  ));
+  return AsyncValue.data(
+    DayData(
+      day: dayAsync.value,
+      tasks: tasksAsync.value ?? [],
+      learnings: learningsAsync.value ?? [],
+      decisions: decisionsAsync.value ?? [],
+      events: eventsAsync.value ?? [],
+      moods: moodsAsync.value ?? [],
+    ),
+  );
 });

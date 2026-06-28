@@ -16,10 +16,9 @@ class ProviderRouter {
   final Map<String, AiProvider> _providers = {};
 
   ProviderRouter({
-    required RateLimitManager rateLimitManager,
-    required AiHealthMonitor healthMonitor,
-  })  : _rateLimitManager = rateLimitManager,
-        _healthMonitor = healthMonitor;
+    required this._rateLimitManager,
+    required this._healthMonitor,
+  });
 
   /// Register a provider. Can be called multiple times to add/replace providers.
   void registerProvider(AiProvider provider) {

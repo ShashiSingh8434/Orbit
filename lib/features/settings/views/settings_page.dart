@@ -60,33 +60,32 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           _SectionHeader(label: 'Appearance'),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Column(
-              children: [
-                _ThemeOptionTile(
-                  icon: Icons.brightness_auto_rounded,
-                  label: 'System Default',
-                  value: ThemeMode.system,
-                  groupValue: themeMode,
-                  onChanged: (m) =>
-                      ref.read(themeNotifierProvider.notifier).setThemeMode(m!),
-                ),
-                _ThemeOptionTile(
-                  icon: Icons.light_mode_rounded,
-                  label: 'Light Mode',
-                  value: ThemeMode.light,
-                  groupValue: themeMode,
-                  onChanged: (m) =>
-                      ref.read(themeNotifierProvider.notifier).setThemeMode(m!),
-                ),
-                _ThemeOptionTile(
-                  icon: Icons.dark_mode_rounded,
-                  label: 'Dark Mode',
-                  value: ThemeMode.dark,
-                  groupValue: themeMode,
-                  onChanged: (m) =>
-                      ref.read(themeNotifierProvider.notifier).setThemeMode(m!),
-                ),
-              ],
+            child: RadioGroup<ThemeMode>(
+              groupValue: themeMode,
+              onChanged: (ThemeMode? value) {
+                if (value != null) {
+                  ref.read(themeNotifierProvider.notifier).setThemeMode(value);
+                }
+              },
+              child: const Column(
+                children: [
+                  _ThemeOptionTile(
+                    icon: Icons.brightness_auto_rounded,
+                    label: 'System Default',
+                    value: ThemeMode.system,
+                  ),
+                  _ThemeOptionTile(
+                    icon: Icons.light_mode_rounded,
+                    label: 'Light Mode',
+                    value: ThemeMode.light,
+                  ),
+                  _ThemeOptionTile(
+                    icon: Icons.dark_mode_rounded,
+                    label: 'Dark Mode',
+                    value: ThemeMode.dark,
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -133,7 +132,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               child: FilledButton.icon(
                 onPressed: () async {
                   if (_selectedMode == AiMode.userKey) {
-                    final hasAnyKey = aiSettings.providers.values.any((p) => p.hasUserKey);
+                    final hasAnyKey = aiSettings.providers.values.any(
+                      (p) => p.hasUserKey,
+                    );
                     if (!hasAnyKey) {
                       showDialog(
                         context: context,
@@ -153,7 +154,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       return;
                     }
                   }
-                  await ref.read(aiSettingsProvider.notifier).setMode(_selectedMode!);
+                  await ref
+                      .read(aiSettingsProvider.notifier)
+                      .setMode(_selectedMode!);
                 },
                 icon: const Icon(Icons.save_rounded),
                 label: const Text('Save AI Mode'),
@@ -168,8 +171,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline_rounded,
-                          color: colorScheme.primary, size: 20),
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -223,10 +229,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           // ── Sign Out ──────────────────────────────────────────────────
           ListTile(
             leading: Icon(Icons.logout_rounded, color: colorScheme.error),
-            title: Text(
-              'Sign Out',
-              style: TextStyle(color: colorScheme.error),
-            ),
+            title: Text('Sign Out', style: TextStyle(color: colorScheme.error)),
             onTap: () => _confirmSignOut(context),
           ),
         ],
@@ -275,9 +278,9 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              letterSpacing: 1.2,
-            ),
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }
@@ -288,19 +291,17 @@ class _ThemeOptionTile extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
   });
 
   final IconData icon;
   final String label;
   final ThemeMode value;
-  final ThemeMode groupValue;
-  final ValueChanged<ThemeMode?> onChanged;
 
   @override
   Widget build(BuildContext context) {
     return RadioListTile<ThemeMode>(
+      value: value,
+      contentPadding: EdgeInsets.zero,
       title: Row(
         children: [
           Icon(icon, size: 20),
@@ -308,10 +309,6 @@ class _ThemeOptionTile extends StatelessWidget {
           Text(label),
         ],
       ),
-      value: value,
-      groupValue: groupValue,
-      onChanged: onChanged,
-      contentPadding: EdgeInsets.zero,
     );
   }
 }
@@ -327,7 +324,11 @@ class _ProviderCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final statusColor = _statusColor(provider.status, colorScheme, provider.hasUserKey);
+    final statusColor = _statusColor(
+      provider.status,
+      colorScheme,
+      provider.hasUserKey,
+    );
     final statusLabel = _statusLabel(provider.status, provider.hasUserKey);
 
     return Padding(
@@ -342,13 +343,16 @@ class _ProviderCard extends ConsumerWidget {
                 children: [
                   Text(
                     provider.name,
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Spacer(),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -390,15 +394,19 @@ class _ProviderCard extends ConsumerWidget {
                             .read(aiSettingsProvider.notifier)
                             .disconnectProvider(provider.id);
                       },
-                      icon: Icon(Icons.link_off_rounded,
-                          size: 18, color: colorScheme.error),
-                      label: Text('Remove',
-                          style: TextStyle(color: colorScheme.error)),
+                      icon: Icon(
+                        Icons.link_off_rounded,
+                        size: 18,
+                        color: colorScheme.error,
+                      ),
+                      label: Text(
+                        'Remove',
+                        style: TextStyle(color: colorScheme.error),
+                      ),
                     ),
                   ] else ...[
                     FilledButton.icon(
-                      onPressed: () =>
-                          AiSetupWizard.show(context, provider),
+                      onPressed: () => AiSetupWizard.show(context, provider),
                       icon: const Icon(Icons.add_link_rounded, size: 18),
                       label: const Text('Connect'),
                     ),
@@ -412,7 +420,11 @@ class _ProviderCard extends ConsumerWidget {
     );
   }
 
-  Color _statusColor(ProviderHealthStatus status, ColorScheme cs, bool hasUserKey) {
+  Color _statusColor(
+    ProviderHealthStatus status,
+    ColorScheme cs,
+    bool hasUserKey,
+  ) {
     if (!hasUserKey) return cs.onSurfaceVariant;
     switch (status) {
       case ProviderHealthStatus.healthy:

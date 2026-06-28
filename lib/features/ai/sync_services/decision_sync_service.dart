@@ -15,27 +15,36 @@ class DecisionSyncService {
 
   DecisionSyncService(this._repository);
 
-  String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
+  String _normalize(String input) =>
+      input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
-  Future<void> syncDecisions(String uid, List<DecisionDto> extractedDecisions, String reflectionId, DateTime dayDate) async {
+  Future<void> syncDecisions(
+    String uid,
+    List<DecisionDto> extractedDecisions,
+    String reflectionId,
+    DateTime dayDate,
+  ) async {
     final existingDecisions = await _repository.getDecisions(uid);
 
     for (final dto in extractedDecisions) {
       final normalizedNewDecision = _normalize(dto.decision);
-      
-      // Simple conflict detection based on similar text. 
+
+      // Simple conflict detection based on similar text.
       // In a production app, the AI would pass back the ID of the superseded decision.
-      int conflictingIndex = existingDecisions.indexWhere((d) => 
-          d.status == 'Active' && _normalize(d.decision) == normalizedNewDecision);
+      int conflictingIndex = existingDecisions.indexWhere(
+        (d) =>
+            d.status == 'Active' &&
+            _normalize(d.decision) == normalizedNewDecision,
+      );
 
       if (conflictingIndex != -1) {
         var existingDecision = existingDecisions[conflictingIndex];
-        
+
         var supersededDecision = existingDecision.copyWith(
           status: 'Superseded',
           updatedAt: DateTime.now(),
         );
-        
+
         await _repository.updateDecision(uid, supersededDecision);
         existingDecisions[conflictingIndex] = supersededDecision;
       }
@@ -57,4 +66,3 @@ class DecisionSyncService {
     }
   }
 }
-

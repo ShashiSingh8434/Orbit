@@ -10,10 +10,11 @@ abstract class DecisionModel with _$DecisionModel {
     required String id,
     required String decision,
     @Default('') String reason,
-    @Default('Active') String status, // Active, Completed, Cancelled, Superseded
+    @Default('Active')
+    String status, // Active, Completed, Cancelled, Superseded
     required DateTime createdAt,
     DateTime? updatedAt,
-    
+
     EntityMetadata? metadata,
   }) = _DecisionModel;
 

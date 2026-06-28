@@ -66,21 +66,25 @@ class FirebaseDayRepository implements DayRepository {
       detailedSummary: d['detailedSummary'] as String?,
       detailedSummaryBullet: d['detailedSummaryBullet'] as String?,
       averageMood: (d['averageMood'] as num?)?.toDouble(),
-      createdAt: d['createdAt'] != null ? (d['createdAt'] as Timestamp).toDate() : null,
-      updatedAt: d['updatedAt'] != null ? (d['updatedAt'] as Timestamp).toDate() : null,
+      createdAt: d['createdAt'] != null
+          ? (d['createdAt'] as Timestamp).toDate()
+          : null,
+      updatedAt: d['updatedAt'] != null
+          ? (d['updatedAt'] as Timestamp).toDate()
+          : null,
       aiVersion: d['aiVersion'] as String?,
     );
   }
 
   Map<String, dynamic> _toMap(DayModel d) => {
-        'summary': d.summary,
-        'summaryMode': d.summaryMode,
-        'reflectionCount': d.reflectionCount,
-        'detailedSummary': d.detailedSummary,
-        'detailedSummaryBullet': d.detailedSummaryBullet,
-        'averageMood': d.averageMood,
-        'createdAt': d.createdAt != null ? Timestamp.fromDate(d.createdAt!) : null,
-        'updatedAt': d.updatedAt != null ? Timestamp.fromDate(d.updatedAt!) : null,
-        'aiVersion': d.aiVersion,
-      };
+    'summary': d.summary,
+    'summaryMode': d.summaryMode,
+    'reflectionCount': d.reflectionCount,
+    'detailedSummary': d.detailedSummary,
+    'detailedSummaryBullet': d.detailedSummaryBullet,
+    'averageMood': d.averageMood,
+    'createdAt': d.createdAt != null ? Timestamp.fromDate(d.createdAt!) : null,
+    'updatedAt': d.updatedAt != null ? Timestamp.fromDate(d.updatedAt!) : null,
+    'aiVersion': d.aiVersion,
+  };
 }

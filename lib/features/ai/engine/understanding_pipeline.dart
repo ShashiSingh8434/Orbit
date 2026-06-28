@@ -55,13 +55,15 @@ class UnderstandingPipeline {
   });
 
   Future<void> onReflectionSaved(String uid, ReflectionModel reflection) async {
-    debugPrint('UnderstandingPipeline triggered for reflection: ${reflection.id}');
+    debugPrint(
+      'UnderstandingPipeline triggered for reflection: ${reflection.id}',
+    );
 
     final schema = UnderstandingPromptBuilder.buildSchema();
 
     final existingDay = await daySyncService.getDay(uid, reflection.createdAt);
     final existingSummary = existingDay?.summary;
-    
+
     // Fetch context to prevent duplicates and enable task completion
     final pendingTasks = await taskSyncService.getPendingTasks(uid);
     final upcomingEvents = await eventSyncService.getUpcomingEvents(uid);
@@ -75,13 +77,15 @@ class UnderstandingPipeline {
     );
 
     try {
-      final response = await aiRequestManager.generate(AiRequest(
-        prompt: prompt,
-        jsonMode: true,
-        responseSchema: schema,
-        requestId: 'understanding_${reflection.id}',
-        label: 'Analyzing reflection...',
-      ));
+      final response = await aiRequestManager.generate(
+        AiRequest(
+          prompt: prompt,
+          jsonMode: true,
+          responseSchema: schema,
+          requestId: 'understanding_${reflection.id}',
+          label: 'Analyzing reflection...',
+        ),
+      );
 
       var jsonString = response.text.trim();
       if (jsonString.startsWith('```json')) {
@@ -105,7 +109,9 @@ class UnderstandingPipeline {
 
       final extractedTasks = <TaskDto>[];
       for (final e in (data['tasks'] as List<dynamic>? ?? [])) {
-        try { extractedTasks.add(TaskDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+        try {
+          extractedTasks.add(TaskDto.fromJson(e as Map<String, dynamic>));
+        } catch (_) {}
       }
 
       final extractedLearnings = <LearningDto>[];
@@ -121,12 +127,18 @@ class UnderstandingPipeline {
 
       final extractedDecisions = <DecisionDto>[];
       for (final e in (data['decisions'] as List<dynamic>? ?? [])) {
-        try { extractedDecisions.add(DecisionDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+        try {
+          extractedDecisions.add(
+            DecisionDto.fromJson(e as Map<String, dynamic>),
+          );
+        } catch (_) {}
       }
 
       final extractedEvents = <EventDto>[];
       for (final e in (data['events'] as List<dynamic>? ?? [])) {
-        try { extractedEvents.add(EventDto.fromJson(e as Map<String, dynamic>)); } catch (_) {}
+        try {
+          extractedEvents.add(EventDto.fromJson(e as Map<String, dynamic>));
+        } catch (_) {}
       }
 
       final extractedMoods = <MoodDto>[];
@@ -142,7 +154,7 @@ class UnderstandingPipeline {
 
       // Stage 4-7: Normalization, Merge, Synchronization, Repository Updates
       await _synchronize(
-        uid: uid, 
+        uid: uid,
         dayDate: reflection.createdAt,
         reflectionId: reflection.id,
         summary: summaryDto,
@@ -152,11 +164,17 @@ class UnderstandingPipeline {
         events: extractedEvents,
         moods: extractedMoods,
       );
-      
+
       // Mark as processed so the QueueManager doesn't retry it
-      await reflectionRepository.markAiProcessed(uid, OrbitDateUtils.dateKey(reflection.createdAt), reflection.id);
-      
-      debugPrint('UnderstandingPipeline completed for reflection: ${reflection.id}');
+      await reflectionRepository.markAiProcessed(
+        uid,
+        OrbitDateUtils.dateKey(reflection.createdAt),
+        reflection.id,
+      );
+
+      debugPrint(
+        'UnderstandingPipeline completed for reflection: ${reflection.id}',
+      );
     } catch (e) {
       debugPrint('UnderstandingPipeline error: $e');
     }

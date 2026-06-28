@@ -11,7 +11,11 @@ final learningRepositoryProvider = Provider<LearningRepository>(
 abstract class LearningRepository {
   Stream<List<LearningModel>> watchLearnings(String uid);
   Future<List<LearningModel>> getLearnings(String uid);
-  Future<PaginatedResult<LearningModel>> getLearningsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20});
+  Future<PaginatedResult<LearningModel>> getLearningsPaginated(
+    String uid, {
+    DocumentSnapshot? startAfter,
+    int limit = 20,
+  });
   Future<void> saveLearning(String uid, LearningModel learning);
   Future<void> updateLearning(String uid, LearningModel learning);
   Future<void> deleteLearning(String uid, String learningId);
@@ -38,8 +42,14 @@ class FirebaseLearningRepository implements LearningRepository {
   }
 
   @override
-  Future<PaginatedResult<LearningModel>> getLearningsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20}) async {
-    Query<Map<String, dynamic>> query = _col(uid).orderBy('createdAt', descending: true).limit(limit);
+  Future<PaginatedResult<LearningModel>> getLearningsPaginated(
+    String uid, {
+    DocumentSnapshot? startAfter,
+    int limit = 20,
+  }) async {
+    Query<Map<String, dynamic>> query = _col(
+      uid,
+    ).orderBy('createdAt', descending: true).limit(limit);
     if (startAfter != null) {
       query = query.startAfterDocument(startAfter);
     }
@@ -73,24 +83,30 @@ class FirebaseLearningRepository implements LearningRepository {
       description: d['description'] as String? ?? '',
       category: d['category'] as String? ?? 'general',
       occurrenceCount: d['occurrenceCount'] as int? ?? 1,
-      lastSeen: d['lastSeen'] != null ? (d['lastSeen'] as Timestamp).toDate() : null,
+      lastSeen: d['lastSeen'] != null
+          ? (d['lastSeen'] as Timestamp).toDate()
+          : null,
       createdAt: (d['createdAt'] as Timestamp).toDate(),
-      updatedAt: d['updatedAt'] != null ? (d['updatedAt'] as Timestamp).toDate() : null,
-      metadata: d['metadata'] != null 
-          ? EntityMetadata.fromJson(Map<String, dynamic>.from(d['metadata'] as Map))
+      updatedAt: d['updatedAt'] != null
+          ? (d['updatedAt'] as Timestamp).toDate()
+          : null,
+      metadata: d['metadata'] != null
+          ? EntityMetadata.fromJson(
+              Map<String, dynamic>.from(d['metadata'] as Map),
+            )
           : null,
     );
   }
 
   Map<String, dynamic> _toMap(LearningModel l) => {
-        'id': l.id,
-        'title': l.title,
-        'description': l.description,
-        'category': l.category,
-        'occurrenceCount': l.occurrenceCount,
-        'lastSeen': l.lastSeen != null ? Timestamp.fromDate(l.lastSeen!) : null,
-        'createdAt': Timestamp.fromDate(l.createdAt),
-        'updatedAt': l.updatedAt != null ? Timestamp.fromDate(l.updatedAt!) : null,
-        if (l.metadata != null) 'metadata': l.metadata!.toJson(),
-      };
+    'id': l.id,
+    'title': l.title,
+    'description': l.description,
+    'category': l.category,
+    'occurrenceCount': l.occurrenceCount,
+    'lastSeen': l.lastSeen != null ? Timestamp.fromDate(l.lastSeen!) : null,
+    'createdAt': Timestamp.fromDate(l.createdAt),
+    'updatedAt': l.updatedAt != null ? Timestamp.fromDate(l.updatedAt!) : null,
+    if (l.metadata != null) 'metadata': l.metadata!.toJson(),
+  };
 }

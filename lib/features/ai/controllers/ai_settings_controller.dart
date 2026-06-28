@@ -30,10 +30,7 @@ class ProviderInfo {
     this.hasUserKey = false,
   });
 
-  ProviderInfo copyWith({
-    ProviderHealthStatus? status,
-    bool? hasUserKey,
-  }) {
+  ProviderInfo copyWith({ProviderHealthStatus? status, bool? hasUserKey}) {
     return ProviderInfo(
       id: id,
       name: name,
@@ -91,7 +88,11 @@ const _defaultProviders = {
     name: 'Groq',
     description: 'Ultra-fast inference. Generous free tier.',
     setupUrl: 'https://console.groq.com/keys',
-    availableModels: ['llama-3.3-70b-versatile', 'mixtral-8x7b-32768', 'llama-3.1-8b-instant'],
+    availableModels: [
+      'llama-3.3-70b-versatile',
+      'mixtral-8x7b-32768',
+      'llama-3.1-8b-instant',
+    ],
     recommendedModel: 'llama-3.3-70b-versatile',
   ),
 };
@@ -99,7 +100,9 @@ const _defaultProviders = {
 // ── Riverpod Controller ──────────────────────────────────────────────────────
 
 final aiSettingsProvider =
-    NotifierProvider<AiSettingsController, AiSettingsState>(AiSettingsController.new);
+    NotifierProvider<AiSettingsController, AiSettingsState>(
+      AiSettingsController.new,
+    );
 
 class AiSettingsController extends Notifier<AiSettingsState> {
   @override
@@ -107,7 +110,9 @@ class AiSettingsController extends Notifier<AiSettingsState> {
     final manager = ref.read(aiRequestManagerProvider);
 
     // Load initial state
-    final mode = manager.aiMode == 'user_key' ? AiMode.userKey : AiMode.orbitDefault;
+    final mode = manager.aiMode == 'user_key'
+        ? AiMode.userKey
+        : AiMode.orbitDefault;
 
     // Load provider statuses
     final providers = Map<String, ProviderInfo>.from(_defaultProviders);
@@ -119,22 +124,19 @@ class AiSettingsController extends Notifier<AiSettingsState> {
     // Check which providers have user keys (async, will update state)
     _loadUserKeyStatus();
 
-    return AiSettingsState(
-      mode: mode,
-      providers: providers,
-    );
+    return AiSettingsState(mode: mode, providers: providers);
   }
 
   Future<void> _loadUserKeyStatus() async {
     final manager = ref.read(aiRequestManagerProvider);
     final providers = Map<String, ProviderInfo>.from(state.providers);
-    
+
     for (final id in providers.keys) {
       final key = await SecureKeyStorage.getKey(id);
       final hasKey = key != null && key.isNotEmpty;
-      
+
       providers[id] = providers[id]!.copyWith(hasUserKey: hasKey);
-      
+
       if (hasKey && manager.aiMode == 'user_key') {
         await manager.registerProviderWithKey(id, key);
       }
@@ -218,7 +220,9 @@ class AiSettingsController extends Notifier<AiSettingsState> {
       final healthy = await manager.testProviderConnection(providerId);
       final providers = Map<String, ProviderInfo>.from(state.providers);
       providers[providerId] = providers[providerId]!.copyWith(
-        status: healthy ? ProviderHealthStatus.healthy : ProviderHealthStatus.offline,
+        status: healthy
+            ? ProviderHealthStatus.healthy
+            : ProviderHealthStatus.offline,
       );
       state = state.copyWith(
         providers: providers,

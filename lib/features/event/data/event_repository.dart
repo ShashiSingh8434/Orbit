@@ -11,7 +11,11 @@ final eventRepositoryProvider = Provider<EventRepository>(
 abstract class EventRepository {
   Stream<List<EventModel>> watchEvents(String uid);
   Future<List<EventModel>> getEvents(String uid);
-  Future<PaginatedResult<EventModel>> getEventsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20});
+  Future<PaginatedResult<EventModel>> getEventsPaginated(
+    String uid, {
+    DocumentSnapshot? startAfter,
+    int limit = 20,
+  });
   Future<void> saveEvent(String uid, EventModel event);
   Future<void> updateEvent(String uid, EventModel event);
   Future<void> deleteEvent(String uid, String eventId);
@@ -38,8 +42,14 @@ class FirebaseEventRepository implements EventRepository {
   }
 
   @override
-  Future<PaginatedResult<EventModel>> getEventsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20}) async {
-    Query<Map<String, dynamic>> query = _col(uid).orderBy('eventDate', descending: true).limit(limit);
+  Future<PaginatedResult<EventModel>> getEventsPaginated(
+    String uid, {
+    DocumentSnapshot? startAfter,
+    int limit = 20,
+  }) async {
+    Query<Map<String, dynamic>> query = _col(
+      uid,
+    ).orderBy('eventDate', descending: true).limit(limit);
     if (startAfter != null) {
       query = query.startAfterDocument(startAfter);
     }
@@ -75,22 +85,26 @@ class FirebaseEventRepository implements EventRepository {
       time: d['time'] as String?,
       location: d['location'] as String?,
       createdAt: (d['createdAt'] as Timestamp).toDate(),
-      updatedAt: d['updatedAt'] != null ? (d['updatedAt'] as Timestamp).toDate() : null,
-      metadata: d['metadata'] != null 
-          ? EntityMetadata.fromJson(Map<String, dynamic>.from(d['metadata'] as Map))
+      updatedAt: d['updatedAt'] != null
+          ? (d['updatedAt'] as Timestamp).toDate()
+          : null,
+      metadata: d['metadata'] != null
+          ? EntityMetadata.fromJson(
+              Map<String, dynamic>.from(d['metadata'] as Map),
+            )
           : null,
     );
   }
 
   Map<String, dynamic> _toMap(EventModel e) => {
-        'id': e.id,
-        'title': e.title,
-        'description': e.description,
-        'eventDate': Timestamp.fromDate(e.eventDate),
-        'time': e.time,
-        'location': e.location,
-        'createdAt': Timestamp.fromDate(e.createdAt),
-        'updatedAt': e.updatedAt != null ? Timestamp.fromDate(e.updatedAt!) : null,
-        if (e.metadata != null) 'metadata': e.metadata!.toJson(),
-      };
+    'id': e.id,
+    'title': e.title,
+    'description': e.description,
+    'eventDate': Timestamp.fromDate(e.eventDate),
+    'time': e.time,
+    'location': e.location,
+    'createdAt': Timestamp.fromDate(e.createdAt),
+    'updatedAt': e.updatedAt != null ? Timestamp.fromDate(e.updatedAt!) : null,
+    if (e.metadata != null) 'metadata': e.metadata!.toJson(),
+  };
 }

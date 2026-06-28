@@ -52,21 +52,25 @@ class FirebaseMoodRepository implements MoodRepository {
       value: d['value'] as int,
       inferredByAi: d['inferredByAi'] as bool? ?? false,
       createdAt: (d['createdAt'] as Timestamp).toDate(),
-      updatedAt: d['updatedAt'] != null ? (d['updatedAt'] as Timestamp).toDate() : null,
-      metadata: d['metadata'] != null 
-          ? EntityMetadata.fromJson(Map<String, dynamic>.from(d['metadata'] as Map))
+      updatedAt: d['updatedAt'] != null
+          ? (d['updatedAt'] as Timestamp).toDate()
+          : null,
+      metadata: d['metadata'] != null
+          ? EntityMetadata.fromJson(
+              Map<String, dynamic>.from(d['metadata'] as Map),
+            )
           : null,
     );
   }
 
   Map<String, dynamic> _toMap(MoodModel m) => {
-        'id': m.id,
-        'date': Timestamp.fromDate(m.date),
-        'timeOfDay': m.timeOfDay,
-        'value': m.value,
-        'inferredByAi': m.inferredByAi,
-        'createdAt': Timestamp.fromDate(m.createdAt),
-        'updatedAt': m.updatedAt != null ? Timestamp.fromDate(m.updatedAt!) : null,
-        if (m.metadata != null) 'metadata': m.metadata!.toJson(),
-      };
+    'id': m.id,
+    'date': Timestamp.fromDate(m.date),
+    'timeOfDay': m.timeOfDay,
+    'value': m.value,
+    'inferredByAi': m.inferredByAi,
+    'createdAt': Timestamp.fromDate(m.createdAt),
+    'updatedAt': m.updatedAt != null ? Timestamp.fromDate(m.updatedAt!) : null,
+    if (m.metadata != null) 'metadata': m.metadata!.toJson(),
+  };
 }

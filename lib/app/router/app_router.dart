@@ -33,27 +33,20 @@ final routerProvider = Provider<GoRouter>((ref) {
     // orbit://weekly            → /home/weekly
     // orbit://task/:id          → /home/tasks/:id
     // orbit://settings          → /home/settings
-
     routes: [
       // ── Unauthenticated ───────────────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (_, __) => const SplashPage(),
-      ),
-      GoRoute(
-        path: AppRoutes.login,
-        builder: (_, __) => const LoginPage(),
-      ),
+      GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),
+      GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginPage()),
 
       // ── Authenticated ─────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.home,
-        builder: (_, __) => const HomePage(),
+        builder: (_, _) => const HomePage(),
         routes: [
           // Reflections
           GoRoute(
             path: 'reflections',
-            builder: (_, __) => const ReflectionListPage(),
+            builder: (_, _) => const ReflectionListPage(),
             routes: [
               GoRoute(
                 path: 'edit',
@@ -67,49 +60,35 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
               GoRoute(
                 path: ':date',
-                builder: (_, state) => ReflectionListPage(
-                  dateKey: state.pathParameters['date'],
-                ),
+                builder: (_, state) =>
+                    ReflectionListPage(dateKey: state.pathParameters['date']),
               ),
             ],
           ),
 
-
           // Tasks
-          GoRoute(
-            path: 'tasks',
-            builder: (_, __) => const TasksPage(),
-          ),
+          GoRoute(path: 'tasks', builder: (_, _) => const TasksPage()),
 
           // Decisions
           GoRoute(
             path: 'decisions',
-            builder: (_, __) => const DecisionListPage(),
+            builder: (_, _) => const DecisionListPage(),
           ),
 
           // Events
-          GoRoute(
-            path: 'events',
-            builder: (_, __) => const EventListPage(),
-          ),
+          GoRoute(path: 'events', builder: (_, _) => const EventListPage()),
 
           // Learnings
           GoRoute(
             path: 'learnings',
-            builder: (_, __) => const LearningListPage(),
+            builder: (_, _) => const LearningListPage(),
           ),
 
           // Guide
-          GoRoute(
-            path: 'guide',
-            builder: (_, __) => const GuidePage(),
-          ),
+          GoRoute(path: 'guide', builder: (_, _) => const GuidePage()),
 
           // Settings
-          GoRoute(
-            path: 'settings',
-            builder: (_, __) => const SettingsPage(),
-          ),
+          GoRoute(path: 'settings', builder: (_, _) => const SettingsPage()),
           // Detailed Summary
           GoRoute(
             path: 'detailed-summary',
@@ -122,7 +101,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           // AI Analytics
           GoRoute(
             path: 'ai-analytics',
-            builder: (_, __) => const AiAnalyticsPage(),
+            builder: (_, _) => const AiAnalyticsPage(),
           ),
         ],
       ),
@@ -133,7 +112,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 // ── Auth Redirect Guard ───────────────────────────────────────────────────────
 class _RouterNotifier extends ChangeNotifier {
   _RouterNotifier(this._ref) {
-    _ref.listen<AsyncValue>(authStateProvider, (_, __) {
+    _ref.listen<AsyncValue>(authStateProvider, (_, _) {
       notifyListeners();
     });
   }
@@ -157,7 +136,7 @@ class _RouterNotifier extends ChangeNotifier {
     if (!isAuthenticated) {
       return loc == AppRoutes.login ? null : AppRoutes.login;
     }
-    
+
     if (loc == AppRoutes.login) {
       return AppRoutes.home;
     }

@@ -17,7 +17,7 @@ abstract class TaskModel with _$TaskModel {
     @Default('medium') String priority,
     @Default('pending') String status,
     DateTime? completedAt,
-    
+
     EntityMetadata? metadata,
   }) = _TaskModel;
 

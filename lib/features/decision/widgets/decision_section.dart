@@ -28,31 +28,49 @@ class DecisionSection extends StatelessWidget {
             child: PulsingSkeleton(width: 90, height: 24),
           ),
           const SizedBox(height: 8),
-          ...List.generate(2, (index) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6.0),
-            child: Row(
-              children: [
-                const PulsingSkeleton(width: 24, height: 24, borderRadius: 12),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.5, height: 16),
-                      const SizedBox(height: 6),
-                      PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.3, height: 12),
-                    ],
+          ...List.generate(
+            2,
+            (index) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6.0),
+              child: Row(
+                children: [
+                  const PulsingSkeleton(
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PulsingSkeleton(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          height: 16,
+                        ),
+                        const SizedBox(height: 6),
+                        PulsingSkeleton(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          height: 12,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       );
     }
 
-    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
-    final emptyText = isToday ? 'No decisions made today' : 'No decisions made on this day';
+    final isToday =
+        date.year == DateTime.now().year &&
+        date.month == DateTime.now().month &&
+        date.day == DateTime.now().day;
+    final emptyText = isToday
+        ? 'No decisions made today'
+        : 'No decisions made on this day';
 
     if (decisions == null || decisions!.isEmpty) {
       return Container(
@@ -99,24 +117,36 @@ class DecisionSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
             'Decisions',
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        ...decisions!.map<Widget>((d) => ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(
-            d.status == 'Superseded' ? Icons.cancel_outlined : Icons.check_circle_outline,
-            color: d.status == 'Superseded' ? colorScheme.onSurfaceVariant : colorScheme.primary,
-          ),
-          title: Text(
-            d.decision,
-            style: TextStyle(
-              decoration: d.status == 'Superseded' ? TextDecoration.lineThrough : null,
-              color: d.status == 'Superseded' ? colorScheme.onSurfaceVariant : null,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
-          subtitle: d.reason.isNotEmpty ? Text(d.reason) : null,
-        )).toList(),
+        ),
+        ...decisions!.map<Widget>(
+          (d) => ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              d.status == 'Superseded'
+                  ? Icons.cancel_outlined
+                  : Icons.check_circle_outline,
+              color: d.status == 'Superseded'
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.primary,
+            ),
+            title: Text(
+              d.decision,
+              style: TextStyle(
+                decoration: d.status == 'Superseded'
+                    ? TextDecoration.lineThrough
+                    : null,
+                color: d.status == 'Superseded'
+                    ? colorScheme.onSurfaceVariant
+                    : null,
+              ),
+            ),
+            subtitle: d.reason.isNotEmpty ? Text(d.reason) : null,
+          ),
+        ),
       ],
     );
   }

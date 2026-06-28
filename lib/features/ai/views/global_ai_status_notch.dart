@@ -6,10 +6,12 @@ class GlobalAiStatusNotch extends ConsumerStatefulWidget {
   const GlobalAiStatusNotch({super.key});
 
   @override
-  ConsumerState<GlobalAiStatusNotch> createState() => _GlobalAiStatusNotchState();
+  ConsumerState<GlobalAiStatusNotch> createState() =>
+      _GlobalAiStatusNotchState();
 }
 
-class _GlobalAiStatusNotchState extends ConsumerState<GlobalAiStatusNotch> with SingleTickerProviderStateMixin {
+class _GlobalAiStatusNotchState extends ConsumerState<GlobalAiStatusNotch>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _slideAnimation;
 
@@ -49,7 +51,7 @@ class _GlobalAiStatusNotchState extends ConsumerState<GlobalAiStatusNotch> with 
       animation: _slideAnimation,
       builder: (context, child) {
         if (_controller.isDismissed) return const SizedBox.shrink();
-        
+
         final double slideOffset = -120.0 * (1.0 - _slideAnimation.value);
 
         return Positioned(
@@ -62,9 +64,14 @@ class _GlobalAiStatusNotchState extends ConsumerState<GlobalAiStatusNotch> with 
               child: IgnorePointer(
                 ignoring: true,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.95),
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.95,
+                    ),
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
@@ -86,7 +93,9 @@ class _GlobalAiStatusNotchState extends ConsumerState<GlobalAiStatusNotch> with 
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+                          valueColor: AlwaysStoppedAnimation(
+                            colorScheme.primary,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),

@@ -16,16 +16,25 @@ class EventSyncService {
 
   EventSyncService(this._repository);
 
-  String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
+  String _normalize(String input) =>
+      input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
   Future<List<EventModel>> getUpcomingEvents(String uid) async {
     final allEvents = await _repository.getEvents(uid);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    return allEvents.where((e) => e.eventDate.isAfter(today.subtract(const Duration(days: 1)))).toList();
+    return allEvents
+        .where(
+          (e) => e.eventDate.isAfter(today.subtract(const Duration(days: 1))),
+        )
+        .toList();
   }
 
-  Future<void> syncEvents(String uid, List<EventDto> extractedEvents, String reflectionId) async {
+  Future<void> syncEvents(
+    String uid,
+    List<EventDto> extractedEvents,
+    String reflectionId,
+  ) async {
     final existingEvents = await _repository.getEvents(uid);
 
     for (final dto in extractedEvents) {
@@ -34,7 +43,9 @@ class EventSyncService {
       try {
         parsedDate = DateTime.parse(dto.eventDate);
       } catch (_) {
-        debugPrint('EventSyncService: Could not parse eventDate "${dto.eventDate}", using today.');
+        debugPrint(
+          'EventSyncService: Could not parse eventDate "${dto.eventDate}", using today.',
+        );
         parsedDate = DateTime.now();
       }
 
@@ -42,7 +53,9 @@ class EventSyncService {
 
       // 1. Check if AI matched an exact ID
       if (dto.originalId != null && dto.originalId!.isNotEmpty) {
-        existingIndex = existingEvents.indexWhere((e) => e.id == dto.originalId);
+        existingIndex = existingEvents.indexWhere(
+          (e) => e.id == dto.originalId,
+        );
       }
 
       // 2. Fallback to title and date matching
@@ -50,9 +63,9 @@ class EventSyncService {
         final normalizedNewTitle = _normalize(dto.title);
         existingIndex = existingEvents.indexWhere((e) {
           return _normalize(e.title) == normalizedNewTitle &&
-                 e.eventDate.year == parsedDate.year &&
-                 e.eventDate.month == parsedDate.month &&
-                 e.eventDate.day == parsedDate.day;
+              e.eventDate.year == parsedDate.year &&
+              e.eventDate.month == parsedDate.month &&
+              e.eventDate.day == parsedDate.day;
         });
       }
 
@@ -60,7 +73,9 @@ class EventSyncService {
         // Duplicate found. Update missing info.
         var existingEvent = existingEvents[existingIndex];
         var updatedEvent = existingEvent.copyWith(
-          description: dto.description != null && dto.description!.isNotEmpty ? dto.description! : existingEvent.description,
+          description: dto.description != null && dto.description!.isNotEmpty
+              ? dto.description!
+              : existingEvent.description,
           time: dto.time ?? existingEvent.time,
           location: dto.location ?? existingEvent.location,
           updatedAt: DateTime.now(),

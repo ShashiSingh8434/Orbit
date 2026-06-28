@@ -186,7 +186,7 @@ class _OverlayContent extends StatelessWidget {
               if (targetRect != null)
                 AnimatedBuilder(
                   animation: state._pulse,
-                  builder: (_, __) {
+                  builder: (_, _) {
                     // Ring diameter matches the painter's spotlight exactly:
                     //   painter radius  = longestSide/2 + 20
                     //   ring diameter   = (longestSide + 40) * pulseScale

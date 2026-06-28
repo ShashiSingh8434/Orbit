@@ -11,16 +11,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: '.env');
-  
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+
   final prefs = await SharedPreferences.getInstance();
-  
+
   runApp(
     ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(prefs),
-      ],
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
       child: const OrbitApp(),
     ),
   );

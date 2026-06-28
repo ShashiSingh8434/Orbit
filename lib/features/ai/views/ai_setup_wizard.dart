@@ -104,7 +104,10 @@ class _AiSetupWizardState extends ConsumerState<AiSetupWizard> {
                       onPressed: () async {
                         final uri = Uri.parse(widget.provider.setupUrl);
                         if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
                         }
                         setState(() => _step = 1);
                       },
@@ -172,7 +175,10 @@ class _AiSetupWizardState extends ConsumerState<AiSetupWizard> {
                     ] else if (_connectionResult == true) ...[
                       Row(
                         children: [
-                          Icon(Icons.check_circle_rounded, color: colorScheme.primary),
+                          Icon(
+                            Icons.check_circle_rounded,
+                            color: colorScheme.primary,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             'Connected successfully!',
@@ -198,12 +204,18 @@ class _AiSetupWizardState extends ConsumerState<AiSetupWizard> {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline, color: colorScheme.error, size: 20),
+                              Icon(
+                                Icons.error_outline,
+                                color: colorScheme.error,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   _errorMessage!,
-                                  style: TextStyle(color: colorScheme.onErrorContainer),
+                                  style: TextStyle(
+                                    color: colorScheme.onErrorContainer,
+                                  ),
                                 ),
                               ),
                             ],
@@ -274,8 +286,8 @@ class _AiSetupWizardState extends ConsumerState<AiSetupWizard> {
               color: isCompleted
                   ? colorScheme.primary
                   : isActive
-                      ? colorScheme.primaryContainer
-                      : colorScheme.surfaceContainerHighest,
+                  ? colorScheme.primaryContainer
+                  : colorScheme.surfaceContainerHighest,
             ),
             child: Center(
               child: isCompleted
@@ -304,10 +316,7 @@ class _AiSetupWizardState extends ConsumerState<AiSetupWizard> {
                         : colorScheme.onSurfaceVariant,
                   ),
                 ),
-                if (isActive) ...[
-                  const SizedBox(height: 12),
-                  child,
-                ],
+                if (isActive) ...[const SizedBox(height: 12), child],
               ],
             ),
           ),

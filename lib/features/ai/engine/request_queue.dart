@@ -31,7 +31,10 @@ class RequestQueue {
   ///
   /// The [task] callback is a Future-returning function that performs the
   /// actual AI call. It will be executed when the queue slot is available.
-  Future<T> enqueue<T>(Future<T> Function(Duration queueWaitTime) task, {String? requestId}) async {
+  Future<T> enqueue<T>(
+    Future<T> Function(Duration queueWaitTime) task, {
+    String? requestId,
+  }) async {
     // Deduplication: if a request with the same ID is already queued, skip it.
     if (requestId != null) {
       final existing = _queue.where((q) => q.requestId == requestId);

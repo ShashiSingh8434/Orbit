@@ -123,30 +123,28 @@ class TaskSection extends StatelessWidget {
             ),
           ),
         ),
-        ...tasks!
-            .map<Widget>(
-              (t) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  t.status == 'completed'
-                      ? Icons.check_circle
-                      : Icons.radio_button_unchecked,
-                  color: t.status == 'completed'
-                      ? Colors.green
-                      : colorScheme.onSurfaceVariant,
-                ),
-                title: Text(
-                  t.title,
-                  style: TextStyle(
-                    color: t.status == 'completed'
-                        ? colorScheme.onSurfaceVariant
-                        : null,
-                  ),
-                ),
-                subtitle: t.description.isNotEmpty ? Text(t.description) : null,
+        ...tasks!.map<Widget>(
+          (t) => ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              t.status == 'completed'
+                  ? Icons.check_circle
+                  : Icons.radio_button_unchecked,
+              color: t.status == 'completed'
+                  ? Colors.green
+                  : colorScheme.onSurfaceVariant,
+            ),
+            title: Text(
+              t.title,
+              style: TextStyle(
+                color: t.status == 'completed'
+                    ? colorScheme.onSurfaceVariant
+                    : null,
               ),
-            )
-            .toList(),
+            ),
+            subtitle: t.description.isNotEmpty ? Text(t.description) : null,
+          ),
+        ),
       ],
     );
   }

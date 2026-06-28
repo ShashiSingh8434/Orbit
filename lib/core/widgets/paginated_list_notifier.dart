@@ -35,17 +35,30 @@ class PaginatedState<T> {
 }
 
 class PaginatedListNotifier<T> extends StateNotifier<PaginatedState<T>> {
-  final Future<PaginatedResult<T>> Function(DocumentSnapshot? startAfter) fetchPage;
+  final Future<PaginatedResult<T>> Function(DocumentSnapshot? startAfter)
+  fetchPage;
   DocumentSnapshot? _lastDoc;
 
   PaginatedListNotifier({required this.fetchPage})
-      : super(PaginatedState(items: [], isLoading: true, isLoadMore: false, hasMore: true)) {
+    : super(
+        PaginatedState(
+          items: [],
+          isLoading: true,
+          isLoadMore: false,
+          hasMore: true,
+        ),
+      ) {
     loadNextPage();
   }
 
   Future<void> refresh() async {
     _lastDoc = null;
-    state = PaginatedState(items: [], isLoading: true, isLoadMore: false, hasMore: true);
+    state = PaginatedState(
+      items: [],
+      isLoading: true,
+      isLoadMore: false,
+      hasMore: true,
+    );
     await loadNextPage();
   }
 
@@ -79,9 +92,7 @@ class PaginatedListNotifier<T> extends StateNotifier<PaginatedState<T>> {
   }
 
   void updateItem(T Function(T) mapper) {
-    state = state.copyWith(
-      items: state.items.map(mapper).toList(),
-    );
+    state = state.copyWith(items: state.items.map(mapper).toList());
   }
 
   void removeItem(bool Function(T) test) {
@@ -91,8 +102,6 @@ class PaginatedListNotifier<T> extends StateNotifier<PaginatedState<T>> {
   }
 
   void addItem(T item) {
-    state = state.copyWith(
-      items: [item, ...state.items],
-    );
+    state = state.copyWith(items: [item, ...state.items]);
   }
 }

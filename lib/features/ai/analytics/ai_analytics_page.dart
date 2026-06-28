@@ -21,7 +21,10 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
   @override
   Widget build(BuildContext context) {
     final service = ref.watch(aiAnalyticsServiceProvider);
-    final stats = service.getStats(apiSource: _selectedApiSource, todayOnly: _todayOnly);
+    final stats = service.getStats(
+      apiSource: _selectedApiSource,
+      todayOnly: _todayOnly,
+    );
     final recentLogs = service.getRecentLogs(count: 10);
 
     final theme = Theme.of(context);
@@ -83,52 +86,68 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
           const SizedBox(height: 24),
 
           // ── Overview Cards ──────────────────────────────────────────────
-          Text('OVERVIEW', style: theme.textTheme.labelSmall?.copyWith(
-            letterSpacing: 1.2, color: colorScheme.onSurfaceVariant,
-          )),
+          Text(
+            'OVERVIEW',
+            style: theme.textTheme.labelSmall?.copyWith(
+              letterSpacing: 1.2,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _StatCard(
-                icon: Icons.send_rounded,
-                label: 'Requests',
-                value: '${stats.totalRequests}',
-                color: colorScheme.primary,
-              )),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.send_rounded,
+                  label: 'Requests',
+                  value: '${stats.totalRequests}',
+                  color: colorScheme.primary,
+                ),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: _StatCard(
-                icon: Icons.token_rounded,
-                label: 'Tokens',
-                value: _formatNumber(stats.totalTokens),
-                color: colorScheme.tertiary,
-              )),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.token_rounded,
+                  label: 'Tokens',
+                  value: _formatNumber(stats.totalTokens),
+                  color: colorScheme.tertiary,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _StatCard(
-                icon: Icons.speed_rounded,
-                label: 'Avg Latency',
-                value: '${stats.avgLatencyMs.round()}ms',
-                color: Colors.orange,
-              )),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.speed_rounded,
+                  label: 'Avg Latency',
+                  value: '${stats.avgLatencyMs.round()}ms',
+                  color: Colors.orange,
+                ),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: _StatCard(
-                icon: Icons.check_circle_rounded,
-                label: 'Success Rate',
-                value: '${(stats.successRate * 100).round()}%',
-                color: Colors.green,
-              )),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.check_circle_rounded,
+                  label: 'Success Rate',
+                  value: '${(stats.successRate * 100).round()}%',
+                  color: Colors.green,
+                ),
+              ),
             ],
           ),
 
           const SizedBox(height: 24),
 
           // ── Model Usage breakdown ───────────────────────────────────────
-          Text('MODEL USAGE', style: theme.textTheme.labelSmall?.copyWith(
-            letterSpacing: 1.2, color: colorScheme.onSurfaceVariant,
-          )),
+          Text(
+            'MODEL USAGE',
+            style: theme.textTheme.labelSmall?.copyWith(
+              letterSpacing: 1.2,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 12),
           if (stats.requestsByModel.isEmpty)
             Center(
@@ -161,13 +180,15 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                           children: [
                             Text(
                               e.key,
-                              style: theme.textTheme.bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w600),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             Text(
                               '${e.value} requests',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant),
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ],
                         ),
@@ -184,22 +205,32 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
 
           const SizedBox(height: 24),
 
           // ── Daily Trend ─────────────────────────────────────────────────
           if (stats.dailyAggregates.isNotEmpty) ...[
-            Text('REQUESTS (LAST 7 DAYS)', style: theme.textTheme.labelSmall?.copyWith(
-              letterSpacing: 1.2, color: colorScheme.onSurfaceVariant,
-            )),
+            Text(
+              'REQUESTS (LAST 7 DAYS)',
+              style: theme.textTheme.labelSmall?.copyWith(
+                letterSpacing: 1.2,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 12),
             SizedBox(
               height: 180,
               child: BarChart(
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,
-                  maxY: stats.dailyAggregates.fold<double>(0, (max, e) => e.requests > max ? e.requests.toDouble() : max) * 1.2,
+                  maxY:
+                      stats.dailyAggregates.fold<double>(
+                        0,
+                        (max, e) =>
+                            e.requests > max ? e.requests.toDouble() : max,
+                      ) *
+                      1.2,
                   barTouchData: BarTouchData(enabled: false),
                   titlesData: FlTitlesData(
                     show: true,
@@ -219,9 +250,15 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                         },
                       ),
                     ),
-                    leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                   borderData: FlBorderData(show: false),
                   gridData: const FlGridData(show: false),
@@ -233,7 +270,9 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                           toY: stats.dailyAggregates[i].requests.toDouble(),
                           color: colorScheme.primary,
                           width: 16,
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(4),
+                          ),
                         ),
                       ],
                     );
@@ -246,34 +285,46 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
           const SizedBox(height: 24),
 
           // ── Error Insights ──────────────────────────────────────────────
-          Text('ERROR INSIGHTS', style: theme.textTheme.labelSmall?.copyWith(
-            letterSpacing: 1.2, color: colorScheme.onSurfaceVariant,
-          )),
+          Text(
+            'ERROR INSIGHTS',
+            style: theme.textTheme.labelSmall?.copyWith(
+              letterSpacing: 1.2,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _StatCard(
-                icon: Icons.timer_off_rounded,
-                label: 'Rate Limits',
-                value: '${stats.rateLimitOccurrences}',
-                color: Colors.orange,
-              )),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.timer_off_rounded,
+                  label: 'Rate Limits',
+                  value: '${stats.rateLimitOccurrences}',
+                  color: Colors.orange,
+                ),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: _StatCard(
-                icon: Icons.error_outline_rounded,
-                label: 'Failures',
-                value: '${stats.failureCount}',
-                color: colorScheme.error,
-              )),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.error_outline_rounded,
+                  label: 'Failures',
+                  value: '${stats.failureCount}',
+                  color: colorScheme.error,
+                ),
+              ),
             ],
           ),
 
           const SizedBox(height: 24),
 
           // ── Recent Activity ─────────────────────────────────────────────
-          Text('RECENT ACTIVITY', style: theme.textTheme.labelSmall?.copyWith(
-            letterSpacing: 1.2, color: colorScheme.onSurfaceVariant,
-          )),
+          Text(
+            'RECENT ACTIVITY',
+            style: theme.textTheme.labelSmall?.copyWith(
+              letterSpacing: 1.2,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 8),
           if (recentLogs.isEmpty)
             Padding(
@@ -297,7 +348,9 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Clear Statistics'),
-        content: const Text('Are you sure you want to clear all AI analytics statistics? This cannot be undone.'),
+        content: const Text(
+          'Are you sure you want to clear all AI analytics statistics? This cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -383,10 +436,11 @@ class _LogTile extends StatelessWidget {
     final statusIcon = log.success
         ? const Icon(Icons.check_circle, size: 16, color: Colors.green)
         : (log.errorType == 'rateLimited' || log.errorType == 'rate_limited'
-            ? const Icon(Icons.timer_off, size: 16, color: Colors.orange)
-            : Icon(Icons.error_outline, size: 16, color: colorScheme.error));
+              ? const Icon(Icons.timer_off, size: 16, color: Colors.orange)
+              : Icon(Icons.error_outline, size: 16, color: colorScheme.error));
 
-    final time = '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}';
+    final time =
+        '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}';
 
     return ListTile(
       dense: true,
@@ -397,7 +451,9 @@ class _LogTile extends StatelessWidget {
       ),
       subtitle: Text(
         '${log.totalTokens ?? 0} tokens • Wait: ${log.queueWaitTimeMs}ms • $time',
-        style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

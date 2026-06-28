@@ -56,10 +56,7 @@ class DetailedSummaryPipeline {
 
     // 2. Fetch all data for this day
     final dateKey = OrbitDateUtils.dateKey(dayDate);
-    final reflections = await reflectionRepository.getReflections(
-      uid,
-      dateKey,
-    );
+    final reflections = await reflectionRepository.getReflections(uid, dateKey);
 
     final allTasks = await taskRepository.getTasks(uid);
     final dayTasks = allTasks.where((t) {

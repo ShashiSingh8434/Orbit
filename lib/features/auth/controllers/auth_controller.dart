@@ -5,8 +5,9 @@ import '../data/auth_repository.dart';
 final authStateProvider = StreamProvider<User?>(
   (ref) => ref.watch(authRepositoryProvider).authStateChanges,
 );
-final authControllerProvider =
-    AsyncNotifierProvider<AuthController, void>(AuthController.new);
+final authControllerProvider = AsyncNotifierProvider<AuthController, void>(
+  AuthController.new,
+);
 
 class AuthController extends AsyncNotifier<void> {
   late AuthRepository _repo;

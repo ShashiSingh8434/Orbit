@@ -11,7 +11,11 @@ final decisionRepositoryProvider = Provider<DecisionRepository>(
 abstract class DecisionRepository {
   Stream<List<DecisionModel>> watchDecisions(String uid);
   Future<List<DecisionModel>> getDecisions(String uid);
-  Future<PaginatedResult<DecisionModel>> getDecisionsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20});
+  Future<PaginatedResult<DecisionModel>> getDecisionsPaginated(
+    String uid, {
+    DocumentSnapshot? startAfter,
+    int limit = 20,
+  });
   Future<void> saveDecision(String uid, DecisionModel decision);
   Future<void> updateDecision(String uid, DecisionModel decision);
   Future<void> deleteDecision(String uid, String decisionId);
@@ -38,8 +42,14 @@ class FirebaseDecisionRepository implements DecisionRepository {
   }
 
   @override
-  Future<PaginatedResult<DecisionModel>> getDecisionsPaginated(String uid, {DocumentSnapshot? startAfter, int limit = 20}) async {
-    Query<Map<String, dynamic>> query = _col(uid).orderBy('createdAt', descending: true).limit(limit);
+  Future<PaginatedResult<DecisionModel>> getDecisionsPaginated(
+    String uid, {
+    DocumentSnapshot? startAfter,
+    int limit = 20,
+  }) async {
+    Query<Map<String, dynamic>> query = _col(
+      uid,
+    ).orderBy('createdAt', descending: true).limit(limit);
     if (startAfter != null) {
       query = query.startAfterDocument(startAfter);
     }
@@ -73,20 +83,24 @@ class FirebaseDecisionRepository implements DecisionRepository {
       reason: d['reason'] as String? ?? '',
       status: d['status'] as String? ?? 'Active',
       createdAt: (d['createdAt'] as Timestamp).toDate(),
-      updatedAt: d['updatedAt'] != null ? (d['updatedAt'] as Timestamp).toDate() : null,
-      metadata: d['metadata'] != null 
-          ? EntityMetadata.fromJson(Map<String, dynamic>.from(d['metadata'] as Map))
+      updatedAt: d['updatedAt'] != null
+          ? (d['updatedAt'] as Timestamp).toDate()
+          : null,
+      metadata: d['metadata'] != null
+          ? EntityMetadata.fromJson(
+              Map<String, dynamic>.from(d['metadata'] as Map),
+            )
           : null,
     );
   }
 
   Map<String, dynamic> _toMap(DecisionModel d) => {
-        'id': d.id,
-        'decision': d.decision,
-        'reason': d.reason,
-        'status': d.status,
-        'createdAt': Timestamp.fromDate(d.createdAt),
-        'updatedAt': d.updatedAt != null ? Timestamp.fromDate(d.updatedAt!) : null,
-        if (d.metadata != null) 'metadata': d.metadata!.toJson(),
-      };
+    'id': d.id,
+    'decision': d.decision,
+    'reason': d.reason,
+    'status': d.status,
+    'createdAt': Timestamp.fromDate(d.createdAt),
+    'updatedAt': d.updatedAt != null ? Timestamp.fromDate(d.updatedAt!) : null,
+    if (d.metadata != null) 'metadata': d.metadata!.toJson(),
+  };
 }

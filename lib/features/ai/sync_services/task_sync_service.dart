@@ -15,14 +15,20 @@ class TaskSyncService {
 
   TaskSyncService(this._repository);
 
-  String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
+  String _normalize(String input) =>
+      input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
   Future<List<TaskModel>> getPendingTasks(String uid) async {
     final allTasks = await _repository.getTasks(uid);
     return allTasks.where((t) => t.status == 'pending').toList();
   }
 
-  Future<void> syncTasks(String uid, List<TaskDto> extractedTasks, String reflectionId, DateTime dayDate) async {
+  Future<void> syncTasks(
+    String uid,
+    List<TaskDto> extractedTasks,
+    String reflectionId,
+    DateTime dayDate,
+  ) async {
     // Fetch existing tasks to perform duplicate and completion detection
     final existingTasks = await _repository.getTasks(uid);
 
@@ -33,21 +39,21 @@ class TaskSyncService {
       if (dto.originalId != null && dto.originalId!.isNotEmpty) {
         existingIndex = existingTasks.indexWhere((t) => t.id == dto.originalId);
       }
-      
+
       // 2. Fallback to Fuzzy title matching if no ID or ID not found
       if (existingIndex == -1) {
         final normalizedNewTitle = _normalize(dto.title);
-        existingIndex = existingTasks.indexWhere((t) => _normalize(t.title) == normalizedNewTitle);
+        existingIndex = existingTasks.indexWhere(
+          (t) => _normalize(t.title) == normalizedNewTitle,
+        );
       }
-      
+
       if (existingIndex != -1) {
         // Update existing task
         var existingTask = existingTasks[existingIndex];
-        
+
         // Manual override preservation: don't overwrite user-set status or dates unless AI explicitly detects completion
-        var updatedTask = existingTask.copyWith(
-          updatedAt: DateTime.now(),
-        );
+        var updatedTask = existingTask.copyWith(updatedAt: DateTime.now());
 
         if (dto.status == 'completed' && existingTask.status != 'completed') {
           updatedTask = updatedTask.copyWith(
@@ -62,12 +68,11 @@ class TaskSyncService {
             dueTime: dto.dueTime,
           );
         }
-        
+
         await _repository.updateTask(uid, updatedTask);
-        
+
         // Update the list in memory for subsequent checks
         existingTasks[existingIndex] = updatedTask;
-
       } else {
         // Create new task
         final task = TaskModel(
@@ -92,4 +97,3 @@ class TaskSyncService {
     }
   }
 }
-

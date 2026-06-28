@@ -29,7 +29,9 @@ class AiAnalyticsService {
     }
 
     await _saveLogs(logs);
-    debugPrint('AiAnalytics: Logged ${log.provider} request (Success: ${log.success})');
+    debugPrint(
+      'AiAnalytics: Logged ${log.provider} request (Success: ${log.success})',
+    );
   }
 
   /// Get aggregated stats filtered by API source and time range.
@@ -38,7 +40,7 @@ class AiAnalyticsService {
     required bool todayOnly,
   }) {
     final logs = _loadLogs();
-    
+
     // Filter by apiSource
     var filtered = logs.where((l) => l.apiSource == apiSource);
 
@@ -82,7 +84,7 @@ class AiAnalyticsService {
       reqByProvider[log.provider] = (reqByProvider[log.provider] ?? 0) + 1;
       tokByProvider[log.provider] =
           (tokByProvider[log.provider] ?? 0) + (log.totalTokens ?? 0);
-      
+
       reqByModel[log.modelName] = (reqByModel[log.modelName] ?? 0) + 1;
     }
 
@@ -118,8 +120,12 @@ class AiAnalyticsService {
       totalTokens: totalTokens,
       totalInputTokens: totalInput,
       totalOutputTokens: totalOutput,
-      avgLatencyMs: filteredList.isNotEmpty ? totalLatency / filteredList.length : 0,
-      successRate: filteredList.isNotEmpty ? successCount / filteredList.length : 0,
+      avgLatencyMs: filteredList.isNotEmpty
+          ? totalLatency / filteredList.length
+          : 0,
+      successRate: filteredList.isNotEmpty
+          ? successCount / filteredList.length
+          : 0,
       requestsByProvider: reqByProvider,
       tokensByProvider: tokByProvider,
       requestsByModel: reqByModel,

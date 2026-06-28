@@ -71,7 +71,7 @@ class ReflectionController extends Notifier<void> {
       aiProcessed: false, // Re-queue for AI on next run
     );
     await _repo.saveReflection(uid, dateKey, updated);
-    
+
     // Trigger understanding pipeline (temporarily directly invoked for Phase 2 demo)
     ref.read(understandingPipelineProvider).onReflectionSaved(uid, updated);
   }

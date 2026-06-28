@@ -50,9 +50,7 @@ class GeminiProvider extends AiProvider {
         model: _model,
         apiKey: _apiKey,
         generationConfig: request.jsonMode
-            ? GenerationConfig(
-                responseMimeType: 'application/json',
-              )
+            ? GenerationConfig(responseMimeType: 'application/json')
             : null,
       );
 

@@ -56,21 +56,33 @@ class AiUsageLog {
 
   factory AiUsageLog.fromJson(Map<String, dynamic> json) => AiUsageLog(
     provider: json['provider'] as String? ?? 'unknown',
-    modelName: json['modelName'] as String? ?? json['model'] as String? ?? 'unknown',
-    modelId: json['modelId'] as String? ?? json['model'] as String? ?? 'unknown',
-    aiMode: json['aiMode'] as String? ?? (json['apiMode'] == 'user_key' ? 'User' : 'Orbit'),
-    apiSource: json['apiSource'] as String? ?? (json['apiMode'] == 'user_key' ? 'My API' : 'Orbit API'),
+    modelName:
+        json['modelName'] as String? ?? json['model'] as String? ?? 'unknown',
+    modelId:
+        json['modelId'] as String? ?? json['model'] as String? ?? 'unknown',
+    aiMode:
+        json['aiMode'] as String? ??
+        (json['apiMode'] == 'user_key' ? 'User' : 'Orbit'),
+    apiSource:
+        json['apiSource'] as String? ??
+        (json['apiMode'] == 'user_key' ? 'My API' : 'Orbit API'),
     timestamp: DateTime.parse(json['timestamp'] as String),
     success: json['success'] as bool? ?? (json['status'] == 'success'),
-    errorType: json['errorType'] as String? ?? (json['status'] != 'success' && json['status'] != null ? json['status'] as String : null),
+    errorType:
+        json['errorType'] as String? ??
+        (json['status'] != 'success' && json['status'] != null
+            ? json['status'] as String
+            : null),
     retryCount: json['retryCount'] as int? ?? 0,
-    responseTimeMs: json['responseTimeMs'] as int? ?? json['latencyMs'] as int? ?? 0,
+    responseTimeMs:
+        json['responseTimeMs'] as int? ?? json['latencyMs'] as int? ?? 0,
     inputTokens: json['inputTokens'] as int?,
     outputTokens: json['outputTokens'] as int?,
     totalTokens: json['totalTokens'] as int?,
     cached: json['cached'] as bool? ?? false,
     queueWaitTimeMs: json['queueWaitTimeMs'] as int? ?? 0,
-    processingTimeMs: json['processingTimeMs'] as int? ?? json['latencyMs'] as int? ?? 0,
+    processingTimeMs:
+        json['processingTimeMs'] as int? ?? json['latencyMs'] as int? ?? 0,
   );
 }
 

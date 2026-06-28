@@ -14,7 +14,7 @@ abstract class MoodModel with _$MoodModel {
     @Default(false) bool inferredByAi,
     required DateTime createdAt,
     DateTime? updatedAt,
-    
+
     EntityMetadata? metadata,
   }) = _MoodModel;
 

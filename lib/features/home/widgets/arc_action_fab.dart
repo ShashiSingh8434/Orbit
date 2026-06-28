@@ -234,7 +234,7 @@ class _VerticalMenuOverlay extends StatelessWidget {
           onTap: onDismiss,
           child: AnimatedBuilder(
             animation: fadeAnim,
-            builder: (_, __) => Container(
+            builder: (_, _) => Container(
               color: Colors.black.withAlpha(
                 (0.4 * 255 * fadeAnim.value).round(),
               ),

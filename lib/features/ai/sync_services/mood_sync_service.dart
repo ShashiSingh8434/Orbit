@@ -15,7 +15,12 @@ class MoodSyncService {
 
   MoodSyncService(this._repository);
 
-  Future<void> syncMoods(String uid, DateTime dayDate, List<MoodDto> extractedMoods, String reflectionId) async {
+  Future<void> syncMoods(
+    String uid,
+    DateTime dayDate,
+    List<MoodDto> extractedMoods,
+    String reflectionId,
+  ) async {
     for (final dto in extractedMoods) {
       final mood = MoodModel(
         id: _uuid.v4(),

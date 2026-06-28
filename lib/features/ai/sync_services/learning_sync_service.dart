@@ -15,18 +15,26 @@ class LearningSyncService {
 
   LearningSyncService(this._repository);
 
-  String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
+  String _normalize(String input) =>
+      input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
-  Future<void> syncLearnings(String uid, List<LearningDto> extractedLearnings, String reflectionId, DateTime dayDate) async {
+  Future<void> syncLearnings(
+    String uid,
+    List<LearningDto> extractedLearnings,
+    String reflectionId,
+    DateTime dayDate,
+  ) async {
     final existingLearnings = await _repository.getLearnings(uid);
 
     for (final dto in extractedLearnings) {
       final normalizedNewTitle = _normalize(dto.title);
-      int existingIndex = existingLearnings.indexWhere((l) => _normalize(l.title) == normalizedNewTitle);
+      int existingIndex = existingLearnings.indexWhere(
+        (l) => _normalize(l.title) == normalizedNewTitle,
+      );
 
       if (existingIndex != -1) {
         var existingLearning = existingLearnings[existingIndex];
-        
+
         var updatedLearning = existingLearning.copyWith(
           occurrenceCount: existingLearning.occurrenceCount + 1,
           lastSeen: DateTime.now(),
@@ -35,7 +43,7 @@ class LearningSyncService {
             aiConfidence: dto.aiConfidence, // Update with latest confidence
           ),
         );
-        
+
         await _repository.updateLearning(uid, updatedLearning);
         existingLearnings[existingIndex] = updatedLearning;
       } else {
@@ -58,4 +66,3 @@ class LearningSyncService {
     }
   }
 }
-
