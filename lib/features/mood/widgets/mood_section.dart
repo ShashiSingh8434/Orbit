@@ -29,17 +29,25 @@ class MoodSection extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Row(
-            children: List.generate(3, (index) => const Padding(
-              padding: EdgeInsets.only(right: 8.0),
-              child: PulsingSkeleton(width: 80, height: 32, borderRadius: 16),
-            )),
+            children: List.generate(
+              3,
+              (index) => const Padding(
+                padding: EdgeInsets.only(right: 8.0),
+                child: PulsingSkeleton(width: 80, height: 32, borderRadius: 16),
+              ),
+            ),
           ),
         ],
       );
     }
 
-    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
-    final emptyText = isToday ? 'No moods recorded today' : 'No moods recorded for this day';
+    final isToday =
+        date.year == DateTime.now().year &&
+        date.month == DateTime.now().month &&
+        date.day == DateTime.now().day;
+    final emptyText = isToday
+        ? 'No moods recorded today'
+        : 'No moods recorded for this day';
 
     if (moods == null || moods!.isEmpty) {
       return Container(
@@ -86,29 +94,48 @@ class MoodSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
             'Mood Timeline',
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         Wrap(
           spacing: 8.0,
-          children: moods!.map<Widget>((m) => Chip(
-            avatar: const Icon(Icons.mood, size: 16),
-            label: Text('${m.timeOfDay}: ${m.value}/5'),
-            backgroundColor: _getColorForMood(m.value, colorScheme),
-          )).toList(),
+          children: moods!
+              .map<Widget>(
+                (m) => Chip(
+                  avatar: const Icon(Icons.mood, size: 16),
+                  label: Text('${m.timeOfDay}: ${m.value}/5'),
+                  backgroundColor: _getColorForMood(m.value, colorScheme),
+                ),
+              )
+              .toList(),
         ),
       ],
     );
   }
 
   Color _getColorForMood(int value, ColorScheme colorScheme) {
+    final isDark = colorScheme.brightness == Brightness.dark;
+
     switch (value) {
-      case 5: return Colors.green.shade200;
-      case 4: return Colors.lightGreen.shade200;
-      case 3: return Colors.yellow.shade200;
-      case 2: return Colors.orange.shade200;
-      case 1: return Colors.red.shade200;
-      default: return colorScheme.surfaceVariant;
+      case 5:
+        return isDark ? const Color(0xFF2E7D32) : const Color(0xFFC8E6C9);
+
+      case 4:
+        return isDark ? const Color(0xFF558B2F) : const Color(0xFFDCEDC8);
+
+      case 3:
+        return isDark ? const Color(0xFFF9A825) : const Color(0xFFFFF9C4);
+
+      case 2:
+        return isDark ? const Color(0xFFEF6C00) : const Color(0xFFFFE0B2);
+
+      case 1:
+        return isDark ? const Color(0xFFC62828) : const Color(0xFFFFCDD2);
+
+      default:
+        return colorScheme.surfaceContainerHighest;
     }
   }
 }

@@ -9,6 +9,7 @@ import '../../tasks/views/task_edit_page.dart';
 ///  • On **tap** → runs [onTap] (e.g. open the home quick-add flow).
 ///  • On **long-press** → opens an animated vertical stack of four action
 ///    buttons rising upward above the FAB.
+
 class ArcActionFab extends StatefulWidget {
   final VoidCallback onTap;
 
@@ -19,9 +20,12 @@ class ArcActionFab extends StatefulWidget {
 }
 
 class _ArcActionFabState extends State<ArcActionFab>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animController;
-  late Animation<double> _fadeAnim;
+    with TickerProviderStateMixin {
+  late final AnimationController _animController;
+  late final AnimationController _pulseController;
+
+  late final Animation<double> _fadeAnim;
+  late final Animation<double> _pulseAnim;
 
   OverlayEntry? _overlayEntry;
   bool _isMenuOpen = false;
@@ -53,17 +57,42 @@ class _ArcActionFabState extends State<ArcActionFab>
   @override
   void initState() {
     super.initState();
+
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 250),
     );
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat();
+
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
+
+    _pulseAnim = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.0,
+          end: 1.06,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 40,
+      ),
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.06,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 60,
+      ),
+    ]).animate(_pulseController);
   }
 
   @override
   void dispose() {
     _removeOverlay();
     _animController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -71,7 +100,10 @@ class _ArcActionFabState extends State<ArcActionFab>
 
   void _openMenu() {
     if (_isMenuOpen) return;
+
     _isMenuOpen = true;
+    _pulseController.stop();
+
     HapticFeedback.mediumImpact();
 
     final RenderBox box = context.findRenderObject() as RenderBox;
@@ -97,9 +129,11 @@ class _ArcActionFabState extends State<ArcActionFab>
 
   void _closeMenu() {
     if (!_isMenuOpen) return;
+
     _animController.reverse().then((_) {
       _removeOverlay();
       _isMenuOpen = false;
+      _pulseController.repeat();
     });
   }
 
@@ -109,20 +143,24 @@ class _ArcActionFabState extends State<ArcActionFab>
   }
 
   // ── Navigation ─────────────────────────────────────────────────────────────
-  // Items are ordered bottom→top: 0=Task, 1=Event, 2=Learning, 3=Decision
 
   void _navigate(int index) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
+
       switch (index) {
         case 0:
           TaskEditPage.push(context);
+          break;
         case 1:
           EventEditPage.push(context);
+          break;
         case 2:
           LearningEditPage.push(context);
+          break;
         case 3:
           DecisionEditPage.push(context);
+          break;
       }
     });
   }
@@ -141,16 +179,19 @@ class _ArcActionFabState extends State<ArcActionFab>
       },
       onLongPress: _openMenu,
       child: AnimatedBuilder(
-        animation: _animController,
+        animation: Listenable.merge([_animController, _pulseController]),
         builder: (context, child) {
-          return Transform.rotate(
-            angle: _animController.value * 0.785398, // π/4 = 45°
-            child: child,
+          return Transform.scale(
+            scale: _isMenuOpen ? 1.0 : _pulseAnim.value,
+            child: Transform.rotate(
+              angle: _animController.value * 0.785398, // 45°
+              child: child,
+            ),
           );
         },
         child: FloatingActionButton(
           heroTag: 'main_fab',
-          onPressed: null, // handled by GestureDetector
+          onPressed: null,
           elevation: 6,
           child: const Icon(Icons.add_rounded, size: 28),
         ),

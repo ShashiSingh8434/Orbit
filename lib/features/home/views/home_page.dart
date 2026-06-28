@@ -15,6 +15,7 @@ import '../../day/providers/day_data_provider.dart';
 import '../widgets/day_skeleton_loader.dart';
 import '../../ai/engine/ai_queue_manager.dart';
 import '../widgets/arc_action_fab.dart';
+import '../widgets/first_run_overlay.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -28,8 +29,13 @@ class _HomePageState extends ConsumerState<HomePage> {
   late DateTime _initialDate;
   int _currentIndex = _initialPage;
 
-  // Assume 1000 pages, with 500 being "today".
   static const int _initialPage = 500;
+
+  /// Key for the guide icon in the AppBar — read by [FirstRunOverlay].
+  final GlobalKey _guideIconKey = GlobalKey();
+
+  /// Key for the FAB — read by [FirstRunOverlay].
+  final GlobalKey _fabKey = GlobalKey();
 
   @override
   void initState() {
@@ -70,6 +76,16 @@ class _HomePageState extends ConsumerState<HomePage> {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         actions: [
+          // ── Guide icon — GlobalKey attached here ────────────────────────
+          IconButton(
+            key: _guideIconKey,
+            icon: const Icon(Icons.info_rounded),
+            tooltip: 'Guide',
+            onPressed: () => context.push(AppRoutes.guide),
+          ),
+
+          const SizedBox(width: 10),
+
           IconButton(
             icon: const Icon(Icons.calendar_month_rounded),
             onPressed: () async {
@@ -97,50 +113,60 @@ class _HomePageState extends ConsumerState<HomePage> {
         ],
       ),
       drawer: const AppDrawer(),
+
+      // ── FirstRunOverlay wraps the entire body ────────────────────────────
       body: SafeArea(
-        child: PageView.builder(
-          controller: _pageController,
-          onPageChanged: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          itemBuilder: (context, index) {
-            final date = _dateForIndex(index);
-            final dayDataAsync = ref.watch(dayDataProvider(date));
+        child: FirstRunOverlay(
+          guideIconKey: _guideIconKey,
+          fabKey: _fabKey,
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) => setState(() => _currentIndex = index),
+            itemBuilder: (context, index) {
+              final date = _dateForIndex(index);
+              final dayDataAsync = ref.watch(dayDataProvider(date));
 
-            // Boundary logic
-            if (date.isBefore(
-              DateTime(creationTime.year, creationTime.month, creationTime.day),
-            )) {
-              return const Center(child: Text("You weren't here yet! 😊"));
-            }
+              if (date.isBefore(
+                DateTime(
+                  creationTime.year,
+                  creationTime.month,
+                  creationTime.day,
+                ),
+              )) {
+                return const Center(child: Text("You weren't here yet! 😊"));
+              }
 
-            final isFuture = date.isAfter(DateTime.now());
+              final isFuture = date.isAfter(DateTime.now());
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _GreetingSection(
-                    date: date,
-                    userDisplayName: user?.displayName,
-                  ),
-                  const SizedBox(height: 16),
-
-                  _DelayedDataView(
-                    asyncValue: dayDataAsync,
-                    date: date,
-                    isFuture: isFuture,
-                  ),
-                ],
-              ),
-            );
-          },
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _GreetingSection(
+                      date: date,
+                      userDisplayName: user?.displayName,
+                    ),
+                    const SizedBox(height: 16),
+                    _DelayedDataView(
+                      asyncValue: dayDataAsync,
+                      date: date,
+                      isFuture: isFuture,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
+
+      // ── FAB — GlobalKey attached here ────────────────────────────────────
       floatingActionButton: ArcActionFab(
+        key: _fabKey,
         onTap: () {
           final dateKey =
               "${_dateForIndex(_currentIndex).year}-${_dateForIndex(_currentIndex).month.toString().padLeft(2, '0')}-${_dateForIndex(_currentIndex).day.toString().padLeft(2, '0')}";
@@ -153,6 +179,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Greeting section (unchanged)
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _GreetingSection extends StatelessWidget {
   final DateTime date;
@@ -192,7 +222,7 @@ class _GreetingSection extends StatelessWidget {
         date.month == DateTime.now().month &&
         date.year == DateTime.now().year;
 
-    final dateLabel = isToday ? "Today" : _formatDate(date);
+    final dateLabel = isToday ? 'Today' : _formatDate(date);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,6 +245,10 @@ class _GreetingSection extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Delayed data view (unchanged)
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _DelayedDataView extends StatefulWidget {
   final AsyncValue<DayData> asyncValue;
   final DateTime date;
@@ -236,14 +270,11 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
   @override
   void initState() {
     super.initState();
-    // If we already have data loaded, skip the artificial delay!
     if (widget.asyncValue.hasValue) {
       _minTimeElapsed = true;
     } else {
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() => _minTimeElapsed = true);
-        }
+        if (mounted) setState(() => _minTimeElapsed = true);
       });
     }
   }
@@ -252,9 +283,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
   Widget build(BuildContext context) {
     return widget.asyncValue.when(
       data: (data) {
-        if (!_minTimeElapsed) {
-          return DaySkeletonLoader(date: widget.date);
-        }
+        if (!_minTimeElapsed) return DaySkeletonLoader(date: widget.date);
 
         if (data.isEmpty) {
           final colorScheme = Theme.of(context).colorScheme;
@@ -271,7 +300,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
                   ),
                   const SizedBox(height: 36),
                   Text(
-                    "A blank canvas",
+                    'A blank canvas',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
@@ -279,7 +308,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Tap the + button to reflect on this day.",
+                    'Tap the + button to reflect on this day.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -345,8 +374,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
         );
       },
       loading: () => DaySkeletonLoader(date: widget.date),
-      error: (err, stack) =>
-          Center(child: Text('Error loading day data: $err')),
+      error: (err, _) => Center(child: Text('Error loading day data: $err')),
     );
   }
 }

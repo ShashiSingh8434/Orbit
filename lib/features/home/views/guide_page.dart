@@ -6,180 +6,307 @@ class GuidePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('How to use Orbit'),
-      ),
+      appBar: AppBar(title: const Text('Guide')),
       body: ListView(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.zero,
         children: [
-          Icon(
-            Icons.explore_rounded,
-            size: 80,
-            color: colorScheme.primary,
+          // ── Hero ──────────────────────────────────────────────────────────
+          _Hero(cs: cs, theme: theme),
+
+          const SizedBox(height: 40),
+
+          // ── Section 1: Live reflection mock ───────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _EyebrowLabel(label: 'Writing a reflection', cs: cs),
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Welcome to your Orbit',
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              'Write naturally. Orbit reads your words and organises them automatically.',
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
             ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Orbit is your personal AI-powered journal. Instead of manually creating tasks or logging events, you just reflect on your day, and our AI automatically organizes your life.',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          const SizedBox(height: 20),
+          const _ReflectionMock(),
+
           const SizedBox(height: 48),
 
-          _SectionHeader(
-            icon: Icons.auto_awesome_rounded,
-            title: 'How to write effective reflections',
-            color: colorScheme.primary,
+          // ── Section 2: Trigger phrases ────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _EyebrowLabel(label: 'Trigger phrases', cs: cs),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              'These phrases help Orbit extract the right type of entry.',
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+            ),
           ),
           const SizedBox(height: 16),
-          _InfoCard(
-            text: 'Speak or type naturally about your day. The AI listens for specific cues to extract data into your dashboard. For best results, use clear trigger phrases:',
-            children: [
-              _BulletPoint(
-                icon: Icons.task_alt_rounded,
-                title: 'Tasks',
-                description: 'Use phrases like "I need to..." or "Remind me to...". For example: "I need to buy groceries tomorrow at 5 PM." (Orbit will automatically set the due date!)',
-              ),
-              _BulletPoint(
-                icon: Icons.lightbulb_outline_rounded,
-                title: 'Learnings',
-                description: 'Use phrases like "I learned..." or "Today I realized...". For example: "I learned that Flutter Riverpod is great for state management."',
-              ),
-              _BulletPoint(
-                icon: Icons.check_circle_outline_rounded,
-                title: 'Decisions',
-                description: 'Use phrases like "I decided to..." or "I chose to...". For example: "I decided to start waking up at 6 AM everyday."',
-              ),
-              _BulletPoint(
-                icon: Icons.event_rounded,
-                title: 'Events',
-                description: 'Mention things that happened. For example: "I had a great meeting with the design team today about the new logo."',
-              ),
-              _BulletPoint(
-                icon: Icons.mood_rounded,
-                title: 'Mood',
-                description: 'Describe how you felt. For example: "I felt really productive today" or "I was a bit stressed in the morning."',
-              ),
-            ],
-          ),
+          const _TriggerGrid(),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 48),
 
-          _SectionHeader(
-            icon: Icons.dashboard_rounded,
-            title: 'Your Dashboard Sections',
-            color: colorScheme.secondary,
+          // ── Section 3: Dashboard ──────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _EyebrowLabel(label: 'Your dashboard', cs: cs),
           ),
           const SizedBox(height: 16),
-          _InfoCard(
-            text: 'Once you save a reflection, Orbit builds your daily dashboard:',
-            children: [
-              _BulletPoint(
-                icon: Icons.auto_stories_rounded,
-                title: 'Summary',
-                description: 'A beautifully written, AI-generated summary of your entire day based on your reflection.',
-              ),
-              _BulletPoint(
-                icon: Icons.calendar_month_rounded,
-                title: 'Time Travel',
-                description: 'Swipe left or right on the home page to view past days or future days. You can even add reflections for the future to plan ahead!',
-              ),
-              _BulletPoint(
-                icon: Icons.mic_rounded,
-                title: 'Voice to Text',
-                description: 'When reflecting, tap the microphone icon to simply speak your thoughts. Orbit will transcribe it instantly.',
-              ),
-            ],
-          ),
-          const SizedBox(height: 40),
-          
-          _SectionHeader(
-            icon: Icons.psychology_rounded,
-            title: 'Prompt Engineering Tips',
-            color: colorScheme.tertiary,
-          ),
-          const SizedBox(height: 16),
-          _InfoCard(
-            text: 'To get the most precise and accurate results from Orbit\'s AI, you can use direct commands to explicitly guide it:',
-            children: [
-              _BulletPoint(
-                icon: Icons.add_task_rounded,
-                title: 'Explicit Task Creation',
-                description: 'Say "Add a task to..." or "I need to..." to ensure the AI treats it as a pending task. Example: "Add a task to review my project notes tomorrow."',
-              ),
-              _BulletPoint(
-                icon: Icons.checklist_rtl_rounded,
-                title: 'Marking Tasks Complete',
-                description: 'To check off an existing task, explicitly name it and say you finished it. Example: "Mark review project notes as complete" or "I finished buying groceries."',
-              ),
-              _BulletPoint(
-                icon: Icons.add_card_rounded,
-                title: 'Explicit Events',
-                description: 'Use the word "schedule" or "add event" to firmly create an upcoming event. Example: "Schedule an event for my dentist appointment on Monday at 10 AM."',
-              ),
-              _BulletPoint(
-                icon: Icons.gavel_rounded,
-                title: 'Decisions & Commitments',
-                description: 'Declare your choices with phrases like "I took a decision to..." or "I decided to...". Example: "I took a decision to start learning Flutter every evening."',
-              ),
-              _BulletPoint(
-                icon: Icons.school_rounded,
-                title: 'Direct Insights',
-                description: 'When you want to log a specific takeaway, say "I learned this..." or "Today I realized...". Example: "I learned this: consistency is more important than intensity."',
-              ),
-            ],
-          ),
+          const _DashboardFeatures(),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 56),
         ],
       ),
     );
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color color;
+// ── Hero ──────────────────────────────────────────────────────────────────────
 
-  const _SectionHeader({
-    required this.icon,
-    required this.title,
-    required this.color,
-  });
+class _Hero extends StatelessWidget {
+  const _Hero({required this.cs, required this.theme});
+
+  final ColorScheme cs;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(28, 48, 28, 44),
+      decoration: BoxDecoration(
+        color: cs.primary,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(30),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(Icons.explore_rounded, size: 32, color: Colors.white),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Just reflect.\nOrbit does the rest.',
+            style: theme.textTheme.headlineLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              height: 1.15,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Write about your day in plain language — tasks, decisions, events, and lessons are extracted automatically.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withAlpha(200),
+              height: 1.6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Eyebrow label ─────────────────────────────────────────────────────────────
+
+class _EyebrowLabel extends StatelessWidget {
+  const _EyebrowLabel({required this.label, required this.cs});
+
+  final String label;
+  final ColorScheme cs;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          width: 3,
+          height: 16,
           decoration: BoxDecoration(
-            color: color.withAlpha(30),
-            borderRadius: BorderRadius.circular(12),
+            color: cs.primary,
+            borderRadius: BorderRadius.circular(2),
           ),
-          child: Icon(icon, color: color),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 10),
+        Text(
+          label.toUpperCase(),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: cs.primary,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Live reflection mock ──────────────────────────────────────────────────────
+
+class _ReflectionMock extends StatelessWidget {
+  const _ReflectionMock();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color ?? cs.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Mock "journal entry" header
+          Row(
+            children: [
+              Icon(
+                Icons.edit_note_rounded,
+                size: 16,
+                color: cs.onSurfaceVariant,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Your reflection',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Annotated sentences
+          _AnnotatedSentence(
+            text: 'I need to finish the project proposal by Thursday.',
+            chipLabel: 'Task',
+            chipColor: const Color(0xFF22C55E),
+            cs: cs,
+            theme: theme,
+          ),
+          const SizedBox(height: 14),
+          _AnnotatedSentence(
+            text: 'I had a great sync with the design team about the new flow.',
+            chipLabel: 'Event',
+            chipColor: const Color(0xFF3B82F6),
+            cs: cs,
+            theme: theme,
+          ),
+          const SizedBox(height: 14),
+          _AnnotatedSentence(
+            text: 'I decided to block 9–11 AM every morning for deep work.',
+            chipLabel: 'Decision',
+            chipColor: const Color(0xFFF59E0B),
+            cs: cs,
+            theme: theme,
+          ),
+          const SizedBox(height: 14),
+          _AnnotatedSentence(
+            text:
+                'I learned that async/await in Dart is cleaner than I thought.',
+            chipLabel: 'Learning',
+            chipColor: const Color(0xFFF97316),
+            cs: cs,
+            theme: theme,
+          ),
+
+          const SizedBox(height: 20),
+          Divider(color: cs.outlineVariant, height: 1),
+          const SizedBox(height: 14),
+
+          // Result hint
+          Row(
+            children: [
+              Icon(Icons.auto_awesome_rounded, size: 14, color: cs.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Orbit creates 1 task, 1 decision, 1 event, and 1 learning from this.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnnotatedSentence extends StatelessWidget {
+  const _AnnotatedSentence({
+    required this.text,
+    required this.chipLabel,
+    required this.chipColor,
+    required this.cs,
+    required this.theme,
+  });
+
+  final String text;
+  final String chipLabel;
+  final Color chipColor;
+  final ColorScheme cs;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withAlpha(120),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              text,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurface,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        // Chip label
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: chipColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
+            chipLabel,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
             ),
           ),
         ),
@@ -188,86 +315,227 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _InfoCard extends StatelessWidget {
-  final String text;
-  final List<Widget> children;
+// ── Trigger phrase grid ───────────────────────────────────────────────────────
 
-  const _InfoCard({required this.text, required this.children});
+class _TriggerGrid extends StatelessWidget {
+  const _TriggerGrid();
+
+  static const _triggers = [
+    _TriggerData(
+      icon: Icons.task_alt_rounded,
+      color: Color(0xFF22C55E),
+      category: 'Task',
+      phrases: ['"I need to…"', '"Remind me to…"', '"Add a task to…"'],
+    ),
+    _TriggerData(
+      icon: Icons.event_rounded,
+      color: Color(0xFF3B82F6),
+      category: 'Event',
+      phrases: ['"I had a…"', '"Schedule an event…"', '"I attended…"'],
+    ),
+    _TriggerData(
+      icon: Icons.gavel_rounded,
+      color: Color(0xFFF59E0B),
+      category: 'Decision',
+      phrases: ['"I decided to…"', '"I chose to…"', '"I took a decision…"'],
+    ),
+
+    _TriggerData(
+      icon: Icons.lightbulb_rounded,
+      color: Color(0xFFF97316),
+      category: 'Learning',
+      phrases: ['"I learned…"', '"Today I realised…"', '"I discovered…"'],
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withAlpha(100),
-        ),
-      ),
+    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            text,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.5,
+        children: _triggers.map((t) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.cardTheme.color ?? cs.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: cs.outlineVariant),
             ),
-          ),
-          const SizedBox(height: 16),
-          ...children,
-        ],
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Coloured icon badge
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: t.color.withAlpha(28),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(t.icon, color: t.color, size: 20),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.category,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: t.phrases.map((p) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: t.color.withAlpha(22),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              p,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: t.color,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 }
 
-class _BulletPoint extends StatelessWidget {
+class _TriggerData {
   final IconData icon;
-  final String title;
-  final String description;
+  final Color color;
+  final String category;
+  final List<String> phrases;
 
-  const _BulletPoint({
+  const _TriggerData({
     required this.icon,
-    required this.title,
-    required this.description,
+    required this.color,
+    required this.category,
+    required this.phrases,
   });
+}
+
+// ── Dashboard features ────────────────────────────────────────────────────────
+
+class _DashboardFeatures extends StatelessWidget {
+  const _DashboardFeatures();
+
+  static const _features = [
+    _FeatureData(
+      icon: Icons.auto_stories_rounded,
+      title: 'AI Summary',
+      body:
+          'After saving, Orbit writes a concise narrative of your day — a readable overview, not just a list.',
+    ),
+    _FeatureData(
+      icon: Icons.calendar_month_rounded,
+      title: 'Time Travel',
+      body:
+          'Swipe left or right on the home page to move between days. Add reflections for future dates to plan ahead.',
+    ),
+    _FeatureData(
+      icon: Icons.mic_rounded,
+      title: 'Voice to text',
+      body:
+          'Tap the microphone in the reflection editor to speak your thoughts. Orbit transcribes instantly.',
+    ),
+    _FeatureData(
+      icon: Icons.mood_rounded,
+      title: 'Mood tracking',
+      body:
+          'Describe how you felt and Orbit logs your mood alongside your entries automatically.',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20, color: colorScheme.primary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: _features.map((f) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: cs.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: Icon(f.icon, color: cs.primary, size: 20),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.4,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 2),
+                      Text(
+                        f.title,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        f.body,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }
+}
+
+class _FeatureData {
+  final IconData icon;
+  final String title;
+  final String body;
+
+  const _FeatureData({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
 }

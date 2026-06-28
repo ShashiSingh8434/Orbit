@@ -28,30 +28,46 @@ class TaskSection extends StatelessWidget {
             child: PulsingSkeleton(width: 80, height: 24),
           ),
           const SizedBox(height: 8),
-          ...List.generate(2, (index) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6.0),
-            child: Row(
-              children: [
-                const PulsingSkeleton(width: 24, height: 24, borderRadius: 12),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.5, height: 16),
-                      const SizedBox(height: 6),
-                      PulsingSkeleton(width: MediaQuery.of(context).size.width * 0.3, height: 12),
-                    ],
+          ...List.generate(
+            2,
+            (index) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6.0),
+              child: Row(
+                children: [
+                  const PulsingSkeleton(
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PulsingSkeleton(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          height: 16,
+                        ),
+                        const SizedBox(height: 6),
+                        PulsingSkeleton(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          height: 12,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       );
     }
 
-    final isToday = date.year == DateTime.now().year && date.month == DateTime.now().month && date.day == DateTime.now().day;
+    final isToday =
+        date.year == DateTime.now().year &&
+        date.month == DateTime.now().month &&
+        date.day == DateTime.now().day;
     final emptyText = isToday ? 'No tasks for today' : 'No tasks for this day';
 
     if (tasks == null || tasks!.isEmpty) {
@@ -64,7 +80,10 @@ class TaskSection extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle_outline, color: colorScheme.onSurfaceVariant),
+            Icon(
+              Icons.check_circle_outline,
+              color: colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -99,24 +118,35 @@ class TaskSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
             'Tasks',
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        ...tasks!.map<Widget>((t) => ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(
-            t.status == 'completed' ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: t.status == 'completed' ? Colors.green : colorScheme.onSurfaceVariant,
-          ),
-          title: Text(
-            t.title,
-            style: TextStyle(
-              decoration: t.status == 'completed' ? TextDecoration.lineThrough : null,
-              color: t.status == 'completed' ? colorScheme.onSurfaceVariant : null,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
-          subtitle: t.description.isNotEmpty ? Text(t.description) : null,
-        )).toList(),
+        ),
+        ...tasks!
+            .map<Widget>(
+              (t) => ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  t.status == 'completed'
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                  color: t.status == 'completed'
+                      ? Colors.green
+                      : colorScheme.onSurfaceVariant,
+                ),
+                title: Text(
+                  t.title,
+                  style: TextStyle(
+                    color: t.status == 'completed'
+                        ? colorScheme.onSurfaceVariant
+                        : null,
+                  ),
+                ),
+                subtitle: t.description.isNotEmpty ? Text(t.description) : null,
+              ),
+            )
+            .toList(),
       ],
     );
   }

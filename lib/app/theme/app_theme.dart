@@ -3,15 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 
 abstract final class AppTheme {
   // ── Brand Colors ──
-  static const Color _primaryLight = Color(0xFF0D47A1); // Deep blue
-  static const Color _primaryDark = Color(0xFF42A5F5); // Sky blue
+  static const Color _primaryLight = Color(0xFF1A56DB); // Vivid indigo-blue
+  static const Color _primaryDark = Color(0xFF42A5F5); // Sky blue (unchanged)
 
   // ── Semantic Colors ──
-  static const Color success = Color(0xFF2E7D32);
+  static const Color success = Color(0xFF1B7F3E);
   static const Color successDark = Color(0xFF66BB6A);
-  static const Color warning = Color(0xFFF57C00);
+  static const Color warning = Color(0xFFD97706);
   static const Color warningDark = Color(0xFFFFA726);
-  static const Color info = Color(0xFF0288D1);
+  static const Color info = Color(0xFF0369A1);
   static const Color infoDark = Color(0xFF4FC3F7);
 
   // ─────────────────────────── LIGHT THEME ───────────────────────────
@@ -22,12 +22,24 @@ abstract final class AppTheme {
       brightness: Brightness.light,
       primary: _primaryLight,
       onPrimary: Colors.white,
-      secondary: const Color(0xFF1565C0),
-      surface: const Color(0xFFF8F9FD),
-      onSurface: const Color(0xFF1A1A2E),
-      surfaceContainerHighest: const Color(0xFFEEF0F6),
-      error: const Color(0xFFD32F2F),
+      secondary: const Color(0xFF6366F1), // indigo accent
+      tertiary: const Color(0xFF0EA5E9), // sky pop
+      surface: const Color(0xFFF1F4FB), // cool blue-grey tint (was near-white)
+      onSurface: const Color(0xFF111827), // near-black, warmer
+      surfaceContainerHighest: const Color(
+        0xFFE2E8F4,
+      ), // visible container tint
+      surfaceContainerLow: const Color(
+        0xFFEBEFF8,
+      ), // card surface — slightly off-white
+      outline: const Color(0xFFB0BCDA),
+      outlineVariant: const Color(0xFFCDD5E8),
+      error: const Color(0xFFDC2626),
       onError: Colors.white,
+      errorContainer: const Color(0xFFFFE4E4),
+      onErrorContainer: const Color(0xFF7F1D1D),
+      primaryContainer: const Color(0xFFDBE8FF),
+      onPrimaryContainer: const Color(0xFF0D2D6B),
     );
 
     final textTheme = _buildTextTheme(colorScheme);
@@ -52,20 +64,20 @@ abstract final class AppTheme {
         ),
       ),
 
-      // ── Card ──
+      // ── Card — slightly warm white so they lift off the blue-grey scaffold ──
       cardTheme: CardThemeData(
-        color: Colors.white,
+        color: const Color(0xFFFFFFFF),
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: colorScheme.outlineVariant.withAlpha(80)),
+          side: BorderSide(color: colorScheme.outlineVariant),
         ),
       ),
 
       // ── Input Fields ──
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: colorScheme.surfaceContainerHighest.withAlpha(120),
+        fillColor: const Color(0xFFEBEFF8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: colorScheme.outlineVariant),
@@ -82,8 +94,10 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: colorScheme.error),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
 
       // ── Elevated Button ──
@@ -93,10 +107,12 @@ abstract final class AppTheme {
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          textStyle:
-              textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
 
@@ -104,8 +120,9 @@ abstract final class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: colorScheme.primary,
-          textStyle:
-              textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
 
@@ -115,8 +132,9 @@ abstract final class AppTheme {
           foregroundColor: colorScheme.primary,
           side: BorderSide(color: colorScheme.primary),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
 
@@ -130,7 +148,7 @@ abstract final class AppTheme {
 
       // ── Divider ──
       dividerTheme: DividerThemeData(
-        color: colorScheme.outlineVariant.withAlpha(80),
+        color: colorScheme.outlineVariant,
         thickness: 1,
       ),
 
@@ -146,7 +164,7 @@ abstract final class AppTheme {
 
       // ── Dialog ──
       dialogTheme: DialogThemeData(
-        backgroundColor: colorScheme.surface,
+        backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
@@ -163,33 +181,33 @@ abstract final class AppTheme {
       ),
 
       // ── BottomSheet ──
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: colorScheme.surface,
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
 
       // ── Drawer ──
-      drawerTheme: DrawerThemeData(
-        backgroundColor: colorScheme.surface,
+      drawerTheme: const DrawerThemeData(
+        backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
         ),
       ),
 
       // ── Chip ──
       chipTheme: ChipThemeData(
-        backgroundColor: colorScheme.surfaceContainerHighest,
-        side: BorderSide(color: colorScheme.outlineVariant.withAlpha(80)),
+        backgroundColor: const Color(0xFFE2E8F4),
+        side: BorderSide(color: colorScheme.outlineVariant),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
 
       // ── PopupMenu ──
       popupMenuTheme: PopupMenuThemeData(
-        color: colorScheme.surface,
+        color: Colors.white,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 4,
@@ -211,6 +229,11 @@ abstract final class AppTheme {
       surfaceContainerHighest: const Color(0xFF1A2035),
       error: const Color(0xFFEF5350),
       onError: const Color(0xFF1A0000),
+      // Slightly richer container tints for depth
+      primaryContainer: const Color(0xFF1A2E4A),
+      onPrimaryContainer: const Color(0xFFBADAFF),
+      errorContainer: const Color(0xFF3B0F0F),
+      onErrorContainer: const Color(0xFFFFB4AB),
     );
 
     final textTheme = _buildTextTheme(colorScheme);
@@ -265,8 +288,10 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: colorScheme.error),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
 
       // ── Elevated Button ──
@@ -276,10 +301,12 @@ abstract final class AppTheme {
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          textStyle:
-              textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
 
@@ -287,8 +314,9 @@ abstract final class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: colorScheme.primary,
-          textStyle:
-              textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
 
@@ -298,8 +326,9 @@ abstract final class AppTheme {
           foregroundColor: colorScheme.primary,
           side: BorderSide(color: colorScheme.primary),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
 

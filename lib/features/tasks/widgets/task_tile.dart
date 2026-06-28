@@ -141,9 +141,6 @@ class TaskTile extends StatelessWidget {
                               task.title,
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                decoration: completed
-                                    ? TextDecoration.lineThrough
-                                    : null,
                                 decorationColor: cs.onSurfaceVariant,
                                 color: completed
                                     ? cs.onSurfaceVariant
