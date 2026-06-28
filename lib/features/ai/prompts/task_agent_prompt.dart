@@ -6,10 +6,16 @@ class TaskAgentPromptBuilder {
     required DateTime today,
     required String promptText,
     required List<TaskModel> pendingTasks,
+    required List<TaskModel> existingTasks,
   }) {
     final todayStr = OrbitDateUtils.dateKey(today);
     final pendingTasksStr = pendingTasks.isNotEmpty
-        ? pendingTasks.map((t) => '- [ID: ${t.id}] "${t.title}" (Priority: ${t.priority}, Due: ${t.dueDate != null ? OrbitDateUtils.dateKey(t.dueDate!) : 'None'})').join('\n   ')
+        ? pendingTasks
+              .map(
+                (t) =>
+                    '- [ID: ${t.id}] "${t.title}" (Priority: ${t.priority}, Due: ${t.dueDate != null ? OrbitDateUtils.dateKey(t.dueDate!) : 'None'})',
+              )
+              .join('\n   ')
         : 'None';
 
     return '''

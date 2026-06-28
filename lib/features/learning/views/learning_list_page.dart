@@ -6,20 +6,26 @@ import '../models/learning_model.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
 import '../../../core/widgets/paginated_list_notifier.dart';
-import 'learning_edit_sheet.dart';
+import 'learning_edit_page.dart';
 
-final paginatedLearningsProvider = StateNotifierProvider<PaginatedListNotifier<LearningModel>, PaginatedState<LearningModel>>((ref) {
-  final user = ref.watch(authStateProvider).value;
-  final repo = ref.watch(learningRepositoryProvider);
-  return PaginatedListNotifier<LearningModel>(
-    fetchPage: (startAfter) {
-      if (user == null) {
-        return Future.value(PaginatedResult(items: [], lastDoc: null, hasMore: false));
-      }
-      return repo.getLearningsPaginated(user.uid, startAfter: startAfter);
-    },
-  );
-});
+final paginatedLearningsProvider =
+    StateNotifierProvider<
+      PaginatedListNotifier<LearningModel>,
+      PaginatedState<LearningModel>
+    >((ref) {
+      final user = ref.watch(authStateProvider).value;
+      final repo = ref.watch(learningRepositoryProvider);
+      return PaginatedListNotifier<LearningModel>(
+        fetchPage: (startAfter) {
+          if (user == null) {
+            return Future.value(
+              PaginatedResult(items: [], lastDoc: null, hasMore: false),
+            );
+          }
+          return repo.getLearningsPaginated(user.uid, startAfter: startAfter);
+        },
+      );
+    });
 
 class LearningListPage extends ConsumerWidget {
   const LearningListPage({super.key});
@@ -31,17 +37,9 @@ class LearningListPage extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Learnings'),
-      ),
+      appBar: AppBar(title: const Text('My Learnings')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => const LearningEditSheet(),
-          );
-        },
+        onPressed: () => LearningEditPage.push(context),
         child: const Icon(Icons.add_rounded),
       ),
       body: Builder(
@@ -63,29 +61,31 @@ class LearningListPage extends ConsumerWidget {
             );
           }
 
-          // Group by Date
           final Map<String, List<LearningModel>> grouped = {};
           for (final l in state.items) {
-            final dateKey = OrbitDateUtils.friendlyLabel(OrbitDateUtils.dateKey(l.createdAt));
+            final dateKey = OrbitDateUtils.friendlyLabel(
+              OrbitDateUtils.dateKey(l.createdAt),
+            );
             grouped.putIfAbsent(dateKey, () => []).add(l);
           }
 
           return NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollInfo) {
-              if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+            onNotification: (info) {
+              if (info.metrics.pixels >= info.metrics.maxScrollExtent - 200) {
                 ref.read(paginatedLearningsProvider.notifier).loadNextPage();
               }
               return true;
             },
             child: RefreshIndicator(
-              onRefresh: () => ref.read(paginatedLearningsProvider.notifier).refresh(),
+              onRefresh: () =>
+                  ref.read(paginatedLearningsProvider.notifier).refresh(),
               child: ListView.builder(
                 itemCount: grouped.length + (state.isLoadMore ? 1 : 0),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemBuilder: (context, index) {
                   if (index == grouped.length) {
                     return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      padding: EdgeInsets.symmetric(vertical: 16),
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
@@ -106,41 +106,54 @@ class LearningListPage extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      ...dayLearnings.map((l) {
-                        return ListTile(
-                          leading: Icon(Icons.lightbulb_outline, color: colorScheme.primary),
+                      ...dayLearnings.map(
+                        (l) => ListTile(
+                          leading: Icon(
+                            Icons.lightbulb_rounded,
+                            color: colorScheme.primary,
+                          ),
                           title: Text(l.title),
-                          subtitle: l.description.isNotEmpty ? Text(l.description) : null,
+                          subtitle: l.description.isNotEmpty
+                              ? Text(l.description)
+                              : null,
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (l.occurrenceCount > 1)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: colorScheme.primaryContainer,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Text('${l.occurrenceCount}x', style: TextStyle(fontSize: 12, color: colorScheme.onPrimaryContainer)),
+                                  child: Text(
+                                    '${l.occurrenceCount}x',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
                                 ),
                               if (l.metadata?.createdBy == 'ai') ...[
                                 const SizedBox(width: 8),
                                 Tooltip(
                                   message: 'Extracted by AI',
-                                  child: Icon(Icons.auto_awesome_rounded, size: 14, color: colorScheme.primary.withAlpha(150)),
+                                  child: Icon(
+                                    Icons.auto_awesome_rounded,
+                                    size: 14,
+                                    color: colorScheme.primary.withAlpha(150),
+                                  ),
                                 ),
                               ],
                             ],
                           ),
-                          onTap: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (context) => LearningEditSheet(learning: l),
-                            );
-                          },
-                        );
-                      }),
+                          onTap: () =>
+                              LearningEditPage.push(context, learning: l),
+                        ),
+                      ),
                       const Divider(),
                     ],
                   );

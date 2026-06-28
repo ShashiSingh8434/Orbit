@@ -6,20 +6,26 @@ import '../models/event_model.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
 import '../../../core/widgets/paginated_list_notifier.dart';
-import 'event_edit_sheet.dart';
+import 'event_edit_page.dart';
 
-final paginatedEventsProvider = StateNotifierProvider<PaginatedListNotifier<EventModel>, PaginatedState<EventModel>>((ref) {
-  final user = ref.watch(authStateProvider).value;
-  final repo = ref.watch(eventRepositoryProvider);
-  return PaginatedListNotifier<EventModel>(
-    fetchPage: (startAfter) {
-      if (user == null) {
-        return Future.value(PaginatedResult(items: [], lastDoc: null, hasMore: false));
-      }
-      return repo.getEventsPaginated(user.uid, startAfter: startAfter);
-    },
-  );
-});
+final paginatedEventsProvider =
+    StateNotifierProvider<
+      PaginatedListNotifier<EventModel>,
+      PaginatedState<EventModel>
+    >((ref) {
+      final user = ref.watch(authStateProvider).value;
+      final repo = ref.watch(eventRepositoryProvider);
+      return PaginatedListNotifier<EventModel>(
+        fetchPage: (startAfter) {
+          if (user == null) {
+            return Future.value(
+              PaginatedResult(items: [], lastDoc: null, hasMore: false),
+            );
+          }
+          return repo.getEventsPaginated(user.uid, startAfter: startAfter);
+        },
+      );
+    });
 
 class EventListPage extends ConsumerWidget {
   const EventListPage({super.key});
@@ -31,17 +37,9 @@ class EventListPage extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Events'),
-      ),
+      appBar: AppBar(title: const Text('My Events')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => const EventEditSheet(),
-          );
-        },
+        onPressed: () => EventEditPage.push(context),
         child: const Icon(Icons.add_rounded),
       ),
       body: Builder(
@@ -63,29 +61,31 @@ class EventListPage extends ConsumerWidget {
             );
           }
 
-          // Group by Date
           final Map<String, List<EventModel>> grouped = {};
           for (final e in state.items) {
-            final dateKey = OrbitDateUtils.friendlyLabel(OrbitDateUtils.dateKey(e.eventDate));
+            final dateKey = OrbitDateUtils.friendlyLabel(
+              OrbitDateUtils.dateKey(e.eventDate),
+            );
             grouped.putIfAbsent(dateKey, () => []).add(e);
           }
 
           return NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollInfo) {
-              if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+            onNotification: (info) {
+              if (info.metrics.pixels >= info.metrics.maxScrollExtent - 200) {
                 ref.read(paginatedEventsProvider.notifier).loadNextPage();
               }
               return true;
             },
             child: RefreshIndicator(
-              onRefresh: () => ref.read(paginatedEventsProvider.notifier).refresh(),
+              onRefresh: () =>
+                  ref.read(paginatedEventsProvider.notifier).refresh(),
               child: ListView.builder(
                 itemCount: grouped.length + (state.isLoadMore ? 1 : 0),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemBuilder: (context, index) {
                   if (index == grouped.length) {
                     return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      padding: EdgeInsets.symmetric(vertical: 16),
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
@@ -106,26 +106,33 @@ class EventListPage extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      ...dayEvents.map((e) {
-                        return ListTile(
-                          leading: Icon(Icons.event, color: colorScheme.primary),
+                      ...dayEvents.map(
+                        (e) => ListTile(
+                          leading: Icon(
+                            Icons.event_rounded,
+                            color: colorScheme.primary,
+                          ),
                           title: Text(e.title),
-                          subtitle: e.time != null ? Text('${e.time} - ${e.description}') : (e.description.isNotEmpty ? Text(e.description) : null),
+                          subtitle: e.time != null
+                              ? Text(
+                                  '${e.time}${e.description.isNotEmpty ? ' · ${e.description}' : ''}',
+                                )
+                              : (e.description.isNotEmpty
+                                    ? Text(e.description)
+                                    : null),
                           trailing: e.metadata?.createdBy == 'ai'
                               ? Tooltip(
                                   message: 'Extracted by AI',
-                                  child: Icon(Icons.auto_awesome_rounded, size: 14, color: colorScheme.primary.withAlpha(150)),
+                                  child: Icon(
+                                    Icons.auto_awesome_rounded,
+                                    size: 14,
+                                    color: colorScheme.primary.withAlpha(150),
+                                  ),
                                 )
                               : null,
-                          onTap: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (context) => EventEditSheet(event: e),
-                            );
-                          },
-                        );
-                      }),
+                          onTap: () => EventEditPage.push(context, event: e),
+                        ),
+                      ),
                       const Divider(),
                     ],
                   );
