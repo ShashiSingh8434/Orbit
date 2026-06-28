@@ -9,6 +9,7 @@ final decisionRepositoryProvider = Provider<DecisionRepository>(
 
 abstract class DecisionRepository {
   Stream<List<DecisionModel>> watchDecisions(String uid);
+  Future<List<DecisionModel>> getDecisions(String uid);
   Future<void> saveDecision(String uid, DecisionModel decision);
   Future<void> updateDecision(String uid, DecisionModel decision);
   Future<void> deleteDecision(String uid, String decisionId);
@@ -26,6 +27,12 @@ class FirebaseDecisionRepository implements DecisionRepository {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snap) => snap.docs.map(_fromDoc).toList());
+  }
+
+  @override
+  Future<List<DecisionModel>> getDecisions(String uid) async {
+    final snap = await _col(uid).orderBy('createdAt', descending: true).get();
+    return snap.docs.map(_fromDoc).toList();
   }
 
   @override

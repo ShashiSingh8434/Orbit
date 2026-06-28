@@ -15,16 +15,20 @@ class AiRequest {
   /// [requestId] while one is still in-flight, the second is discarded.
   final String? requestId;
 
+  /// User-friendly label describing the work being done, shown in the loading notch.
+  final String? label;
+
   const AiRequest({
     required this.prompt,
     this.jsonMode = false,
     this.responseSchema,
     this.requestId,
+    this.label,
   });
 
   @override
   String toString() =>
-      'AiRequest(jsonMode=$jsonMode, requestId=$requestId, promptLen=${prompt.length})';
+      'AiRequest(jsonMode=$jsonMode, requestId=$requestId, label=$label, promptLen=${prompt.length})';
 }
 
 /// The result returned by any AI provider after a successful generation.

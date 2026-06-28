@@ -6,14 +6,22 @@ import 'package:go_router/go_router.dart';
 import '../analytics/ai_analytics_service.dart';
 import '../analytics/ai_usage_log.dart';
 
-/// AI Analytics dashboard page — shows usage stats, provider breakdown, trends.
-class AiAnalyticsPage extends ConsumerWidget {
+/// AI Analytics dashboard page — shows usage stats, model breakdown, trends.
+class AiAnalyticsPage extends ConsumerStatefulWidget {
   const AiAnalyticsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final service = ref.read(aiAnalyticsServiceProvider);
-    final stats = service.getStats(days: 7);
+  ConsumerState<AiAnalyticsPage> createState() => _AiAnalyticsPageState();
+}
+
+class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
+  String _selectedApiSource = 'Orbit API'; // 'Orbit API' | 'My API'
+  bool _todayOnly = false; // false = All Time, true = Today
+
+  @override
+  Widget build(BuildContext context) {
+    final service = ref.watch(aiAnalyticsServiceProvider);
+    final stats = service.getStats(apiSource: _selectedApiSource, todayOnly: _todayOnly);
     final recentLogs = service.getRecentLogs(count: 10);
 
     final theme = Theme.of(context);
@@ -23,10 +31,57 @@ class AiAnalyticsPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('AI Analytics'),
         leading: BackButton(onPressed: () => context.pop()),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_sweep_rounded),
+            tooltip: 'Clear Statistics',
+            onPressed: () => _confirmClear(context),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // ── Filters ─────────────────────────────────────────────────────
+          Row(
+            children: [
+              Expanded(
+                child: SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: 'Orbit API', label: Text('Orbit API')),
+                    ButtonSegment(value: 'My API', label: Text('My API')),
+                  ],
+                  selected: {_selectedApiSource},
+                  onSelectionChanged: (val) {
+                    setState(() {
+                      _selectedApiSource = val.first;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: SegmentedButton<bool>(
+                  segments: const [
+                    ButtonSegment(value: false, label: Text('All Time')),
+                    ButtonSegment(value: true, label: Text('Today')),
+                  ],
+                  selected: {_todayOnly},
+                  onSelectionChanged: (val) {
+                    setState(() {
+                      _todayOnly = val.first;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
           // ── Overview Cards ──────────────────────────────────────────────
           Text('OVERVIEW', style: theme.textTheme.labelSmall?.copyWith(
             letterSpacing: 1.2, color: colorScheme.onSurfaceVariant,
@@ -70,61 +125,66 @@ class AiAnalyticsPage extends ConsumerWidget {
 
           const SizedBox(height: 24),
 
-          // ── Provider Breakdown ──────────────────────────────────────────
-          Text('PROVIDER BREAKDOWN', style: theme.textTheme.labelSmall?.copyWith(
+          // ── Model Usage breakdown ───────────────────────────────────────
+          Text('MODEL USAGE', style: theme.textTheme.labelSmall?.copyWith(
             letterSpacing: 1.2, color: colorScheme.onSurfaceVariant,
           )),
           const SizedBox(height: 12),
-          if (stats.requestsByProvider.isEmpty)
+          if (stats.requestsByModel.isEmpty)
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  'No data yet. Use AI features to see analytics.',
+                  'No model usage data for this filter.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
             )
-          else ...[
-            ...stats.requestsByProvider.entries.map((e) {
-              final maxReq = stats.totalRequests;
-              final fraction = maxReq > 0 ? e.value / maxReq : 0.0;
-              final providerColor = e.key == 'gemini' ? colorScheme.primary : colorScheme.tertiary;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          else
+            ...(stats.requestsByModel.entries.toList()
+                  ..sort((a, b) => b.value.compareTo(a.value)))
+                .map((e) {
+                  final maxReq = stats.totalRequests;
+                  final fraction = maxReq > 0 ? e.value / maxReq : 0.0;
+                  final modelColor = e.key.toLowerCase().contains('gemini')
+                      ? colorScheme.primary
+                      : colorScheme.tertiary;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          e.key == 'gemini' ? 'Google Gemini' : 'Groq',
-                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              e.key,
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              '${e.value} requests',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '${e.value} requests',
-                          style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        const SizedBox(height: 4),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: fraction,
+                            minHeight: 8,
+                            backgroundColor: modelColor.withValues(alpha: 0.1),
+                            valueColor: AlwaysStoppedAnimation(modelColor),
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: fraction,
-                        minHeight: 8,
-                        backgroundColor: providerColor.withValues(alpha: 0.1),
-                        valueColor: AlwaysStoppedAnimation(providerColor),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ],
+                  );
+                }).toList(),
 
           const SizedBox(height: 24),
 
@@ -232,6 +292,35 @@ class AiAnalyticsPage extends ConsumerWidget {
     );
   }
 
+  void _confirmClear(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear Statistics'),
+        content: const Text('Are you sure you want to clear all AI analytics statistics? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ref.read(aiAnalyticsServiceProvider).clearAll();
+              if (mounted) {
+                setState(() {});
+              }
+            },
+            child: Text(
+              'Clear',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _formatNumber(int n) {
     if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
@@ -291,11 +380,11 @@ class _LogTile extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final statusIcon = switch (log.status) {
-      'success' => Icon(Icons.check_circle, size: 16, color: Colors.green),
-      'rate_limited' => Icon(Icons.timer_off, size: 16, color: Colors.orange),
-      _ => Icon(Icons.error_outline, size: 16, color: colorScheme.error),
-    };
+    final statusIcon = log.success
+        ? const Icon(Icons.check_circle, size: 16, color: Colors.green)
+        : (log.errorType == 'rateLimited' || log.errorType == 'rate_limited'
+            ? const Icon(Icons.timer_off, size: 16, color: Colors.orange)
+            : Icon(Icons.error_outline, size: 16, color: colorScheme.error));
 
     final time = '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}';
 
@@ -303,11 +392,11 @@ class _LogTile extends StatelessWidget {
       dense: true,
       leading: statusIcon,
       title: Text(
-        '${log.provider == 'gemini' ? 'Gemini' : 'Groq'} • ${log.latencyMs}ms',
+        '${log.modelName} • ${log.responseTimeMs}ms',
         style: theme.textTheme.bodyMedium,
       ),
       subtitle: Text(
-        '${log.totalTokens ?? 0} tokens • $time',
+        '${log.totalTokens ?? 0} tokens • Wait: ${log.queueWaitTimeMs}ms • $time',
         style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
       ),
     );

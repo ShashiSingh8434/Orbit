@@ -9,6 +9,7 @@ final learningRepositoryProvider = Provider<LearningRepository>(
 
 abstract class LearningRepository {
   Stream<List<LearningModel>> watchLearnings(String uid);
+  Future<List<LearningModel>> getLearnings(String uid);
   Future<void> saveLearning(String uid, LearningModel learning);
   Future<void> updateLearning(String uid, LearningModel learning);
   Future<void> deleteLearning(String uid, String learningId);
@@ -26,6 +27,12 @@ class FirebaseLearningRepository implements LearningRepository {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snap) => snap.docs.map(_fromDoc).toList());
+  }
+
+  @override
+  Future<List<LearningModel>> getLearnings(String uid) async {
+    final snap = await _col(uid).orderBy('createdAt', descending: true).get();
+    return snap.docs.map(_fromDoc).toList();
   }
 
   @override

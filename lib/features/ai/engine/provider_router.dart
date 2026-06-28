@@ -1,19 +1,25 @@
 import 'package:flutter/foundation.dart';
 import '../providers/ai_provider.dart';
+import 'ai_health_monitor.dart';
 import 'rate_limit_manager.dart';
 
 /// Monitors provider health and selects which [AiProvider] to use for a request.
 ///
 /// Selection logic:
-/// 1. Try the user's preferred provider (if healthy + not cooling down).
-/// 2. If preferred is unavailable, iterate the remaining providers by priority.
-/// 3. If no provider is available, throw [AllProvidersExhaustedException].
+/// 1. Iterate providers sorted by priority.
+/// 2. If provider is in excludeIds, skip it.
+/// 3. If provider is not usable (rate limited, cooling down, invalid key, or offline), skip it.
+/// 4. Return the first available provider, or throw [AllProvidersExhaustedException].
 class ProviderRouter {
   final RateLimitManager _rateLimitManager;
+  final AiHealthMonitor _healthMonitor;
   final Map<String, AiProvider> _providers = {};
-  String? _preferredProviderId;
 
-  ProviderRouter({required this._rateLimitManager});
+  ProviderRouter({
+    required RateLimitManager rateLimitManager,
+    required AiHealthMonitor healthMonitor,
+  })  : _rateLimitManager = rateLimitManager,
+        _healthMonitor = healthMonitor;
 
   /// Register a provider. Can be called multiple times to add/replace providers.
   void registerProvider(AiProvider provider) {
@@ -29,63 +35,40 @@ class ProviderRouter {
     debugPrint('ProviderRouter: Unregistered provider "$providerId"');
   }
 
-  /// Set the user's preferred provider.
-  void setPreferred(String providerId) {
-    _preferredProviderId = providerId;
-    debugPrint('ProviderRouter: Preferred provider set to "$providerId"');
-  }
-
-  /// Get the current preferred provider ID.
-  String? get preferredProviderId => _preferredProviderId;
-
   /// All registered provider IDs.
   List<String> get registeredProviderIds => _providers.keys.toList();
 
   /// Whether a given provider is registered.
   bool hasProvider(String providerId) => _providers.containsKey(providerId);
 
+  /// Helper to determine if a provider is usable.
+  bool isUsable(String providerId) {
+    if (!_rateLimitManager.canUseProvider(providerId)) return false;
+    final health = _healthMonitor.getStatus(providerId);
+    if (health == ProviderHealthStatus.invalidKey ||
+        health == ProviderHealthStatus.offline) {
+      return false;
+    }
+    return true;
+  }
+
   /// Select the best available provider for a request.
   ///
   /// Throws [AllProvidersExhaustedException] if none are available.
-  AiProvider selectProvider() {
-    // 1. Try preferred (match by exact ID or prefix, e.g. "groq" matches "groq_llama_70b")
-    if (_preferredProviderId != null) {
-      final preferredMatches =
-          _providers.values
-              .where((p) => p.id.startsWith(_preferredProviderId!))
-              .toList()
-            ..sort((a, b) => a.priority.compareTo(b.priority));
-
-      for (final preferred in preferredMatches) {
-        if (_rateLimitManager.canUseProvider(preferred.id)) {
-          debugPrint(
-            'ProviderRouter: Using preferred provider "${preferred.id}"',
-          );
-          return preferred;
-        }
-        debugPrint(
-          'ProviderRouter: Preferred "${preferred.id}" is cooling down '
-          '(${_rateLimitManager.cooldownRemaining(preferred.id).inSeconds}s remaining)',
-        );
+  AiProvider selectProvider({Set<String>? excludeIds}) {
+    final candidates = _providers.values.where((provider) {
+      if (excludeIds != null && excludeIds.contains(provider.id)) {
+        return false;
       }
+      return isUsable(provider.id);
+    }).toList();
+
+    if (candidates.isEmpty) {
+      throw const AllProvidersExhaustedException();
     }
 
-    // 2. Try remaining providers sorted by priority
-    final sorted = _providers.values.toList()
-      ..sort((a, b) => a.priority.compareTo(b.priority));
-
-    for (final provider in sorted) {
-      if (_preferredProviderId != null &&
-          provider.id.startsWith(_preferredProviderId!))
-        continue; // Already tried
-      if (_rateLimitManager.canUseProvider(provider.id)) {
-        debugPrint('ProviderRouter: Falling back to "${provider.id}"');
-        return provider;
-      }
-    }
-
-    // 3. No providers available
-    throw const AllProvidersExhaustedException();
+    candidates.sort((a, b) => a.priority.compareTo(b.priority));
+    return candidates.first;
   }
 
   /// Get a specific provider by ID (for validation, health checks, etc.).

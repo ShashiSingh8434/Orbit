@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import '../features/ai/views/global_ai_status_notch.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_notifier.dart';
@@ -22,6 +23,15 @@ class OrbitApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       routerConfig: router,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            // ignore: use_null_aware_elements
+            if (child != null) child,
+            const GlobalAiStatusNotch(),
+          ],
+        );
+      },
     );
   }
 }

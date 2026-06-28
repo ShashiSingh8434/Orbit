@@ -119,12 +119,17 @@ class DetailedSummaryPipeline {
         AiRequest(
           prompt: promptParagraph,
           requestId: 'detailed_paragraph_$dateKey',
+          label: 'Generating daily summary...',
         ),
       );
       final paragraph = responseParagraph.text;
 
       final responseBullet = await aiRequestManager.generate(
-        AiRequest(prompt: promptBullet, requestId: 'detailed_bullet_$dateKey'),
+        AiRequest(
+          prompt: promptBullet,
+          requestId: 'detailed_bullet_$dateKey',
+          label: 'Generating summary highlights...',
+        ),
       );
       final bullet = responseBullet.text;
 

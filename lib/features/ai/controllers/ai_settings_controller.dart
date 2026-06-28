@@ -49,14 +49,12 @@ class ProviderInfo {
 
 class AiSettingsState {
   final AiMode mode;
-  final String preferredProviderId;
   final Map<String, ProviderInfo> providers;
   final bool isLoading;
   final String? testResult; // 'success', 'failed', or null
 
   const AiSettingsState({
     this.mode = AiMode.orbitDefault,
-    this.preferredProviderId = 'gemini',
     this.providers = const {},
     this.isLoading = false,
     this.testResult,
@@ -64,14 +62,12 @@ class AiSettingsState {
 
   AiSettingsState copyWith({
     AiMode? mode,
-    String? preferredProviderId,
     Map<String, ProviderInfo>? providers,
     bool? isLoading,
     String? testResult,
   }) {
     return AiSettingsState(
       mode: mode ?? this.mode,
-      preferredProviderId: preferredProviderId ?? this.preferredProviderId,
       providers: providers ?? this.providers,
       isLoading: isLoading ?? this.isLoading,
       testResult: testResult,
@@ -112,7 +108,6 @@ class AiSettingsController extends Notifier<AiSettingsState> {
 
     // Load initial state
     final mode = manager.aiMode == 'user_key' ? AiMode.userKey : AiMode.orbitDefault;
-    final preferred = manager.preferredProvider;
 
     // Load provider statuses
     final providers = Map<String, ProviderInfo>.from(_defaultProviders);
@@ -126,7 +121,6 @@ class AiSettingsController extends Notifier<AiSettingsState> {
 
     return AiSettingsState(
       mode: mode,
-      preferredProviderId: preferred,
       providers: providers,
     );
   }
@@ -141,12 +135,12 @@ class AiSettingsController extends Notifier<AiSettingsState> {
       
       providers[id] = providers[id]!.copyWith(hasUserKey: hasKey);
       
-      // If we have a user key and we are in userKey mode, make sure it's registered
       if (hasKey && manager.aiMode == 'user_key') {
-        manager.registerProviderWithKey(id, key);
+        await manager.registerProviderWithKey(id, key);
       }
     }
     state = state.copyWith(providers: providers);
+    await manager.ensureInitialized();
   }
 
   /// Switch between Orbit Default and User API Key mode.
@@ -156,13 +150,6 @@ class AiSettingsController extends Notifier<AiSettingsState> {
     await manager.setAiMode(modeStr);
     state = state.copyWith(mode: mode);
     debugPrint('AiSettings: Mode set to $modeStr');
-  }
-
-  /// Set the preferred AI provider.
-  Future<void> setPreferredProvider(String providerId) async {
-    final manager = ref.read(aiRequestManagerProvider);
-    await manager.setPreferredProvider(providerId);
-    state = state.copyWith(preferredProviderId: providerId);
   }
 
   /// Connect a provider with a user-supplied API key.
@@ -177,7 +164,7 @@ class AiSettingsController extends Notifier<AiSettingsState> {
       await SecureKeyStorage.saveKey(providerId, apiKey);
 
       // Register with the manager
-      manager.registerProviderWithKey(providerId, apiKey);
+      await manager.registerProviderWithKey(providerId, apiKey);
 
       // Update state
       final providers = Map<String, ProviderInfo>.from(state.providers);
@@ -212,8 +199,7 @@ class AiSettingsController extends Notifier<AiSettingsState> {
     await SecureKeyStorage.deleteKey(providerId);
 
     final manager = ref.read(aiRequestManagerProvider);
-    // Re-initialize to fall back to Orbit Default keys
-    manager.unregisterProvider(providerId);
+    await manager.unregisterProvider(providerId);
 
     final providers = Map<String, ProviderInfo>.from(state.providers);
     providers[providerId] = providers[providerId]!.copyWith(
@@ -228,15 +214,8 @@ class AiSettingsController extends Notifier<AiSettingsState> {
     state = state.copyWith(isLoading: true, testResult: null);
 
     final manager = ref.read(aiRequestManagerProvider);
-    final provider = manager.router.getProvider(providerId);
-
-    if (provider == null) {
-      state = state.copyWith(isLoading: false, testResult: 'failed');
-      return;
-    }
-
     try {
-      final healthy = await provider.healthCheck();
+      final healthy = await manager.testProviderConnection(providerId);
       final providers = Map<String, ProviderInfo>.from(state.providers);
       providers[providerId] = providers[providerId]!.copyWith(
         status: healthy ? ProviderHealthStatus.healthy : ProviderHealthStatus.offline,

@@ -80,6 +80,7 @@ class UnderstandingPipeline {
         jsonMode: true,
         responseSchema: schema,
         requestId: 'understanding_${reflection.id}',
+        label: 'Analyzing reflection...',
       ));
 
       var jsonString = response.text.trim();

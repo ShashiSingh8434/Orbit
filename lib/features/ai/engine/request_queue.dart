@@ -31,7 +31,7 @@ class RequestQueue {
   ///
   /// The [task] callback is a Future-returning function that performs the
   /// actual AI call. It will be executed when the queue slot is available.
-  Future<T> enqueue<T>(Future<T> Function() task, {String? requestId}) async {
+  Future<T> enqueue<T>(Future<T> Function(Duration queueWaitTime) task, {String? requestId}) async {
     // Deduplication: if a request with the same ID is already queued, skip it.
     if (requestId != null) {
       final existing = _queue.where((q) => q.requestId == requestId);
@@ -41,12 +41,14 @@ class RequestQueue {
       }
     }
 
+    final enqueueTime = DateTime.now();
     final completer = Completer<T>();
     _queue.add(
       _QueuedTask(
         execute: () async {
           try {
-            final result = await task().timeout(timeout);
+            final queueWaitTime = DateTime.now().difference(enqueueTime);
+            final result = await task(queueWaitTime).timeout(timeout);
             completer.complete(result);
           } catch (e, s) {
             completer.completeError(e, s);

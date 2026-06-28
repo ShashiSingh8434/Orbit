@@ -29,16 +29,28 @@ class AiAnalyticsService {
     }
 
     await _saveLogs(logs);
-    debugPrint('AiAnalytics: Logged ${log.provider} request (${log.status})');
+    debugPrint('AiAnalytics: Logged ${log.provider} request (Success: ${log.success})');
   }
 
-  /// Get aggregated stats for the given time range.
-  AiAnalyticsStats getStats({int days = 7}) {
+  /// Get aggregated stats filtered by API source and time range.
+  AiAnalyticsStats getStats({
+    required String apiSource,
+    required bool todayOnly,
+  }) {
     final logs = _loadLogs();
-    final cutoff = DateTime.now().subtract(Duration(days: days));
-    final filtered = logs.where((l) => l.timestamp.isAfter(cutoff)).toList();
+    
+    // Filter by apiSource
+    var filtered = logs.where((l) => l.apiSource == apiSource);
 
-    if (filtered.isEmpty) return const AiAnalyticsStats();
+    // Filter by time range
+    if (todayOnly) {
+      final now = DateTime.now();
+      final todayStart = DateTime(now.year, now.month, now.day);
+      filtered = filtered.where((l) => l.timestamp.isAfter(todayStart));
+    }
+
+    final filteredList = filtered.toList();
+    if (filteredList.isEmpty) return const AiAnalyticsStats();
 
     // Basic aggregates
     int totalTokens = 0;
@@ -50,31 +62,39 @@ class AiAnalyticsService {
     int failCount = 0;
     final reqByProvider = <String, int>{};
     final tokByProvider = <String, int>{};
+    final reqByModel = <String, int>{};
 
-    for (final log in filtered) {
+    for (final log in filteredList) {
       totalTokens += log.totalTokens ?? 0;
       totalInput += log.inputTokens ?? 0;
       totalOutput += log.outputTokens ?? 0;
-      totalLatency += log.latencyMs;
+      totalLatency += log.responseTimeMs;
 
-      if (log.status == 'success') successCount++;
-      if (log.status == 'rate_limited') rateLimitCount++;
-      if (log.status == 'failed') failCount++;
+      if (log.success) {
+        successCount++;
+      } else {
+        failCount++;
+        if (log.errorType == 'rateLimited' || log.errorType == 'rate_limited') {
+          rateLimitCount++;
+        }
+      }
 
       reqByProvider[log.provider] = (reqByProvider[log.provider] ?? 0) + 1;
       tokByProvider[log.provider] =
           (tokByProvider[log.provider] ?? 0) + (log.totalTokens ?? 0);
+      
+      reqByModel[log.modelName] = (reqByModel[log.modelName] ?? 0) + 1;
     }
 
     // Daily aggregates
     final dailyMap = <String, _DailyAcc>{};
-    for (final log in filtered) {
+    for (final log in filteredList) {
       final key =
           '${log.timestamp.year}-${log.timestamp.month.toString().padLeft(2, '0')}-${log.timestamp.day.toString().padLeft(2, '0')}';
       final acc = dailyMap.putIfAbsent(key, () => _DailyAcc());
       acc.requests++;
       acc.tokens += log.totalTokens ?? 0;
-      acc.totalLatency += log.latencyMs;
+      acc.totalLatency += log.responseTimeMs;
     }
 
     final dailyAggregates = dailyMap.entries.map((e) {
@@ -94,14 +114,15 @@ class AiAnalyticsService {
     }).toList()..sort((a, b) => a.date.compareTo(b.date));
 
     return AiAnalyticsStats(
-      totalRequests: filtered.length,
+      totalRequests: filteredList.length,
       totalTokens: totalTokens,
       totalInputTokens: totalInput,
       totalOutputTokens: totalOutput,
-      avgLatencyMs: filtered.isNotEmpty ? totalLatency / filtered.length : 0,
-      successRate: filtered.isNotEmpty ? successCount / filtered.length : 0,
+      avgLatencyMs: filteredList.isNotEmpty ? totalLatency / filteredList.length : 0,
+      successRate: filteredList.isNotEmpty ? successCount / filteredList.length : 0,
       requestsByProvider: reqByProvider,
       tokensByProvider: tokByProvider,
+      requestsByModel: reqByModel,
       rateLimitOccurrences: rateLimitCount,
       failureCount: failCount,
       dailyAggregates: dailyAggregates,

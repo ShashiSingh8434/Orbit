@@ -9,6 +9,7 @@ final eventRepositoryProvider = Provider<EventRepository>(
 
 abstract class EventRepository {
   Stream<List<EventModel>> watchEvents(String uid);
+  Future<List<EventModel>> getEvents(String uid);
   Future<void> saveEvent(String uid, EventModel event);
   Future<void> updateEvent(String uid, EventModel event);
   Future<void> deleteEvent(String uid, String eventId);
@@ -26,6 +27,12 @@ class FirebaseEventRepository implements EventRepository {
         .orderBy('eventDate', descending: true)
         .snapshots()
         .map((snap) => snap.docs.map(_fromDoc).toList());
+  }
+
+  @override
+  Future<List<EventModel>> getEvents(String uid) async {
+    final snap = await _col(uid).orderBy('eventDate', descending: true).get();
+    return snap.docs.map(_fromDoc).toList();
   }
 
   @override

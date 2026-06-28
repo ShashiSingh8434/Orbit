@@ -53,11 +53,20 @@ final dayTasksStreamProvider = StreamProvider.family<List<TaskModel>, DateTime>(
   if (user == null) return const Stream.empty();
   return ref.watch(taskRepositoryProvider).watchTasks(user.uid).map((tasks) {
     final key = OrbitDateUtils.dateKey(date);
+    final todayKey = OrbitDateUtils.todayKey();
+    final isPageToday = key == todayKey;
+
     return tasks.where((t) {
       if (t.dueDate != null) {
         return OrbitDateUtils.dateKey(t.dueDate!) == key;
       }
-      return OrbitDateUtils.dateKey(t.createdAt) == key;
+      // Unplanned tasks
+      if (t.status == 'pending') {
+        return isPageToday;
+      } else {
+        final completedDate = t.completedAt ?? t.createdAt;
+        return OrbitDateUtils.dateKey(completedDate) == key;
+      }
     }).toList();
   });
 });

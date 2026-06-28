@@ -18,14 +18,13 @@ class TaskSyncService {
   String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
   Future<List<TaskModel>> getPendingTasks(String uid) async {
-    final allTasks = await _repository.watchTasks(uid).first;
+    final allTasks = await _repository.getTasks(uid);
     return allTasks.where((t) => t.status == 'pending').toList();
   }
 
   Future<void> syncTasks(String uid, List<TaskDto> extractedTasks, String reflectionId, DateTime dayDate) async {
     // Fetch existing tasks to perform duplicate and completion detection
-    final existingTasksStream = _repository.watchTasks(uid).first;
-    final existingTasks = await existingTasksStream;
+    final existingTasks = await _repository.getTasks(uid);
 
     for (final dto in extractedTasks) {
       int existingIndex = -1;

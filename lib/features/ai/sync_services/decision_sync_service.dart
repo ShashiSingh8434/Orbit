@@ -18,8 +18,7 @@ class DecisionSyncService {
   String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
   Future<void> syncDecisions(String uid, List<DecisionDto> extractedDecisions, String reflectionId, DateTime dayDate) async {
-    final existingDecisionsStream = _repository.watchDecisions(uid).first;
-    final existingDecisions = await existingDecisionsStream;
+    final existingDecisions = await _repository.getDecisions(uid);
 
     for (final dto in extractedDecisions) {
       final normalizedNewDecision = _normalize(dto.decision);

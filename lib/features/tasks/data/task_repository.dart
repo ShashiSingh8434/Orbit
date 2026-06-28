@@ -13,6 +13,7 @@ final taskRepositoryProvider = Provider<TaskRepository>(
 
 abstract class TaskRepository {
   Stream<List<TaskModel>> watchTasks(String uid);
+  Future<List<TaskModel>> getTasks(String uid);
   Future<void> saveTask(String uid, TaskModel task);
   Future<void> updateTask(String uid, TaskModel task);
   Future<void> deleteTask(String uid, String taskId);
@@ -33,6 +34,12 @@ class FirebaseTaskRepository implements TaskRepository {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snap) => snap.docs.map(_fromDoc).toList());
+  }
+
+  @override
+  Future<List<TaskModel>> getTasks(String uid) async {
+    final snap = await _col(uid).orderBy('createdAt', descending: true).get();
+    return snap.docs.map(_fromDoc).toList();
   }
 
   @override

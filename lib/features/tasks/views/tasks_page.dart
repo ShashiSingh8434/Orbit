@@ -113,7 +113,12 @@ class _TasksPageState extends ConsumerState<TasksPage> {
           if (t.dueDate != null) {
             return OrbitDateUtils.dateKey(t.dueDate!) == todayKey;
           }
-          return OrbitDateUtils.dateKey(t.createdAt) == todayKey;
+          if (t.status == 'pending') {
+            return true;
+          } else {
+            final completedDate = t.completedAt ?? t.createdAt;
+            return OrbitDateUtils.dateKey(completedDate) == todayKey;
+          }
       }
     }).toList();
 

@@ -25,7 +25,7 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   late PageController _pageController;
   late DateTime _initialDate;
-  int _currentIndex = 0;
+  int _currentIndex = _initialPage;
 
   // Assume 1000 pages, with 500 being "today".
   static const int _initialPage = 500;

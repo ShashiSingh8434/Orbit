@@ -18,8 +18,7 @@ class LearningSyncService {
   String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
   Future<void> syncLearnings(String uid, List<LearningDto> extractedLearnings, String reflectionId, DateTime dayDate) async {
-    final existingLearningsStream = _repository.watchLearnings(uid).first;
-    final existingLearnings = await existingLearningsStream;
+    final existingLearnings = await _repository.getLearnings(uid);
 
     for (final dto in extractedLearnings) {
       final normalizedNewTitle = _normalize(dto.title);

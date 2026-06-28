@@ -19,14 +19,14 @@ class EventSyncService {
   String _normalize(String input) => input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
   Future<List<EventModel>> getUpcomingEvents(String uid) async {
-    final allEvents = await _repository.watchEvents(uid).first;
+    final allEvents = await _repository.getEvents(uid);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     return allEvents.where((e) => e.eventDate.isAfter(today.subtract(const Duration(days: 1)))).toList();
   }
 
   Future<void> syncEvents(String uid, List<EventDto> extractedEvents, String reflectionId) async {
-    final existingEvents = await _repository.watchEvents(uid).first;
+    final existingEvents = await _repository.getEvents(uid);
 
     for (final dto in extractedEvents) {
       // Parse eventDate safely, fallback to today

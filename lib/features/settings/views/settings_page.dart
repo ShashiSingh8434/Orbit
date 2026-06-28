@@ -10,16 +10,25 @@ import '../../ai/engine/ai_health_monitor.dart';
 import '../../ai/views/ai_setup_wizard.dart';
 
 /// Settings page — theme, AI preferences, account info, sign out.
-class SettingsPage extends ConsumerWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  AiMode? _selectedMode;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final themeMode = ref.watch(themeNotifierProvider);
     final user = ref.watch(authStateProvider).value;
     final aiSettings = ref.watch(aiSettingsProvider);
+
+    _selectedMode ??= aiSettings.mode;
 
     return Scaffold(
       appBar: AppBar(
@@ -109,14 +118,49 @@ class SettingsPage extends ConsumerWidget {
                   icon: Icon(Icons.key_rounded),
                 ),
               ],
-              selected: {aiSettings.mode},
+              selected: {_selectedMode!},
               onSelectionChanged: (selection) {
-                ref.read(aiSettingsProvider.notifier).setMode(selection.first);
+                setState(() {
+                  _selectedMode = selection.first;
+                });
               },
             ),
           ),
 
-          if (aiSettings.mode == AiMode.orbitDefault) ...[
+          if (_selectedMode != aiSettings.mode)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: FilledButton.icon(
+                onPressed: () async {
+                  if (_selectedMode == AiMode.userKey) {
+                    final hasAnyKey = aiSettings.providers.values.any((p) => p.hasUserKey);
+                    if (!hasAnyKey) {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('No API Keys Connected'),
+                          content: const Text(
+                            'Please connect at least one AI provider (Google Gemini or Groq) with your own API key before switching to My API Key mode.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                      return;
+                    }
+                  }
+                  await ref.read(aiSettingsProvider.notifier).setMode(_selectedMode!);
+                },
+                icon: const Icon(Icons.save_rounded),
+                label: const Text('Save AI Mode'),
+              ),
+            ),
+
+          if (_selectedMode == AiMode.orbitDefault) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Card(
@@ -142,34 +186,12 @@ class SettingsPage extends ConsumerWidget {
             ),
           ],
 
-          // Preferred provider
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: SegmentedButton<String>(
-              segments: aiSettings.providers.values.map((p) {
-                return ButtonSegment(
-                  value: p.id,
-                  label: Text(p.name),
-                );
-              }).toList(),
-              selected: {aiSettings.preferredProviderId},
-              onSelectionChanged: (selection) {
-                ref
-                    .read(aiSettingsProvider.notifier)
-                    .setPreferredProvider(selection.first);
-              },
-            ),
-          ),
-
-
-
-          if (aiSettings.mode == AiMode.userKey) ...[
+          if (_selectedMode == AiMode.userKey) ...[
             // Provider cards
             ...aiSettings.providers.values.map((provider) {
               return _ProviderCard(provider: provider);
             }),
           ],
-
 
           const Divider(),
 
@@ -205,14 +227,14 @@ class SettingsPage extends ConsumerWidget {
               'Sign Out',
               style: TextStyle(color: colorScheme.error),
             ),
-            onTap: () => _confirmSignOut(context, ref),
+            onTap: () => _confirmSignOut(context),
           ),
         ],
       ),
     );
   }
 
-  void _confirmSignOut(BuildContext context, WidgetRef ref) {
+  void _confirmSignOut(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -305,9 +327,8 @@ class _ProviderCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final aiSettings = ref.watch(aiSettingsProvider);
-    final statusColor = _statusColor(provider.status, colorScheme, provider.hasUserKey, aiSettings.mode);
-    final statusLabel = _statusLabel(provider.status, provider.hasUserKey, aiSettings.mode);
+    final statusColor = _statusColor(provider.status, colorScheme, provider.hasUserKey);
+    final statusLabel = _statusLabel(provider.status, provider.hasUserKey);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -391,8 +412,8 @@ class _ProviderCard extends ConsumerWidget {
     );
   }
 
-  Color _statusColor(ProviderHealthStatus status, ColorScheme cs, bool hasUserKey, AiMode mode) {
-    if (mode == AiMode.userKey && !hasUserKey) return cs.onSurfaceVariant;
+  Color _statusColor(ProviderHealthStatus status, ColorScheme cs, bool hasUserKey) {
+    if (!hasUserKey) return cs.onSurfaceVariant;
     switch (status) {
       case ProviderHealthStatus.healthy:
         return Colors.green;
@@ -407,8 +428,8 @@ class _ProviderCard extends ConsumerWidget {
     }
   }
 
-  String _statusLabel(ProviderHealthStatus status, bool hasUserKey, AiMode mode) {
-    if (mode == AiMode.userKey && !hasUserKey) return 'Not Connected';
+  String _statusLabel(ProviderHealthStatus status, bool hasUserKey) {
+    if (!hasUserKey) return 'Not Connected';
     switch (status) {
       case ProviderHealthStatus.healthy:
         return 'Connected';

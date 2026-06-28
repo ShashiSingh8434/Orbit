@@ -51,10 +51,12 @@ class FirebaseReflectionRepository implements ReflectionRepository {
   @override
   Stream<List<ReflectionModel>> watchReflections(String uid, String dateKey) {
     return _col(uid, dateKey)
-        .where('deleted', isEqualTo: false)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map(_fromDoc).toList());
+        .map((snap) {
+          final list = snap.docs.map(_fromDoc).where((r) => !r.deleted).toList();
+          list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return list;
+        });
   }
 
   @override
@@ -62,11 +64,10 @@ class FirebaseReflectionRepository implements ReflectionRepository {
     String uid,
     String dateKey,
   ) async {
-    final snap = await _col(uid, dateKey)
-        .where('deleted', isEqualTo: false)
-        .orderBy('createdAt', descending: true)
-        .get();
-    return snap.docs.map(_fromDoc).toList();
+    final snap = await _col(uid, dateKey).get();
+    final list = snap.docs.map(_fromDoc).where((r) => !r.deleted).toList();
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return list;
   }
 
   @override
