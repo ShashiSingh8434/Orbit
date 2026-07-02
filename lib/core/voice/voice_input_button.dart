@@ -130,7 +130,8 @@ class _VoiceInputButtonState extends ConsumerState<VoiceInputButton> {
     final colorScheme = Theme.of(context).colorScheme;
 
     final bool processing = voiceState.isProcessing;
-    final bool disabled = voiceState.isInitialising || !voiceState.isAvailable || processing;
+    final bool disabled =
+        voiceState.isInitialising || !voiceState.isAvailable || processing;
     final bool listening = voiceState.isListening;
 
     final bgColor = listening
@@ -164,16 +165,16 @@ class _VoiceInputButtonState extends ConsumerState<VoiceInputButton> {
         onTap: disabled
             ? null
             : () => _voiceController.toggle(
-                    widget.controller,
-                    appendMode: widget.appendMode,
-                    listenFor: widget.listenFor,
-                    pauseFor: widget.pauseFor,
-                    localeId: widget.localeId,
-                    onListeningStarted: widget.onListeningStarted,
-                    onListeningStopped: widget.onListeningStopped,
-                    onTextChanged: widget.onTextChanged,
-                    onError: widget.onError,
-                  ),
+                widget.controller,
+                appendMode: widget.appendMode,
+                listenFor: widget.listenFor,
+                pauseFor: widget.pauseFor,
+                localeId: widget.localeId,
+                onListeningStarted: widget.onListeningStarted,
+                onListeningStopped: widget.onListeningStopped,
+                onTextChanged: widget.onTextChanged,
+                onError: widget.onError,
+              ),
       ),
     );
   }
@@ -280,7 +281,9 @@ class _AnimatedMicButtonState extends State<_AnimatedMicButton>
                   widget.listening ? Icons.mic_rounded : Icons.mic_none_rounded,
                   size: widget.iconSize,
                   color: widget.disabled
-                      ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.3)
                       : widget.iconColor,
                 ),
         ),

@@ -53,7 +53,8 @@ class VoiceService {
     if (!hasPerm) return;
 
     final tempDir = await getTemporaryDirectory();
-    _tempFilePath = '${tempDir.path}/voice_record_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    _tempFilePath =
+        '${tempDir.path}/voice_record_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
     _isListening = true;
     try {
@@ -88,7 +89,8 @@ class VoiceService {
     // Load API Keys
     final orbitGeminiKey = dotenv.env['GEMINI_API_KEY']?.trim() ?? '';
     final userGeminiKey = await SecureKeyStorage.getKey('gemini');
-    final geminiApiKey = (userGeminiKey != null && userGeminiKey.trim().isNotEmpty)
+    final geminiApiKey =
+        (userGeminiKey != null && userGeminiKey.trim().isNotEmpty)
         ? userGeminiKey.trim()
         : orbitGeminiKey;
 
@@ -102,47 +104,76 @@ class VoiceService {
       // 1. Try Groq whisper-large-v3-turbo
       if (groqApiKey.isNotEmpty) {
         try {
-          AppLogger.info('VoiceService: Attempting whisper-large-v3-turbo transcription on Groq...');
-          final text = await _transcribeWithGroq(file, 'whisper-large-v3-turbo', groqApiKey);
+          AppLogger.info(
+            'VoiceService: Attempting whisper-large-v3-turbo transcription on Groq...',
+          );
+          final text = await _transcribeWithGroq(
+            file,
+            'whisper-large-v3-turbo',
+            groqApiKey,
+          );
           if (text.isNotEmpty) {
             AppLogger.info('VoiceService: whisper-large-v3-turbo succeeded.');
             return text;
           }
         } catch (e) {
-          AppLogger.warning('VoiceService: whisper-large-v3-turbo transcription failed, trying fallback', e);
+          AppLogger.warning(
+            'VoiceService: whisper-large-v3-turbo transcription failed, trying fallback',
+            e,
+          );
         }
       }
 
       // 2. Try Gemini gemini-2.5-flash
       if (geminiApiKey.isNotEmpty) {
         try {
-          AppLogger.info('VoiceService: Attempting gemini-2.5-flash transcription on Gemini...');
-          final text = await _transcribeWithGemini(file, 'gemini-2.5-flash', geminiApiKey);
+          AppLogger.info(
+            'VoiceService: Attempting gemini-2.5-flash transcription on Gemini...',
+          );
+          final text = await _transcribeWithGemini(
+            file,
+            'gemini-2.5-flash',
+            geminiApiKey,
+          );
           if (text.isNotEmpty) {
             AppLogger.info('VoiceService: gemini-2.5-flash succeeded.');
             return text;
           }
         } catch (e) {
-          AppLogger.warning('VoiceService: gemini-2.5-flash transcription failed, trying fallback', e);
+          AppLogger.warning(
+            'VoiceService: gemini-2.5-flash transcription failed, trying fallback',
+            e,
+          );
         }
       }
 
       // 3. Try Groq whisper-large-v3
       if (groqApiKey.isNotEmpty) {
         try {
-          AppLogger.info('VoiceService: Attempting whisper-large-v3 transcription on Groq...');
-          final text = await _transcribeWithGroq(file, 'whisper-large-v3', groqApiKey);
+          AppLogger.info(
+            'VoiceService: Attempting whisper-large-v3 transcription on Groq...',
+          );
+          final text = await _transcribeWithGroq(
+            file,
+            'whisper-large-v3',
+            groqApiKey,
+          );
           if (text.isNotEmpty) {
             AppLogger.info('VoiceService: whisper-large-v3 succeeded.');
             return text;
           }
         } catch (e) {
-          AppLogger.error('VoiceService: whisper-large-v3 transcription failed', e);
+          AppLogger.error(
+            'VoiceService: whisper-large-v3 transcription failed',
+            e,
+          );
           rethrow;
         }
       }
 
-      throw Exception('All transcription providers failed or no API keys were configured.');
+      throw Exception(
+        'All transcription providers failed or no API keys were configured.',
+      );
     } finally {
       // Clean up the temp file
       try {
@@ -155,7 +186,11 @@ class VoiceService {
   }
 
   /// Transcribes using Groq's speech-to-text API.
-  Future<String> _transcribeWithGroq(File file, String model, String apiKey) async {
+  Future<String> _transcribeWithGroq(
+    File file,
+    String model,
+    String apiKey,
+  ) async {
     final request = http.MultipartRequest(
       'POST',
       Uri.parse('https://api.groq.com/openai/v1/audio/transcriptions'),
@@ -177,11 +212,12 @@ class VoiceService {
   }
 
   /// Transcribes using Gemini's API.
-  Future<String> _transcribeWithGemini(File file, String modelName, String apiKey) async {
-    final model = GenerativeModel(
-      model: modelName,
-      apiKey: apiKey,
-    );
+  Future<String> _transcribeWithGemini(
+    File file,
+    String modelName,
+    String apiKey,
+  ) async {
+    final model = GenerativeModel(model: modelName, apiKey: apiKey);
 
     final bytes = await file.readAsBytes();
     final audioPart = DataPart('audio/m4a', bytes);
@@ -191,7 +227,7 @@ class VoiceService {
         TextPart(
           'Transcribe this voice recording into clear text. '
           'Do not summarize, translate, or explain. '
-          'Only write down the exact spoken words, maintaining proper punctuation and casing.'
+          'Only write down the exact spoken words, maintaining proper punctuation and casing.',
         ),
         audioPart,
       ]),

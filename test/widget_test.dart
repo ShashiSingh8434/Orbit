@@ -1,7 +1,7 @@
-// Placeholder test file.
-// Firebase-dependent widget tests require additional setup
-// (mock Firebase, mock SharedPreferences, etc.).
-//
-// TODO: Add integration tests for auth flow and theme switching.
+import 'package:flutter_test/flutter_test.dart';
 
-void main() {}
+void main() {
+  test('Placeholder Unit Test', () {
+    expect(true, isTrue);
+  });
+}

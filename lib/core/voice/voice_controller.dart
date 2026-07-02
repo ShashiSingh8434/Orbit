@@ -102,9 +102,13 @@ class VoiceController extends StateNotifier<VoiceState> {
   Future<void> toggle(
     TextEditingController controller, {
     bool appendMode = true,
-    Duration listenFor = const Duration(minutes: 5), // Keep for API compatibility
-    Duration pauseFor = const Duration(seconds: 8),  // Keep for API compatibility
-    String? localeId,                                // Keep for API compatibility
+    Duration listenFor = const Duration(
+      minutes: 5,
+    ), // Keep for API compatibility
+    Duration pauseFor = const Duration(
+      seconds: 8,
+    ), // Keep for API compatibility
+    String? localeId, // Keep for API compatibility
     VoidCallback? onListeningStarted,
     VoidCallback? onListeningStopped,
     void Function(String text)? onTextChanged,
@@ -154,9 +158,11 @@ class VoiceController extends StateNotifier<VoiceState> {
       if (transcript.isNotEmpty && targetController != null) {
         final base = appendMode ? textBefore : '';
         final updated = _buildText(base, transcript, appendMode: appendMode);
-        
+
         targetController.text = updated;
-        targetController.selection = TextSelection.collapsed(offset: updated.length);
+        targetController.selection = TextSelection.collapsed(
+          offset: updated.length,
+        );
         onTextChanged?.call(updated);
       }
     } catch (e) {
@@ -176,7 +182,7 @@ class VoiceController extends StateNotifier<VoiceState> {
   Future<void> destroy() async {
     if (!state.isListening) return;
     await _service.cancelListening();
-    
+
     Future.microtask(() {
       if (mounted) {
         state = state.copyWith(isListening: false, isProcessing: false);

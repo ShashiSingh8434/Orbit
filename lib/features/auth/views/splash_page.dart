@@ -36,7 +36,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
       duration: const Duration(seconds: 4),
     )..repeat();
 
-    Future.delayed(const Duration(milliseconds: 0),() {
+    Future.delayed(const Duration(milliseconds: 0), () {
       if (!mounted) return;
       final authValue = ref.read(authStateProvider).value;
       if (authValue != null) {
@@ -165,7 +165,9 @@ class SpacePainter extends CustomPainter {
 
     // Pulsing outer glow
     final glowRadius = 45.0 + (pulseProgress * 15.0);
-    paint.color = colorScheme.primary.withValues(alpha: 0.2 - (pulseProgress * 0.1));
+    paint.color = colorScheme.primary.withValues(
+      alpha: 0.2 - (pulseProgress * 0.1),
+    );
     canvas.drawCircle(center, glowRadius, paint);
 
     // Main core

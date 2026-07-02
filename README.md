@@ -1,95 +1,127 @@
 # Orbit
 
-An AI-powered personal operating system for students — built with Flutter, Firebase, and Material 3.
+Orbit is an AI-powered Personal Operating System for students designed to handle the cognitive load of student life. By allowing you to braindump your day in a single reflection, Orbit's AI brain parses your text and automatically organizes your classes, tasks, decisions, learnings, and mood updates.
 
-Orbit handles the cognitive load of student life by allowing you to braindump your day in a single reflection. Orbit's AI brain parses your text and automatically organizes your classes, tasks, decisions, learnings, and mood.
+Built using **Flutter**, **Firebase**, and **Material 3**.
 
-## ✨ Features
+---
 
-- **Smart Reflection:** Write your daily thoughts naturally; Orbit automatically extracts structured Tasks, Events, Decisions, Learnings, and Moods.
-- **AI Infrastructure Layer:** Robust multi-provider AI system (Google Gemini & Groq).
-  - *Automatic Fallback:* If a provider hits a rate limit or goes offline, Orbit seamlessly fails over to another provider.
-  - *Secure Keys:* Connect your own API keys, encrypted locally using `flutter_secure_storage`.
-  - *Analytics Dashboard:* Track your AI token usage, request latency, and provider health in real-time.
-- **Detailed Daily Summaries:** Choose between paragraph or bullet-point summaries of your day.
-- **Modern UI/UX:** Space-themed custom splash screen, interactive "Slide to Sign In" slider, and Material 3 dynamic color theming.
+## 📸 Media & Screenshots
+
+| Custom Space Splash | Dynamic Home View |
+|:---:|:---:|
+| ![Splash Placeholder](assets/app_logo_dark.png) | ![Home Placeholder](assets/app_logo_light.png) |
+
+---
+
+## ✨ Key Features
+
+- **Smart Reflection (Speech & Text)**: Capture daily reflections either by typing or via voice recording (utilizing automated Whisper/Gemini Fallback Speech-To-Text transcription).
+- **Automated AI Extraction**: The system parses reflections to extract and synchronize:
+  - **Tasks**: Todo items with priorities and automatically detected due dates.
+  - **Decisions**: Key conclusions and logic paths recorded for later reference.
+  - **Learnings**: Captured knowledge snippets categorized by subject or theme.
+  - **Events**: Time-sensitive academic or personal events.
+  - **Mood tracking**: Automatic daily mood inference.
+- **Fail-safe AI Infrastructure**: A robust request manager supporting:
+  - **Sequential Fallback**: Graceful failover between Google Gemini and Groq API systems.
+  - **Real-time Health Monitoring**: Real-time evaluation of API latency and error rates.
+  - **Local Encryption**: Secure client-side storage of user-provided API tokens.
+- **Space Aesthetics**: Space-themed custom splash layouts, dynamic Material 3 custom theming (Dark & Light support), and rich animations.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Flutter** (Dart)
-- **Firebase** (Auth, Firestore)
-- **Riverpod** (State Management & Dependency Injection)
-- **Gemini & Groq** (Generative AI)
-- **Material 3** 
+- **Framework**: [Flutter](https://flutter.dev) (Dart)
+- **Backend Services**: [Firebase](https://firebase.google.com) (Authentication, Cloud Firestore)
+- **State Management**: [Riverpod](https://riverpod.dev) (Dependency injection and reactive state caching)
+- **Model Layer**: [Freezed](https://pub.dev/packages/freezed) & [Json Serializable](https://pub.dev/packages/json_serializable) for immutable models
+- **AI Models**: Google Gemini 2.5 Flash, Groq Whisper (whisper-large-v3, whisper-large-v3-turbo), Llama 3/3.3, and Qwen.
 
-## 🚀 Getting Started
+---
 
-### Prerequisites
+## 🏗️ Architecture & folder Structure
 
-- Flutter SDK `>=3.12.0`
-- Dart `>=3.0.0`
-- A Firebase project
-- API Keys for Google Gemini (and optionally Groq)
+Orbit follows a **Feature-First Architecture** combined with Riverpod state management.
 
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/ShashiSingh8434/Orbit.git
-cd orbit
+```text
+lib/
+├── app/                  # Global routing and theme notifications
+├── core/                 # Shared widgets, utilities (AppLogger), and voice recording controllers
+└── features/             # Isolated feature components
+    ├── ai/               # AI prompts, synchronizers, and request router
+    ├── auth/             # Google Sign-In and email login views
+    ├── day/              # Daily summary aggregates
+    ├── tasks/            # Todo lists and task tracking
+    └── [other domains]   # events, learning, decision, mood, settings, home
 ```
 
-### 2. Environment Variables
+For a detailed look, refer to the documentation:
+- [Technical Architecture](docs/architecture.md)
+- [Folder Directory Reference](docs/folder_structure.md)
 
-Orbit uses a `.env` file to manage default API keys. Create a `.env` file in the root directory:
+---
 
+## 🚀 Setup & Installation
+
+### 1. Prerequisites
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (Stable channel)
+- A Firebase Project account
+- Google Gemini and optionally Groq API tokens
+
+### 2. Environment Configuration
+Copy the environment template file:
 ```bash
 cp .env.example .env
 ```
-Add your API keys to the `.env` file:
+Fill in the values in your `.env`:
 ```env
-GEMINI_API_KEY=your_gemini_key_here
-GROQ_API_KEY=your_groq_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 ```
 
-### 3. Firebase Setup
+### 3. Firebase Integration
+Add your `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) files to their respective platform locations.
+For complete instructions, check the [Workspace Setup Guide](docs/setup.md).
 
-Install the FlutterFire CLI if you haven't:
-
-```bash
-dart pub global activate flutterfire_cli
-```
-
-Configure your Firebase project:
-
-```bash
-flutterfire configure
-```
-
-#### Enable Authentication
-1. Go to **Firebase Console → Authentication → Sign-in method**
-2. Enable **Google** as a sign-in provider.
-3. Add your **SHA-1** fingerprint (required for Android Google Sign-In).
-
-#### Enable Firestore
-1. Go to **Firebase Console → Firestore Database**
-2. Create a database (start in **test mode** for development).
-
-### 4. Install dependencies
-
+### 4. Running the Application
 ```bash
 flutter pub get
-```
-
-### 5. Run
-
-```bash
 flutter run
 ```
 
-## 🏗️ Architecture
+### 5. Building the Release APK
+To compile the production release binary:
+```bash
+flutter build apk --release
+```
 
-- **Feature-First Architecture:** Code is organized by domain (`ai`, `auth`, `day`, `event`, `tasks`, etc.) rather than by layer.
-- **Riverpod Providers:** Heavy use of Riverpod for immutable state management, data caching, and dependency injection.
-- **AI Abstraction Layer:** The `AiRequestManager` handles queueing, rate limits, and provider failovers to ensure reliable AI inferences regardless of the underlying SDK.
+---
 
+## 🛣️ Roadmap
 
+- [x] Speech-to-text reflection transcription fallback pipeline.
+- [x] Native response schema compliance.
+- [x] Secure centralized mode-aware logging.
+- [ ] Offline caching support for reflections.
+- [ ] Integration of calendar services (Google Calendar).
+- [ ] Direct WhatsApp integration for sending quick reflections.
+
+---
+
+## 🤝 Contributing
+
+We welcome community contributions! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to understand branch conventions, Conventional Commits style guides, and local development configurations.
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for more details.
+
+---
+
+## 👤 Credits
+
+Created and maintained by [Shashi Singh](https://github.com/ShashiSingh8434). Special thanks to all contributors!

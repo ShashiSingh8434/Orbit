@@ -19,8 +19,6 @@ abstract final class AppRoutes {
   /// Weekly overview (future). Deep-link: `orbit://weekly`
   static const weekly = '/home/weekly';
 
-
-
   /// Task list. Deep-link: `orbit://task` (all tasks)
   static const tasks = '/home/tasks';
 

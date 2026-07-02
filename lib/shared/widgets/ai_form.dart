@@ -180,7 +180,9 @@ class _AiFormState extends ConsumerState<AiForm> {
                 if (_scrollController.hasClients) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (_scrollController.hasClients) {
-                      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                      _scrollController.jumpTo(
+                        _scrollController.position.maxScrollExtent,
+                      );
                     }
                   });
                 }
@@ -192,4 +194,3 @@ class _AiFormState extends ConsumerState<AiForm> {
     );
   }
 }
-

@@ -34,8 +34,17 @@ class AppLogger {
     }
   }
 
-  static void _log(String level, String message, Object? error, StackTrace? stackTrace) {
-    final timestamp = DateTime.now().toIso8601String().split('T').last.substring(0, 12);
+  static void _log(
+    String level,
+    String message,
+    Object? error,
+    StackTrace? stackTrace,
+  ) {
+    final timestamp = DateTime.now()
+        .toIso8601String()
+        .split('T')
+        .last
+        .substring(0, 12);
     final logMessage = '[$timestamp] [$level] $message';
     debugPrint(logMessage);
     if (error != null) {
