@@ -45,9 +45,9 @@ graph TD
 
 Orbit uses a **Feature-First** layout combined with clean separation of concerns. Inside the [lib](file:///c:/Shashi%20Singh/Projects/Orbit/orbit/lib) folder, files are grouped into three primary directories:
 
-*   **[app](file:///c:/Shashi%20Singh/Projects/Orbit/orbit/lib/app)**: Application-wide configurations, including routing ([router.dart](file:///c:/Shashi%20Singh/Projects/Orbit/orbit/lib/app/router.dart)) and global app bootstrap logic.
-*   **[core](file:///c:/Shashi%20Singh/Projects/Orbit/orbit/lib/core)**: Shared elements, general-purpose widgets, cross-cutting configurations, and shared providers (e.g., Speech-to-Text Voice Service).
-*   **[features](file:///c:/Shashi%20Singh/Projects/Orbit/orbit/lib/features)**: Self-contained feature modules (e.g., `auth`, `reflection`, `tasks`, `mood`, `ai`).
+*   **[app](/lib/app)**: Application-wide configurations, including routing ([router.dart](file:///c:/Shashi%20Singh/Projects/Orbit/orbit/lib/app/router.dart)) and global app bootstrap logic.
+*   **[shared](../lib/shared)**: Shared elements, general-purpose widgets, cross-cutting configurations, and shared providers (e.g., Speech-to-Text Voice Service).
+*   **[features](../lib/features)**: Self-contained feature modules (e.g., `auth`, `reflection`, `tasks`, `mood`, `ai`).
 
 Each module in `lib/features/` is split into clean architectural layers:
 1.  **`views/`**: Pure representation files (UI layouts, forms, lists).

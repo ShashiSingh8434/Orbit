@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Checks if the user is authenticated with Firebase Auth
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Checks if the authenticated user's UID matches the resource owner's UID
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Secure all user-owned data hierarchically
+    // This recursive wildcard ({document=**}) automatically covers:
+    // - users/{uid}
+    // - users/{uid}/tasks/{taskId}
+    // - users/{uid}/learnings/{learningId}
+    // - users/{uid}/events/{eventId}
+    // - users/{uid}/moods/{moodId}
+    // - users/{uid}/days/{dayId}
+    // - users/{uid}/decisions/{decisionId}
+    // - users/{uid}/reflections/{dateKey}/entries/{reflectionId}
+    match /users/{uid}/{document=**} {
+      allow read, write: if isOwner(uid);
+    }
+  }
+}
