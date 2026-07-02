@@ -22,7 +22,6 @@ Built using **Flutter**, **Firebase**, and **Material 3**.
   - **Decisions**: Key conclusions and logic paths recorded for later reference.
   - **Learnings**: Captured knowledge snippets categorized by subject or theme.
   - **Events**: Time-sensitive academic or personal events.
-  - **Mood tracking**: Automatic daily mood inference.
 - **Fail-safe AI Infrastructure**: A robust request manager supporting:
   - **Sequential Fallback**: Graceful failover between Google Gemini and Groq API systems.
   - **Real-time Health Monitoring**: Real-time evaluation of API latency and error rates.
@@ -106,7 +105,6 @@ flutter build apk --release
 - [x] Secure centralized mode-aware logging.
 - [ ] Offline caching support for reflections.
 - [ ] Integration of calendar services (Google Calendar).
-- [ ] Direct WhatsApp integration for sending quick reflections.
 
 ---
 
@@ -124,4 +122,4 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more details.
 
 ## 👤 Credits
 
-Created and maintained by [Shashi Singh](https://github.com/ShashiSingh8434). Special thanks to all contributors!
+Created and maintained by [Shashi Singh](https://github.com/ShashiSingh8434).
