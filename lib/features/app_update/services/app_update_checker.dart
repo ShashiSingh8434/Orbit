@@ -31,7 +31,9 @@ class AppUpdateChecker {
     // 2. Fetch remote configurations
     final config = await _repository.fetchAppConfig();
     if (config == null) {
-      AppLogger.warning('Remote AppConfig could not be retrieved. Skipping update check.');
+      AppLogger.warning(
+        'Remote AppConfig could not be retrieved. Skipping update check.',
+      );
       return AppUpdateResult(
         updateRequired: false,
         forceUpdate: false,

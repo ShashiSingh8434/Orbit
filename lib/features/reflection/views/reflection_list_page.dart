@@ -28,7 +28,7 @@ class ReflectionListPage extends ConsumerWidget {
         leading: BackButton(onPressed: () => context.pop()),
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_today_rounded),
+            icon: const Icon(Icons.calendar_month_rounded),
             tooltip: 'Pick date',
             onPressed: () => _pickDate(context, ref, resolvedDate),
           ),

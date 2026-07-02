@@ -26,7 +26,8 @@ class AppUpdateState {
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       result: result ?? this.result,
-      optionalUpdateDismissed: optionalUpdateDismissed ?? this.optionalUpdateDismissed,
+      optionalUpdateDismissed:
+          optionalUpdateDismissed ?? this.optionalUpdateDismissed,
     );
   }
 }
@@ -47,7 +48,11 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
       state = state.copyWith(isLoading: false, result: result);
       return result;
     } catch (e, stackTrace) {
-      AppLogger.error('Error occurred in AppUpdateNotifier while checking updates', e, stackTrace);
+      AppLogger.error(
+        'Error occurred in AppUpdateNotifier while checking updates',
+        e,
+        stackTrace,
+      );
       state = state.copyWith(isLoading: false, error: e.toString());
       return null;
     }
@@ -60,7 +65,8 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   }
 }
 
-final appUpdateProvider = StateNotifierProvider<AppUpdateNotifier, AppUpdateState>((ref) {
-  final checker = ref.watch(appUpdateCheckerProvider);
-  return AppUpdateNotifier(checker);
-});
+final appUpdateProvider =
+    StateNotifierProvider<AppUpdateNotifier, AppUpdateState>((ref) {
+      final checker = ref.watch(appUpdateCheckerProvider);
+      return AppUpdateNotifier(checker);
+    });

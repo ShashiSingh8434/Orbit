@@ -40,7 +40,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _initialPage);
-    _initialDate = DateTime.now();
+    final now = DateTime.now();
+    _initialDate = DateTime(now.year, now.month, now.day);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = ref.read(authStateProvider).value;
@@ -97,8 +98,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 lastDate: DateTime.now().add(const Duration(days: 365)),
               );
               if (selectedDate != null) {
+                final cleanSelected = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
                 final targetIndex =
-                    _initialPage + selectedDate.difference(_initialDate).inDays;
+                    _initialPage + cleanSelected.difference(_initialDate).inDays;
                 _pageController.animateToPage(
                   targetIndex,
                   duration: const Duration(milliseconds: 300),

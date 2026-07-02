@@ -18,10 +18,15 @@ class FirebaseAppConfigRepository implements AppConfigRepository {
   Future<AppConfig?> fetchAppConfig() async {
     try {
       AppLogger.info('Fetching remote app configuration from Firestore...');
-      final doc = await _firestore.collection('app_config').doc('current').get();
+      final doc = await _firestore
+          .collection('app_config')
+          .doc('current')
+          .get();
 
       if (!doc.exists) {
-        AppLogger.warning('AppConfig document does not exist in Firestore (app_config/current)');
+        AppLogger.warning(
+          'AppConfig document does not exist in Firestore (app_config/current)',
+        );
         return null;
       }
 
@@ -29,7 +34,11 @@ class FirebaseAppConfigRepository implements AppConfigRepository {
       AppLogger.info('Successfully fetched remote app configuration: $config');
       return config;
     } catch (e, stackTrace) {
-      AppLogger.error('Failed to fetch remote app configuration from Firestore', e, stackTrace);
+      AppLogger.error(
+        'Failed to fetch remote app configuration from Firestore',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
