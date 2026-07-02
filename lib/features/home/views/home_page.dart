@@ -10,7 +10,6 @@ import '../../tasks/widgets/task_section.dart';
 import '../../learning/widgets/learning_section.dart';
 import '../../decision/widgets/decision_section.dart';
 import '../../event/widgets/event_section.dart';
-import '../../mood/widgets/mood_section.dart';
 import '../../day/providers/day_data_provider.dart';
 import '../widgets/day_skeleton_loader.dart';
 import '../../ai/engine/ai_queue_manager.dart';
@@ -272,7 +271,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
     if (widget.asyncValue.hasValue) {
       _minTimeElapsed = true;
     } else {
-      Future.delayed(const Duration(seconds: 2), () {
+      Future.delayed(const Duration(seconds: 0), () {
         if (mounted) setState(() => _minTimeElapsed = true);
       });
     }
@@ -361,14 +360,14 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
               ),
               const SizedBox(height: 16),
             ],
-            if (data.moods.isNotEmpty) ...[
-              MoodSection(
-                moods: data.moods,
-                isLoading: false,
-                date: widget.date,
-              ),
-              const SizedBox(height: 16),
-            ],
+            // if (data.moods.isNotEmpty) ...[
+            //   MoodSection(
+            //     moods: data.moods,
+            //     isLoading: false,
+            //     date: widget.date,
+            //   ),
+            //   const SizedBox(height: 16),
+            // ],
           ],
         );
       },

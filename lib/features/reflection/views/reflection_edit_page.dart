@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/voice/voice_input_button.dart';
+import '../../../core/voice/voice_provider.dart';
+import '../../../core/voice/voice_controller.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../controllers/reflection_controller.dart';
 import '../models/reflection_model.dart';
@@ -56,11 +58,14 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
     'social',
   ];
 
+  late final VoiceController _voiceController;
+
   @override
   void initState() {
     super.initState();
     _resolvedDate = widget.dateKey ?? OrbitDateUtils.todayKey();
     _textCtrl = TextEditingController();
+    _voiceController = ref.read(voiceControllerProvider.notifier);
     _initPage();
   }
 
@@ -88,6 +93,7 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
 
   @override
   void dispose() {
+    _voiceController.destroy();
     _textCtrl.dispose();
     _tagInputCtrl.dispose();
     super.dispose();
@@ -96,6 +102,9 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
   // ── Save ──────────────────────────────────────────────────────────────────
 
   Future<void> _save() async {
+    // Stop voice input listening if it's active
+    _voiceController.stop();
+
     final text = _textCtrl.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

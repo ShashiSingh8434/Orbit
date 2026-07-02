@@ -36,7 +36,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
       duration: const Duration(seconds: 4),
     )..repeat();
 
-    Future.delayed(const Duration(milliseconds: 3500), () {
+    Future.delayed(const Duration(milliseconds: 0),() {
       if (!mounted) return;
       final authValue = ref.read(authStateProvider).value;
       if (authValue != null) {

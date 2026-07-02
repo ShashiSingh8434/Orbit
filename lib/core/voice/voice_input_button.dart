@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'voice_provider.dart';
+import 'voice_controller.dart';
 
 /// A self-contained microphone button that drives voice-to-text for any
 /// [TextEditingController].
@@ -105,13 +106,20 @@ class VoiceInputButton extends ConsumerStatefulWidget {
 }
 
 class _VoiceInputButtonState extends ConsumerState<VoiceInputButton> {
+  late final VoiceController _voiceController;
+
+  @override
+  void initState() {
+    super.initState();
+    _voiceController = ref.read(voiceControllerProvider.notifier);
+  }
+
   @override
   void dispose() {
-    // Stop listening immediately when this button is removed from the widget tree
+    // Cancel listening immediately when this button is removed from the widget tree
     // (e.g. when navigating away from the page).
-    final voiceState = ref.read(voiceControllerProvider);
-    if (voiceState.isListening) {
-      ref.read(voiceControllerProvider.notifier).stop();
+    if (_voiceController.isListening) {
+      _voiceController.destroy();
     }
     super.dispose();
   }
@@ -151,9 +159,7 @@ class _VoiceInputButtonState extends ConsumerState<VoiceInputButton> {
         iconColor: iconColor,
         onTap: disabled
             ? null
-            : () => ref
-                  .read(voiceControllerProvider.notifier)
-                  .toggle(
+            : () => _voiceController.toggle(
                     widget.controller,
                     appendMode: widget.appendMode,
                     listenFor: widget.listenFor,

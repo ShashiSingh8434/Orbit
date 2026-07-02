@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/voice/voice_input_button.dart';
+import '../../core/voice/voice_provider.dart';
+import '../../core/voice/voice_controller.dart';
 
-class AiForm extends StatefulWidget {
+class AiForm extends ConsumerStatefulWidget {
   final TextEditingController promptCtrl;
   final bool isLoading;
   final String? error;
@@ -22,34 +25,25 @@ class AiForm extends StatefulWidget {
   });
 
   @override
-  State<AiForm> createState() => _AiFormState();
+  ConsumerState<AiForm> createState() => _AiFormState();
 }
 
-class _AiFormState extends State<AiForm> {
+class _AiFormState extends ConsumerState<AiForm> {
   late final ScrollController _scrollController;
+  late final VoiceController _voiceController;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    widget.promptCtrl.addListener(_scrollListener);
+    _voiceController = ref.read(voiceControllerProvider.notifier);
   }
 
   @override
   void dispose() {
-    widget.promptCtrl.removeListener(_scrollListener);
+    _voiceController.destroy();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _scrollListener() {
-    if (_scrollController.hasClients) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-        }
-      });
-    }
   }
 
   @override
@@ -153,7 +147,11 @@ class _AiFormState extends State<AiForm> {
                 child: widget.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : FilledButton.icon(
-                        onPressed: widget.onSubmit,
+                        onPressed: () {
+                          // Stop voice input listening if it's active
+                          _voiceController.stop();
+                          widget.onSubmit();
+                        },
                         style: FilledButton.styleFrom(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -177,6 +175,16 @@ class _AiFormState extends State<AiForm> {
               buttonSize: 52,
               pauseFor: const Duration(seconds: 10),
               tooltip: 'Dictate your prompt',
+              onTextChanged: (_) {
+                // Scroll to the bottom when voice input updates text
+                if (_scrollController.hasClients) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                    }
+                  });
+                }
+              },
             ),
           ],
         ),
@@ -184,3 +192,4 @@ class _AiFormState extends State<AiForm> {
     );
   }
 }
+

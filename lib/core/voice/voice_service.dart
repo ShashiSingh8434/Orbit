@@ -16,10 +16,10 @@ typedef VoiceErrorCallback = void Function(SpeechRecognitionError error);
 class VoiceService {
   VoiceService();
 
-  final SpeechToText _stt = SpeechToText();
-
-  bool _isAvailable = false;
-  bool _isListening = false;
+  static final SpeechToText _stt = SpeechToText();
+  static bool _isAvailable = false;
+  static bool _isListening = false;
+  static Future<bool>? _initFuture;
 
   /// Whether the device supports speech recognition.
   bool get isAvailable => _isAvailable;
@@ -34,8 +34,9 @@ class VoiceService {
     VoiceErrorCallback? onError,
   }) async {
     if (_isAvailable) return true;
+    if (_initFuture != null) return _initFuture!;
 
-    _isAvailable = await _stt.initialize(
+    _initFuture = _stt.initialize(
       onStatus: (status) {
         // Sync internal state so callers can rely on [isListening].
         if (status == 'done' || status == 'notListening') {
@@ -49,6 +50,15 @@ class VoiceService {
       },
       debugLogging: false,
     );
+
+    try {
+      _isAvailable = await _initFuture!;
+    } catch (e) {
+      _isAvailable = false;
+      rethrow;
+    } finally {
+      _initFuture = null;
+    }
 
     return _isAvailable;
   }

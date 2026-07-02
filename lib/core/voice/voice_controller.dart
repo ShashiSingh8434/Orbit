@@ -70,6 +70,9 @@ class VoiceController extends StateNotifier<VoiceState> {
 
   final VoiceService _service;
 
+  /// Whether the voice controller is currently listening.
+  bool get isListening => state.isListening;
+
   // Tracks the text that existed *before* the current listening session so
   // partial results can be appended repeatedly without duplication.
   String _textBeforeListening = '';
@@ -291,10 +294,31 @@ class VoiceController extends StateNotifier<VoiceState> {
     _listenSessionId++; // Invalidate any running callbacks
     if (!state.isListening) return;
     await _service.stopListening();
-    state = state.copyWith(isListening: false);
-    _activeOnListeningStopped?.call();
-    _clearActiveSession();
+    
+    Future.microtask(() {
+      if (mounted) {
+        state = state.copyWith(isListening: false);
+        _activeOnListeningStopped?.call();
+        _clearActiveSession();
+      }
+    });
   }
+
+  /// Cancels any active listening session immediately and clears state.
+  Future<void> destroy() async {
+    _shouldRestart = false;
+    _listenSessionId++; // Invalidate any running callbacks
+    await _service.cancelListening();
+    
+    Future.microtask(() {
+      if (mounted) {
+        state = state.copyWith(isListening: false);
+        _activeOnListeningStopped?.call();
+        _clearActiveSession();
+      }
+    });
+  }
+
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 

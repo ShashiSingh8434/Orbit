@@ -25,7 +25,7 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
       apiSource: _selectedApiSource,
       todayOnly: _todayOnly,
     );
-    final recentLogs = service.getRecentLogs(count: 10);
+    final recentLogs = service.getRecentLogs(count: 5);
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
