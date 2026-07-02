@@ -129,7 +129,8 @@ class _VoiceInputButtonState extends ConsumerState<VoiceInputButton> {
     final voiceState = ref.watch(voiceControllerProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    final bool disabled = voiceState.isInitialising || !voiceState.isAvailable;
+    final bool processing = voiceState.isProcessing;
+    final bool disabled = voiceState.isInitialising || !voiceState.isAvailable || processing;
     final bool listening = voiceState.isListening;
 
     final bgColor = listening
@@ -142,7 +143,9 @@ class _VoiceInputButtonState extends ConsumerState<VoiceInputButton> {
 
     final String resolvedTooltip =
         widget.tooltip ??
-        (disabled
+        (processing
+            ? 'Processing transcription...'
+            : disabled
             ? 'Voice input unavailable'
             : listening
             ? 'Stop listening'
@@ -152,6 +155,7 @@ class _VoiceInputButtonState extends ConsumerState<VoiceInputButton> {
       message: resolvedTooltip,
       child: _AnimatedMicButton(
         listening: listening,
+        processing: processing,
         disabled: disabled,
         size: widget.buttonSize,
         iconSize: widget.iconSize,
@@ -178,11 +182,10 @@ class _VoiceInputButtonState extends ConsumerState<VoiceInputButton> {
 // ── Internal animated button ──────────────────────────────────────────────────
 
 /// Animated mic button with a gentle pulse when listening.
-///
-/// Kept private so the public API surface stays clean.
 class _AnimatedMicButton extends StatefulWidget {
   const _AnimatedMicButton({
     required this.listening,
+    required this.processing,
     required this.disabled,
     required this.size,
     required this.iconSize,
@@ -192,6 +195,7 @@ class _AnimatedMicButton extends StatefulWidget {
   });
 
   final bool listening;
+  final bool processing;
   final bool disabled;
   final double size;
   final double iconSize;
@@ -264,13 +268,21 @@ class _AnimatedMicButtonState extends State<_AnimatedMicButton>
                 : widget.backgroundColor,
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            widget.listening ? Icons.mic_rounded : Icons.mic_none_rounded,
-            size: widget.iconSize,
-            color: widget.disabled
-                ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)
-                : widget.iconColor,
-          ),
+          child: widget.processing
+              ? Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(widget.iconColor),
+                  ),
+                )
+              : Icon(
+                  widget.listening ? Icons.mic_rounded : Icons.mic_none_rounded,
+                  size: widget.iconSize,
+                  color: widget.disabled
+                      ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)
+                      : widget.iconColor,
+                ),
         ),
       ),
     );

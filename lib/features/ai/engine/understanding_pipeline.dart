@@ -88,15 +88,11 @@ class UnderstandingPipeline {
       );
 
       var jsonString = response.text.trim();
-      if (jsonString.startsWith('```json')) {
-        jsonString = jsonString.substring(7);
-      } else if (jsonString.startsWith('```')) {
-        jsonString = jsonString.substring(3);
+      final firstBrace = jsonString.indexOf('{');
+      final lastBrace = jsonString.lastIndexOf('}');
+      if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
+        jsonString = jsonString.substring(firstBrace, lastBrace + 1);
       }
-      if (jsonString.endsWith('```')) {
-        jsonString = jsonString.substring(0, jsonString.length - 3);
-      }
-      jsonString = jsonString.trim();
 
       final Map<String, dynamic> data = jsonDecode(jsonString);
 
@@ -175,8 +171,9 @@ class UnderstandingPipeline {
       debugPrint(
         'UnderstandingPipeline completed for reflection: ${reflection.id}',
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('UnderstandingPipeline error: $e');
+      debugPrint('Stack trace: $stackTrace');
     }
   }
 
