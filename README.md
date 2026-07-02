@@ -6,11 +6,61 @@ Built using **Flutter**, **Firebase**, and **Material 3**.
 
 ---
 
-## 📸 Media & Screenshots
+## 📸 Media
 
-| Custom Space Splash | Dynamic Home View |
-|:---:|:---:|
-| ![Splash Placeholder](assets/app_logo_dark.png) | ![Home Placeholder](assets/app_logo_light.png) |
+<table align="center" cellpadding="12" cellspacing="12">
+  <tr>
+    <td align="center">
+      <sub><b>Dashboard</b></sub>
+      <img src="https://github.com/user-attachments/assets/d8f2401c-8646-43fc-9d1b-376a43ff9d4a" width="220"/><br/>
+    </td>
+    <td align="center">
+      <sub><b>Reflection</b></sub>
+      <img src="https://github.com/user-attachments/assets/76614997-e511-4e8b-be69-ac374b6c24f9" width="220"/><br/>
+    </td>
+    <td align="center">
+      <sub><b>Response</b></sub>
+      <img src="https://github.com/user-attachments/assets/907b11f0-54ca-4f86-b4c6-7f403afe64af" width="220"/><br/>
+    </td>
+    <td align="center">
+      <sub><b>Decisions</b></sub>
+      <img src="https://github.com/user-attachments/assets/8525b608-0f69-4d19-a5a5-b8ace688aaef" width="220"/><br/>
+    </td>
+  </tr>
+
+  <tr>
+    <td align="center">
+      <sub><b>Tasks</b></sub>
+      <img src="https://github.com/user-attachments/assets/c5a0dfba-409f-4d69-96e8-d72a22527ca0" width="220"/><br/>
+    </td>
+    <td align="center">
+      <sub><b>Guide Page</b></sub>
+      <img src="https://github.com/user-attachments/assets/7cf8e555-6e3f-4736-a3fb-76d0e888bf45" width="220"/><br/>
+    </td>
+    <td align="center">
+      <sub><b>Settings</b></sub>
+      <img src="https://github.com/user-attachments/assets/634a82cd-1e06-4fb7-974e-0b8721bdb4f3" width="220"/><br/>
+    </td>
+    <td align="center">
+      <sub><b>AI Analytics</b></sub>
+      <img src="https://github.com/user-attachments/assets/dd33ea92-71a1-484b-9115-16493ed42c36" width="220"/><br/>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🎥 Demo
+
+<div align="center">
+
+https://github.com/user-attachments/assets/968c53c1-ad7e-49ac-8578-c9b403b301b6
+
+**Orbit App Demo**
+
+*A quick overview of the application's features and user experience.*
+
+</div>
 
 ---
 
