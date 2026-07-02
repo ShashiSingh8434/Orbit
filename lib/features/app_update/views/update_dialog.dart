@@ -23,7 +23,10 @@ class UpdateDialog extends ConsumerWidget {
     AppLogger.info('Launching download URL: ${config.downloadUrl}');
     try {
       if (await canLaunchUrl(url)) {
-        final success = await launchUrl(url, mode: LaunchMode.externalApplication);
+        final success = await launchUrl(
+          url,
+          mode: LaunchMode.externalApplication,
+        );
         AppLogger.info('URL launch result: success=$success');
       } else {
         AppLogger.error('Could not launch URL: ${config.downloadUrl}');
@@ -92,7 +95,8 @@ class UpdateDialog extends ConsumerWidget {
                   ),
                   _VersionBadge(
                     label: 'Latest',
-                    version: '^${config.latestVersionName}+${config.latestVersionCode}',
+                    version:
+                        '^${config.latestVersionName}+${config.latestVersionCode}',
                     color: colorScheme.primary,
                   ),
                 ],
@@ -115,7 +119,9 @@ class UpdateDialog extends ConsumerWidget {
                   constraints: const BoxConstraints(maxHeight: 150),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: SingleChildScrollView(
@@ -138,7 +144,9 @@ class UpdateDialog extends ConsumerWidget {
                   if (forceUpdate) ...[
                     TextButton(
                       onPressed: () {
-                        AppLogger.info('User clicked "Exit" button in forced update dialog.');
+                        AppLogger.info(
+                          'User clicked "Exit" button in forced update dialog.',
+                        );
                         SystemNavigator.pop();
                       },
                       child: Text(
@@ -154,7 +162,9 @@ class UpdateDialog extends ConsumerWidget {
                     TextButton(
                       onPressed: () {
                         AppLogger.info('User clicked "Later" button.');
-                        ref.read(appUpdateProvider.notifier).dismissOptionalUpdate();
+                        ref
+                            .read(appUpdateProvider.notifier)
+                            .dismissOptionalUpdate();
                         Navigator.of(context).pop();
                       },
                       child: Text(
@@ -175,14 +185,15 @@ class UpdateDialog extends ConsumerWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       elevation: 0,
                     ),
                     child: const Text(
                       'Update Now',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -216,10 +227,7 @@ class _VersionBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

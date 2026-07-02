@@ -213,6 +213,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
           ),
+
           // ListTile(
           //   leading: const Icon(Icons.gavel_rounded),
           //   title: const Text('Licences'),
@@ -223,7 +224,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           //     applicationVersion: AppConstants.appVersion,
           //   ),
           // ),
-
           const Divider(),
 
           // ── Sign Out ──────────────────────────────────────────────────

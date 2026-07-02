@@ -98,9 +98,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                 lastDate: DateTime.now().add(const Duration(days: 365)),
               );
               if (selectedDate != null) {
-                final cleanSelected = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+                final cleanSelected = DateTime(
+                  selectedDate.year,
+                  selectedDate.month,
+                  selectedDate.day,
+                );
                 final targetIndex =
-                    _initialPage + cleanSelected.difference(_initialDate).inDays;
+                    _initialPage +
+                    cleanSelected.difference(_initialDate).inDays;
                 _pageController.animateToPage(
                   targetIndex,
                   duration: const Duration(milliseconds: 300),
