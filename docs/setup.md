@@ -23,7 +23,7 @@ Orbit relies on Firebase Authentication and Firebase Cloud Firestore for storage
 3. Download the configuration sheets:
    - For Android: Download `google-services.json` and move it to `android/app/google-services.json`.
    - For iOS: Download `GoogleService-Info.plist` and move it to `ios/Runner/GoogleService-Info.plist`.
-4. Enable **Email/Password** and **Google Sign-In** under **Authentication**.
+4. Enable **Google Sign-In** under **Authentication**.
 5. Enable **Cloud Firestore** and configure database rules.
 
 ---

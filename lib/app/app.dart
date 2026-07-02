@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import '../core/voice/global_voice_status_notch.dart';
 import '../features/ai/views/global_ai_status_notch.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
@@ -29,6 +30,7 @@ class OrbitApp extends ConsumerWidget {
             // ignore: use_null_aware_elements
             if (child != null) child,
             const GlobalAiStatusNotch(),
+            const GlobalVoiceStatusNotch(),
           ],
         );
       },

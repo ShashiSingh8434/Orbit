@@ -213,16 +213,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.gavel_rounded),
-            title: const Text('Licences'),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => showLicensePage(
-              context: context,
-              applicationName: AppConstants.appName,
-              applicationVersion: AppConstants.appVersion,
-            ),
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.gavel_rounded),
+          //   title: const Text('Licences'),
+          //   trailing: const Icon(Icons.chevron_right_rounded),
+          //   onTap: () => showLicensePage(
+          //     context: context,
+          //     applicationName: AppConstants.appName,
+          //     applicationVersion: AppConstants.appVersion,
+          //   ),
+          // ),
 
           const Divider(),
 
