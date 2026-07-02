@@ -43,7 +43,7 @@ dependencies:
 
   # ── Environment Variables ──
   # Keys are loaded from .env (gitignored). See .env.example.
-  flutter_dotenv: ^5.2.1
+  flutter_dotenv: ^6.0.1
 
   # ── Persistence ──
   shared_preferences: ^2.3.3
