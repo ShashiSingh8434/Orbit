@@ -39,7 +39,7 @@ class LoginPage extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 24),
-                      const OrbitLogo(size: 100),
+                      const OrbitLogo(size: 125),
                       const SizedBox(height: 40),
                       Text(
                         'Welcome to ${AppConstants.appName}',
