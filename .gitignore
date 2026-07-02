@@ -44,13 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Firebase
-
-firebase.json
-lib/firebase_options.dart
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
-
 # Environment Variables — NEVER commit the real .env file.
 # Copy .env.example → .env and fill in your secret keys.
 .env
