@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/app_logger.dart';
@@ -134,7 +135,22 @@ class UpdateDialog extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (!forceUpdate) ...[
+                  if (forceUpdate) ...[
+                    TextButton(
+                      onPressed: () {
+                        AppLogger.info('User clicked "Exit" button in forced update dialog.');
+                        SystemNavigator.pop();
+                      },
+                      child: Text(
+                        'Exit',
+                        style: TextStyle(
+                          color: colorScheme.error,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ] else ...[
                     TextButton(
                       onPressed: () {
                         AppLogger.info('User clicked "Later" button.');
