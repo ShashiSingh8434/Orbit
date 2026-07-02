@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import '../../auth/views/splash_page.dart'; // For SpacePainter
+import '../../../shared/widgets/space_painter.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../ai/engine/detailed_summary_pipeline.dart';
 

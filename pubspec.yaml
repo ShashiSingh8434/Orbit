@@ -60,6 +60,7 @@ dependencies:
   http: ^1.2.2
   crypto: ^3.0.6
   url_launcher: ^6.3.1
+  package_info_plus: ^8.0.0
 
   # ── Charts ──
   fl_chart: ^0.70.2
