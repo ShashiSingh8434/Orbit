@@ -13,6 +13,7 @@ import '../analytics/ai_usage_log.dart';
 import '../storage/secure_key_storage.dart';
 import 'ai_health_monitor.dart';
 import 'provider_router.dart';
+import '../../../core/utils/app_logger.dart';
 import 'rate_limit_manager.dart';
 import 'request_queue.dart';
 import 'response_cache.dart';
@@ -207,7 +208,7 @@ class AiRequestManager {
     }
     _initFuture = null; // force reload
     await ensureInitialized();
-    debugPrint('AiRequestManager: Registered $providerId with user key');
+    AppLogger.debug('AiRequestManager: Registered $providerId with user key');
   }
 
   /// Unregister a provider (e.g. when user removes their key).
@@ -221,7 +222,7 @@ class AiRequestManager {
     }
     _initFuture = null; // force reload
     await ensureInitialized();
-    debugPrint('AiRequestManager: Unregistered provider $providerId');
+    AppLogger.debug('AiRequestManager: Unregistered provider $providerId');
   }
 
   /// Validate an API key for a specific provider.
@@ -326,7 +327,7 @@ class AiRequestManager {
       }
     }
 
-    debugPrint(
+    AppLogger.debug(
       'AiRequestManager: Provider registration completed. Mode=$aiMode',
     );
   }
@@ -395,7 +396,7 @@ class AiRequestManager {
           );
           final cached = _responseCache.get(request.prompt, candidate.id);
           if (cached != null) {
-            debugPrint('AiRequestManager: Cache hit');
+            AppLogger.debug('AiRequestManager: Cache hit');
             final processingTime = DateTime.now().difference(processingStart);
             final totalTime = queueWaitTime + processingTime;
 
@@ -430,7 +431,7 @@ class AiRequestManager {
       try {
         final provider = _providerRouter.selectProvider(excludeIds: failedIds);
 
-        debugPrint(
+        AppLogger.info(
           'AiRequestManager: Attempt ${attempt + 1}/$_maxRetries '
           'using "${provider.id}" (${provider.model})',
         );
@@ -472,8 +473,9 @@ class AiRequestManager {
       } on AiException catch (e) {
         lastError = e;
         final failedProviderId = e.providerId ?? '';
-        debugPrint(
+        AppLogger.warning(
           'AiRequestManager: ${e.type} from $failedProviderId: ${e.message}',
+          e,
         );
 
         if (failedProviderId.isNotEmpty) {
@@ -516,13 +518,13 @@ class AiRequestManager {
 
         if (attempt < _maxRetries - 1) {
           final backoff = Duration(milliseconds: 500 * (attempt + 1));
-          debugPrint(
+          AppLogger.warning(
             'AiRequestManager: Backing off ${backoff.inMilliseconds}ms',
           );
           await Future.delayed(backoff);
         }
       } on AllProvidersExhaustedException {
-        debugPrint('AiRequestManager: All providers exhausted');
+        AppLogger.error('AiRequestManager: All providers exhausted');
         rethrow;
       }
     }

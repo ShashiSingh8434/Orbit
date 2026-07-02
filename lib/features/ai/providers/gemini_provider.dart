@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import 'ai_provider.dart';
 import 'ai_request.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Google Gemini implementation of [AiProvider].
 ///
@@ -103,7 +103,7 @@ class GeminiProvider extends AiProvider {
       await testModel.generateContent([Content.text('Hello')]);
       return true;
     } catch (e) {
-      debugPrint('GeminiProvider.validateApiKey failed: $e');
+      AppLogger.warning('GeminiProvider.validateApiKey failed', e);
       return false;
     }
   }
@@ -115,7 +115,7 @@ class GeminiProvider extends AiProvider {
       await testModel.generateContent([Content.text('ping')]);
       return true;
     } catch (e) {
-      debugPrint('GeminiProvider.healthCheck failed: $e');
+      AppLogger.warning('GeminiProvider.healthCheck failed', e);
       return false;
     }
   }

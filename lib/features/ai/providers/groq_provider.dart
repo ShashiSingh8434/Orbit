@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'ai_provider.dart';
 import 'ai_request.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Groq implementation of [AiProvider].
 ///
@@ -148,7 +148,7 @@ class GroqProvider extends AiProvider {
 
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('GroqProvider.validateApiKey failed: $e');
+      AppLogger.warning('GroqProvider.validateApiKey failed', e);
       return false;
     }
   }
@@ -175,7 +175,7 @@ class GroqProvider extends AiProvider {
 
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('GroqProvider.healthCheck failed: $e');
+      AppLogger.warning('GroqProvider.healthCheck failed', e);
       return false;
     }
   }

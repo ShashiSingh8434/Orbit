@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/app_logger.dart';
 
 import '../engine/ai_health_monitor.dart';
 import '../engine/ai_request_manager.dart';
@@ -151,7 +151,7 @@ class AiSettingsController extends Notifier<AiSettingsState> {
     final modeStr = mode == AiMode.userKey ? 'user_key' : 'orbit_default';
     await manager.setAiMode(modeStr);
     state = state.copyWith(mode: mode);
-    debugPrint('AiSettings: Mode set to $modeStr');
+    AppLogger.info('AiSettings: Mode set to $modeStr');
   }
 
   /// Connect a provider with a user-supplied API key.

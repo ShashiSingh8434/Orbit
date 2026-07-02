@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/app_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/providers/shared_preferences_provider.dart';
@@ -29,7 +29,7 @@ class AiAnalyticsService {
     }
 
     await _saveLogs(logs);
-    debugPrint(
+    AppLogger.debug(
       'AiAnalytics: Logged ${log.provider} request (Success: ${log.success})',
     );
   }
@@ -157,8 +157,8 @@ class AiAnalyticsService {
       return list
           .map((e) => AiUsageLog.fromJson(e as Map<String, dynamic>))
           .toList();
-    } catch (e) {
-      debugPrint('AiAnalytics: Error loading logs: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error('AiAnalytics: Error loading logs', e, stackTrace);
       return [];
     }
   }

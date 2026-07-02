@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// A serial FIFO queue that ensures only one AI request is in-flight at a time.
 ///
@@ -39,7 +39,7 @@ class RequestQueue {
     if (requestId != null) {
       final existing = _queue.where((q) => q.requestId == requestId);
       if (existing.isNotEmpty) {
-        debugPrint('RequestQueue: Deduplicating request "$requestId"');
+        AppLogger.debug('RequestQueue: Deduplicating request "$requestId"');
         return existing.first.completer.future as Future<T>;
       }
     }

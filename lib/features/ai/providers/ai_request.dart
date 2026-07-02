@@ -1,4 +1,5 @@
 /// Unified request/response models for all AI providers.
+library;
 
 /// Represents a single request to any AI provider.
 class AiRequest {

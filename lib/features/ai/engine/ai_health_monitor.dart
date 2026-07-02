@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import '../../../core/utils/app_logger.dart';
 
 import '../providers/ai_request.dart';
 
@@ -16,7 +16,7 @@ class AiHealthMonitor {
   /// Update health based on a successful response.
   void recordSuccess(String providerId) {
     _statuses[providerId] = ProviderHealthStatus.healthy;
-    debugPrint('AiHealthMonitor: $providerId → healthy');
+    AppLogger.debug('AiHealthMonitor: $providerId → healthy');
   }
 
   /// Update health based on a failure.
@@ -36,7 +36,7 @@ class AiHealthMonitor {
         // Don't change status on unknown/bad-request errors
         break;
     }
-    debugPrint('AiHealthMonitor: $providerId → ${_statuses[providerId]}');
+    AppLogger.debug('AiHealthMonitor: $providerId → ${_statuses[providerId]}');
   }
 
   /// Manually set a provider's status (e.g. after key validation).

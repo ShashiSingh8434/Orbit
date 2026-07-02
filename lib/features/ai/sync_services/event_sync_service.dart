@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../event/data/event_repository.dart';
 import '../../event/models/event_model.dart';
 import '../../../core/models/entity_metadata.dart';
 import '../models/dtos/event_dto.dart';
+import '../../../core/utils/app_logger.dart';
 
 final eventSyncServiceProvider = Provider<EventSyncService>((ref) {
   return EventSyncService(ref.read(eventRepositoryProvider));
@@ -42,9 +42,10 @@ class EventSyncService {
       DateTime parsedDate;
       try {
         parsedDate = DateTime.parse(dto.eventDate);
-      } catch (_) {
-        debugPrint(
+      } catch (e) {
+        AppLogger.warning(
           'EventSyncService: Could not parse eventDate "${dto.eventDate}", using today.',
+          e,
         );
         parsedDate = DateTime.now();
       }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../reflection/models/reflection_model.dart';
 import '../models/dtos/summary_dto.dart';
 import '../models/dtos/task_dto.dart';
@@ -55,7 +55,7 @@ class UnderstandingPipeline {
   });
 
   Future<void> onReflectionSaved(String uid, ReflectionModel reflection) async {
-    debugPrint(
+    AppLogger.info(
       'UnderstandingPipeline triggered for reflection: ${reflection.id}',
     );
 
@@ -168,12 +168,11 @@ class UnderstandingPipeline {
         reflection.id,
       );
 
-      debugPrint(
+      AppLogger.info(
         'UnderstandingPipeline completed for reflection: ${reflection.id}',
       );
     } catch (e, stackTrace) {
-      debugPrint('UnderstandingPipeline error: $e');
-      debugPrint('Stack trace: $stackTrace');
+      AppLogger.error('UnderstandingPipeline error', e, stackTrace);
     }
   }
 

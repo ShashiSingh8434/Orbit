@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Tracks per-provider rate-limit state and enforces exponential backoff cooldowns.
 ///
@@ -43,7 +43,7 @@ class RateLimitManager {
     state.cooldownExpiry = null;
     state.lastSuccess = DateTime.now();
     state.requestsThisMinute++;
-    debugPrint('RateLimitManager: $providerId success (streak reset)');
+    AppLogger.debug('RateLimitManager: $providerId success (streak reset)');
   }
 
   /// Call when a provider returns a rate-limit error.
@@ -60,7 +60,7 @@ class RateLimitManager {
     final cooldown = retryAfter ?? _cooldownLadder[ladderIndex];
 
     state.cooldownExpiry = DateTime.now().add(cooldown);
-    debugPrint(
+    AppLogger.warning(
       'RateLimitManager: $providerId rate-limited. '
       'Failures=${state.consecutiveFailures}, cooldown=${cooldown.inSeconds}s',
     );
@@ -70,7 +70,7 @@ class RateLimitManager {
   void recordFailure(String providerId) {
     final state = _getOrCreate(providerId);
     state.consecutiveFailures++;
-    debugPrint(
+    AppLogger.warning(
       'RateLimitManager: $providerId failure #${state.consecutiveFailures}',
     );
   }

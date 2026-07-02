@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../reflection/data/reflection_repository.dart';
 import 'understanding_pipeline.dart';
@@ -31,7 +31,7 @@ class AiQueueManager {
     int daysToLookBack = 7,
   }) async {
     if (_isProcessing) {
-      debugPrint('AiQueueManager: Already processing queue. Skipping.');
+      AppLogger.debug('AiQueueManager: Already processing queue. Skipping.');
       return;
     }
 
@@ -39,7 +39,7 @@ class AiQueueManager {
     int processedCount = 0;
 
     try {
-      debugPrint(
+      AppLogger.info(
         'AiQueueManager: Scanning for unextracted reflections over the last $daysToLookBack days...',
       );
 
@@ -57,7 +57,7 @@ class AiQueueManager {
             .toList();
 
         for (final reflection in unprocessed) {
-          debugPrint(
+          AppLogger.info(
             'AiQueueManager: Pushing reflection ${reflection.id} ($dateKey) to pipeline.',
           );
 
@@ -67,9 +67,11 @@ class AiQueueManager {
 
             // Add a small delay between processing multiple reflections to prevent immediate rate limit hits again
             await Future.delayed(const Duration(seconds: 2));
-          } catch (e) {
-            debugPrint(
-              'AiQueueManager: Failed to process reflection ${reflection.id}: $e',
+          } catch (e, s) {
+            AppLogger.error(
+              'AiQueueManager: Failed to process reflection ${reflection.id}',
+              e,
+              s,
             );
             // We continue processing others even if one fails
           }
@@ -77,14 +79,14 @@ class AiQueueManager {
       }
 
       if (processedCount > 0) {
-        debugPrint(
+        AppLogger.info(
           'AiQueueManager: Finished processing $processedCount queued reflections.',
         );
       } else {
-        debugPrint('AiQueueManager: No unextracted reflections found.');
+        AppLogger.info('AiQueueManager: No unextracted reflections found.');
       }
-    } catch (e) {
-      debugPrint('AiQueueManager: Error during queue scan: $e');
+    } catch (e, s) {
+      AppLogger.error('AiQueueManager: Error during queue scan', e, s);
     } finally {
       _isProcessing = false;
     }

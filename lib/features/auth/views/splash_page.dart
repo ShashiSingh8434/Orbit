@@ -128,7 +128,7 @@ class SpacePainter extends CustomPainter {
           math.sin(starProgress * math.pi * 4 + twinklePhase) * 0.5 + 0.5;
 
       final baseColor = isDark ? Colors.white : colorScheme.primary;
-      paint.color = baseColor.withOpacity(0.1 + (twinkle * 0.4));
+      paint.color = baseColor.withValues(alpha: 0.1 + (twinkle * 0.4));
       canvas.drawCircle(Offset(x, y), r, paint);
     }
 
@@ -153,8 +153,8 @@ class SpacePainter extends CustomPainter {
         opacity = math.sin((progress - 0.1) / 0.8 * math.pi) * 0.6;
       }
 
-      paint.color = (isDark ? Colors.white : colorScheme.primary).withOpacity(
-        opacity,
+      paint.color = (isDark ? Colors.white : colorScheme.primary).withValues(
+        alpha: opacity,
       );
       canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
     }
@@ -165,7 +165,7 @@ class SpacePainter extends CustomPainter {
 
     // Pulsing outer glow
     final glowRadius = 45.0 + (pulseProgress * 15.0);
-    paint.color = colorScheme.primary.withOpacity(0.2 - (pulseProgress * 0.1));
+    paint.color = colorScheme.primary.withValues(alpha: 0.2 - (pulseProgress * 0.1));
     canvas.drawCircle(center, glowRadius, paint);
 
     // Main core
@@ -191,8 +191,8 @@ class SpacePainter extends CustomPainter {
       // Draw orbit path
       paint.style = PaintingStyle.stroke;
       paint.strokeWidth = 1.0;
-      paint.color = (isDark ? Colors.white : colorScheme.primary).withOpacity(
-        0.15,
+      paint.color = (isDark ? Colors.white : colorScheme.primary).withValues(
+        alpha: 0.15,
       );
       canvas.drawCircle(center, orbitRadii[i], paint);
 
@@ -233,8 +233,8 @@ class SpacePainter extends CustomPainter {
       text: TextSpan(
         text: 'Aligning stars...',
         style: TextStyle(
-          color: (isDark ? Colors.white : colorScheme.primary).withOpacity(
-            0.5 + (pulseProgress * 0.5),
+          color: (isDark ? Colors.white : colorScheme.primary).withValues(
+            alpha: 0.5 + (pulseProgress * 0.5),
           ),
           fontSize: 14,
           letterSpacing: 2.0,

@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Wrapper around [FlutterSecureStorage] for encrypted API key management.
 ///
@@ -15,7 +15,7 @@ class SecureKeyStorage {
   /// Save an API key for a provider. Overwrites any existing key.
   static Future<void> saveKey(String providerId, String apiKey) async {
     await _storage.write(key: '$_keyPrefix$providerId', value: apiKey);
-    debugPrint('SecureKeyStorage: Saved key for $providerId');
+    AppLogger.debug('SecureKeyStorage: Saved key for $providerId');
   }
 
   /// Retrieve the stored API key for a provider. Returns `null` if not set.
@@ -26,7 +26,7 @@ class SecureKeyStorage {
   /// Delete the stored API key for a provider.
   static Future<void> deleteKey(String providerId) async {
     await _storage.delete(key: '$_keyPrefix$providerId');
-    debugPrint('SecureKeyStorage: Deleted key for $providerId');
+    AppLogger.debug('SecureKeyStorage: Deleted key for $providerId');
   }
 
   /// Whether a key exists for the given provider.
@@ -43,6 +43,6 @@ class SecureKeyStorage {
         await _storage.delete(key: key);
       }
     }
-    debugPrint('SecureKeyStorage: Cleared all keys');
+    AppLogger.debug('SecureKeyStorage: Cleared all keys');
   }
 }

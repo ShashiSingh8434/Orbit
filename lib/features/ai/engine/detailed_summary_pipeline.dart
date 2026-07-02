@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../reflection/data/reflection_repository.dart';
 import '../../tasks/data/task_repository.dart';
 import '../../event/data/event_repository.dart';
@@ -137,8 +137,8 @@ class DetailedSummaryPipeline {
       }
 
       return (paragraph: paragraph, bullet: bullet);
-    } catch (e) {
-      debugPrint('DetailedSummaryPipeline error: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error('DetailedSummaryPipeline error', e, stackTrace);
       return (paragraph: null, bullet: null);
     }
   }

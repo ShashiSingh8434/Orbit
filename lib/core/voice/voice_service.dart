@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../features/ai/storage/secure_key_storage.dart';
+import '../utils/app_logger.dart';
 
 /// Encapsulates all audio recording and transcription interactions.
 class VoiceService {
@@ -35,7 +35,7 @@ class VoiceService {
       _isAvailable = await _initFuture!;
     } catch (e) {
       _isAvailable = false;
-      debugPrint('VoiceService initialization failed: $e');
+      AppLogger.error('VoiceService initialization failed', e);
     } finally {
       _initFuture = null;
     }
@@ -102,42 +102,42 @@ class VoiceService {
       // 1. Try Groq whisper-large-v3-turbo
       if (groqApiKey.isNotEmpty) {
         try {
-          debugPrint('VoiceService: Attempting whisper-large-v3-turbo transcription on Groq...');
+          AppLogger.info('VoiceService: Attempting whisper-large-v3-turbo transcription on Groq...');
           final text = await _transcribeWithGroq(file, 'whisper-large-v3-turbo', groqApiKey);
           if (text.isNotEmpty) {
-            debugPrint('VoiceService: whisper-large-v3-turbo succeeded.');
+            AppLogger.info('VoiceService: whisper-large-v3-turbo succeeded.');
             return text;
           }
         } catch (e) {
-          debugPrint('VoiceService: whisper-large-v3-turbo transcription failed, trying fallback: $e');
+          AppLogger.warning('VoiceService: whisper-large-v3-turbo transcription failed, trying fallback', e);
         }
       }
 
       // 2. Try Gemini gemini-2.5-flash
       if (geminiApiKey.isNotEmpty) {
         try {
-          debugPrint('VoiceService: Attempting gemini-2.5-flash transcription on Gemini...');
+          AppLogger.info('VoiceService: Attempting gemini-2.5-flash transcription on Gemini...');
           final text = await _transcribeWithGemini(file, 'gemini-2.5-flash', geminiApiKey);
           if (text.isNotEmpty) {
-            debugPrint('VoiceService: gemini-2.5-flash succeeded.');
+            AppLogger.info('VoiceService: gemini-2.5-flash succeeded.');
             return text;
           }
         } catch (e) {
-          debugPrint('VoiceService: gemini-2.5-flash transcription failed, trying fallback: $e');
+          AppLogger.warning('VoiceService: gemini-2.5-flash transcription failed, trying fallback', e);
         }
       }
 
       // 3. Try Groq whisper-large-v3
       if (groqApiKey.isNotEmpty) {
         try {
-          debugPrint('VoiceService: Attempting whisper-large-v3 transcription on Groq...');
+          AppLogger.info('VoiceService: Attempting whisper-large-v3 transcription on Groq...');
           final text = await _transcribeWithGroq(file, 'whisper-large-v3', groqApiKey);
           if (text.isNotEmpty) {
-            debugPrint('VoiceService: whisper-large-v3 succeeded.');
+            AppLogger.info('VoiceService: whisper-large-v3 succeeded.');
             return text;
           }
         } catch (e) {
-          debugPrint('VoiceService: whisper-large-v3 transcription failed: $e');
+          AppLogger.error('VoiceService: whisper-large-v3 transcription failed', e);
           rethrow;
         }
       }

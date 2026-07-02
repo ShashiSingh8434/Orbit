@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import '../providers/ai_provider.dart';
 import 'ai_health_monitor.dart';
 import 'rate_limit_manager.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Monitors provider health and selects which [AiProvider] to use for a request.
 ///
@@ -23,7 +23,7 @@ class ProviderRouter {
   /// Register a provider. Can be called multiple times to add/replace providers.
   void registerProvider(AiProvider provider) {
     _providers[provider.id] = provider;
-    debugPrint(
+    AppLogger.debug(
       'ProviderRouter: Registered provider "${provider.id}" (${provider.name})',
     );
   }
@@ -31,7 +31,7 @@ class ProviderRouter {
   /// Remove a provider (e.g. when user disconnects their key).
   void unregisterProvider(String providerId) {
     _providers.remove(providerId);
-    debugPrint('ProviderRouter: Unregistered provider "$providerId"');
+    AppLogger.debug('ProviderRouter: Unregistered provider "$providerId"');
   }
 
   /// All registered provider IDs.
