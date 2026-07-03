@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/pulsing_skeleton.dart';
+import '../../../core/widgets/orbit_card.dart';
 import '../models/decision_model.dart';
 
 class DecisionSection extends StatelessWidget {
@@ -123,8 +124,8 @@ class DecisionSection extends StatelessWidget {
           ),
         ),
         ...decisions!.map<Widget>(
-          (d) => ListTile(
-            contentPadding: EdgeInsets.zero,
+          (d) => OrbitCard(
+            margin: const EdgeInsets.only(bottom: 8),
             leading: Icon(
               d.status == 'Superseded'
                   ? Icons.cancel_outlined
@@ -133,18 +134,17 @@ class DecisionSection extends StatelessWidget {
                   ? colorScheme.onSurfaceVariant
                   : colorScheme.primary,
             ),
-            title: Text(
-              d.decision,
-              style: TextStyle(
-                decoration: d.status == 'Superseded'
-                    ? TextDecoration.lineThrough
-                    : null,
-                color: d.status == 'Superseded'
-                    ? colorScheme.onSurfaceVariant
-                    : null,
-              ),
+            title: d.decision,
+            titleStyle: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              decoration: d.status == 'Superseded'
+                  ? TextDecoration.lineThrough
+                  : null,
+              color: d.status == 'Superseded'
+                  ? colorScheme.onSurfaceVariant
+                  : null,
             ),
-            subtitle: d.reason.isNotEmpty ? Text(d.reason) : null,
+            description: d.reason.isNotEmpty ? d.reason : null,
           ),
         ),
       ],

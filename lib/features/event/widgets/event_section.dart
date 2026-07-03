@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/pulsing_skeleton.dart';
+import '../../../core/widgets/orbit_card.dart';
 import '../models/event_model.dart';
 
 class EventSection extends StatelessWidget {
@@ -123,15 +124,15 @@ class EventSection extends StatelessWidget {
           ),
         ),
         ..._getSortedEvents().map<Widget>(
-          (e) => ListTile(
-            contentPadding: EdgeInsets.zero,
+          (e) => OrbitCard(
+            margin: const EdgeInsets.only(bottom: 8),
             leading: const Icon(Icons.event, color: Colors.deepPurple),
-            title: Text(e.title),
-            subtitle: e.time != null
-                ? Text(e.time!)
-                : (e.description.isNotEmpty ? Text(e.description) : null),
+            title: e.title,
+            description: e.time != null
+                ? '${e.time}${e.description.isNotEmpty ? ' · ${e.description}' : ''}'
+                : (e.description.isNotEmpty ? e.description : null),
             trailing: e.location != null
-                ? const Icon(Icons.location_on_outlined)
+                ? Icon(Icons.location_on_outlined, color: colorScheme.onSurfaceVariant)
                 : null,
           ),
         ),

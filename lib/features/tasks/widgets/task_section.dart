@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/pulsing_skeleton.dart';
+import '../../../core/widgets/orbit_card.dart';
 import '../models/task_model.dart';
 
 class TaskSection extends StatelessWidget {
@@ -124,8 +125,8 @@ class TaskSection extends StatelessWidget {
           ),
         ),
         ...tasks!.map<Widget>(
-          (t) => ListTile(
-            contentPadding: EdgeInsets.zero,
+          (t) => OrbitCard(
+            margin: const EdgeInsets.only(bottom: 8),
             leading: Icon(
               t.status == 'completed'
                   ? Icons.check_circle
@@ -134,15 +135,14 @@ class TaskSection extends StatelessWidget {
                   ? Colors.green
                   : colorScheme.onSurfaceVariant,
             ),
-            title: Text(
-              t.title,
-              style: TextStyle(
-                color: t.status == 'completed'
-                    ? colorScheme.onSurfaceVariant
-                    : null,
-              ),
+            title: t.title,
+            titleStyle: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: t.status == 'completed'
+                  ? colorScheme.onSurfaceVariant
+                  : null,
             ),
-            subtitle: t.description.isNotEmpty ? Text(t.description) : null,
+            description: t.description.isNotEmpty ? t.description : null,
           ),
         ),
       ],

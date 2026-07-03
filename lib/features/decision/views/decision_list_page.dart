@@ -7,6 +7,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
 import '../../../core/widgets/paginated_list_notifier.dart';
 import 'decision_edit_page.dart';
+import '../../../core/widgets/orbit_card.dart';
 
 final paginatedDecisionsProvider =
     StateNotifierProvider<
@@ -107,35 +108,19 @@ class DecisionListPage extends ConsumerWidget {
                         ),
                       ),
                       ...dayDecisions.map((d) {
-                        final isSuperseded = d.status == 'Superseded';
-                        return ListTile(
-                          leading: Icon(
-                            isSuperseded
-                                ? Icons.cancel_outlined
-                                : Icons.check_circle,
-                            color: isSuperseded
-                                ? colorScheme.onSurfaceVariant
-                                : colorScheme.primary,
+                        return OrbitCard(
+                          title: d.decision,
+                          titleStyle: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                          title: Text(
-                            d.decision,
-                            style: TextStyle(
-                              decoration: isSuperseded
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                              color: isSuperseded
-                                  ? colorScheme.onSurfaceVariant
-                                  : null,
-                            ),
-                          ),
-                          subtitle: d.reason.isNotEmpty ? Text(d.reason) : null,
+                          description: d.reason.isNotEmpty ? d.reason : null,
                           trailing: d.metadata?.createdBy == 'ai'
                               ? Tooltip(
                                   message: 'Extracted by AI',
                                   child: Icon(
                                     Icons.auto_awesome_rounded,
                                     size: 14,
-                                    color: colorScheme.primary.withAlpha(150),
+                                    color: colorScheme.primary.withValues(alpha: 0.6),
                                   ),
                                 )
                               : null,
@@ -143,7 +128,6 @@ class DecisionListPage extends ConsumerWidget {
                               DecisionEditPage.push(context, decision: d),
                         );
                       }),
-                      const Divider(),
                     ],
                   );
                 },

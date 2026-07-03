@@ -53,7 +53,7 @@ class ReflectionListPage extends ConsumerWidget {
                           );
                         },
                         icon: const Icon(Icons.auto_awesome),
-                        label: const Text('See detailed summary'),
+                        label: const Text('Explore Orbit Deep Dive'),
                       ),
                     ),
                   ),

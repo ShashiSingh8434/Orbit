@@ -7,6 +7,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
 import '../../../core/widgets/paginated_list_notifier.dart';
 import 'learning_edit_page.dart';
+import '../../../core/widgets/orbit_card.dart';
 
 final paginatedLearningsProvider =
     StateNotifierProvider<
@@ -107,54 +108,49 @@ class LearningListPage extends ConsumerWidget {
                         ),
                       ),
                       ...dayLearnings.map(
-                        (l) => ListTile(
-                          leading: Icon(
-                            Icons.lightbulb_rounded,
-                            color: colorScheme.primary,
-                          ),
-                          title: Text(l.title),
-                          subtitle: l.description.isNotEmpty
-                              ? Text(l.description)
-                              : null,
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (l.occurrenceCount > 1)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    '${l.occurrenceCount}x',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: colorScheme.onPrimaryContainer,
-                                    ),
-                                  ),
-                                ),
-                              if (l.metadata?.createdBy == 'ai') ...[
-                                const SizedBox(width: 8),
-                                Tooltip(
-                                  message: 'Extracted by AI',
-                                  child: Icon(
-                                    Icons.auto_awesome_rounded,
-                                    size: 14,
-                                    color: colorScheme.primary.withAlpha(150),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
+                        (l) => OrbitCard(
+                          title: l.title,
+                          description: l.description,
                           onTap: () =>
                               LearningEditPage.push(context, learning: l),
+                          trailing: (l.occurrenceCount > 1 || l.metadata?.createdBy == 'ai')
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (l.occurrenceCount > 1)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primaryContainer,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          '${l.occurrenceCount}x',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: colorScheme.onPrimaryContainer,
+                                          ),
+                                        ),
+                                      ),
+                                    if (l.metadata?.createdBy == 'ai') ...[
+                                      const SizedBox(width: 8),
+                                      Tooltip(
+                                        message: 'Extracted by AI',
+                                        child: Icon(
+                                          Icons.auto_awesome_rounded,
+                                          size: 14,
+                                          color: colorScheme.primary.withValues(alpha: 0.6),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                )
+                              : null,
                         ),
                       ),
-                      const Divider(),
                     ],
                   );
                 },

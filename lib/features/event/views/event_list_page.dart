@@ -7,6 +7,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
 import '../../../core/widgets/paginated_list_notifier.dart';
 import 'event_edit_page.dart';
+import '../../../core/widgets/orbit_card.dart';
 
 final paginatedEventsProvider =
     StateNotifierProvider<
@@ -107,33 +108,24 @@ class EventListPage extends ConsumerWidget {
                         ),
                       ),
                       ...dayEvents.map(
-                        (e) => ListTile(
-                          leading: Icon(
-                            Icons.event_rounded,
-                            color: colorScheme.primary,
-                          ),
-                          title: Text(e.title),
-                          subtitle: e.time != null
-                              ? Text(
-                                  '${e.time}${e.description.isNotEmpty ? ' · ${e.description}' : ''}',
-                                )
-                              : (e.description.isNotEmpty
-                                    ? Text(e.description)
-                                    : null),
+                        (e) => OrbitCard(
+                          title: e.title,
+                          description: e.time != null
+                              ? '${e.time}${e.description.isNotEmpty ? ' · ${e.description}' : ''}'
+                              : (e.description.isNotEmpty ? e.description : null),
+                          onTap: () => EventEditPage.push(context, event: e),
                           trailing: e.metadata?.createdBy == 'ai'
                               ? Tooltip(
                                   message: 'Extracted by AI',
                                   child: Icon(
                                     Icons.auto_awesome_rounded,
                                     size: 14,
-                                    color: colorScheme.primary.withAlpha(150),
+                                    color: colorScheme.primary.withValues(alpha: 0.6),
                                   ),
                                 )
                               : null,
-                          onTap: () => EventEditPage.push(context, event: e),
                         ),
                       ),
-                      const Divider(),
                     ],
                   );
                 },

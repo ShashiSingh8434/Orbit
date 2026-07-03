@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/pulsing_skeleton.dart';
+import '../../../core/widgets/orbit_card.dart';
 import '../models/learning_model.dart';
 
 class LearningSection extends StatelessWidget {
@@ -123,19 +124,30 @@ class LearningSection extends StatelessWidget {
           ),
         ),
         ...learnings!.map<Widget>(
-          (l) => Card(
+          (l) => OrbitCard(
             margin: const EdgeInsets.only(bottom: 8),
-            child: ListTile(
-              leading: const Icon(Icons.lightbulb_outline, color: Colors.amber),
-              title: Text(l.title),
-              subtitle: l.description.isNotEmpty ? Text(l.description) : null,
-              trailing: l.occurrenceCount > 1
-                  ? Chip(
-                      label: Text('${l.occurrenceCount}x'),
-                      visualDensity: VisualDensity.compact,
-                    )
-                  : null,
-            ),
+            leading: const Icon(Icons.lightbulb_outline, color: Colors.amber),
+            title: l.title,
+            description: l.description,
+            trailing: l.occurrenceCount > 1
+                ? Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${l.occurrenceCount}x',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  )
+                : null,
           ),
         ),
       ],

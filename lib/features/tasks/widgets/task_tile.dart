@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/orbit_card.dart';
 import '../models/task_model.dart';
 
 class TaskTile extends StatelessWidget {
@@ -87,126 +88,67 @@ class TaskTile extends StatelessWidget {
         ? cs.error
         : cs.primary;
 
-    return Card(
+    return OrbitCard(
       margin: const EdgeInsets.only(bottom: 8),
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: overdue && !completed
-            ? BorderSide(color: cs.error.withAlpha(80), width: 1)
-            : BorderSide.none,
-      ),
-      child: InkWell(
-        onTap: onEdit,
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── Left colour accent bar ───────────────────────────────────
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 4,
-                color: accentColor,
-              ),
-
-              // ── Checkbox ─────────────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Center(
-                  child: Checkbox(
-                    value: completed,
-                    onChanged: (v) => onToggle(v ?? false),
-                    activeColor: cs.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ),
-
-              // ── Content ───────────────────────────────────────────────────
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 12, 8, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Title row with optional AI badge
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              task.title,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                decorationColor: cs.onSurfaceVariant,
-                                color: completed
-                                    ? cs.onSurfaceVariant
-                                    : cs.onSurface,
-                              ),
-                            ),
-                          ),
-                          if (task.metadata?.createdBy == 'ai') ...[
-                            const SizedBox(width: 6),
-                            Tooltip(
-                              message: 'Extracted by AI',
-                              child: Icon(
-                                Icons.auto_awesome_rounded,
-                                size: 13,
-                                color: cs.primary.withAlpha(160),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-
-                      // Description
-                      if (task.description.isNotEmpty) ...[
-                        const SizedBox(height: 3),
-                        Text(
-                          task.description,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-
-                      // Due date chip
-                      if (task.dueDate != null) ...[
-                        const SizedBox(height: 6),
-                        _DueDateChip(
-                          label: _formatDueDate(),
-                          isOverdue: overdue,
-                          isCompleted: completed,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-
-              // ── Delete button ─────────────────────────────────────────────
-              Center(
-                child: IconButton(
-                  onPressed: () => _confirmDelete(context),
-                  icon: Icon(
-                    Icons.delete_outline_rounded,
-                    size: 20,
-                    color: Colors.red.withValues(alpha: 0.75),
-                  ),
-                  tooltip: 'Delete task',
-                  splashRadius: 20,
-                ),
-              ),
-
-              const SizedBox(width: 4),
-            ],
+      accentColor: accentColor,
+      borderColor: overdue && !completed ? cs.error.withValues(alpha: 0.3) : null,
+      onTap: onEdit,
+      leading: GestureDetector(
+        onTap: () => onToggle(!completed),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 2.0),
+          child: Icon(
+            completed ? Icons.check_circle : Icons.radio_button_unchecked,
+            color: completed ? Colors.green : cs.onSurfaceVariant,
+            size: 24,
           ),
         ),
+      ),
+      title: task.title,
+      titleStyle: theme.textTheme.bodyLarge?.copyWith(
+        fontWeight: FontWeight.w600,
+        decorationColor: cs.onSurfaceVariant,
+        color: completed ? cs.onSurfaceVariant : cs.onSurface,
+      ),
+      description: task.description.isNotEmpty ? task.description : null,
+      bottomContent: task.dueDate != null
+          ? Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: _DueDateChip(
+                label: _formatDueDate(),
+                isOverdue: overdue,
+                isCompleted: completed,
+              ),
+            )
+          : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (task.metadata?.createdBy == 'ai') ...[
+            Tooltip(
+              message: 'Extracted by AI',
+              child: Icon(
+                Icons.auto_awesome_rounded,
+                size: 14,
+                color: cs.primary.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          IconButton(
+            onPressed: () => _confirmDelete(context),
+            icon: Icon(
+              Icons.delete_outline_rounded,
+              size: 20,
+              color: Colors.red.withValues(alpha: 0.75),
+            ),
+            tooltip: 'Delete task',
+            splashRadius: 20,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
       ),
     );
   }

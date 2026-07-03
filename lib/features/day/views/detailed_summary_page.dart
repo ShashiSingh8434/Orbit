@@ -161,6 +161,22 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage>
     );
   }
 
+  String _preprocessMarkdown(String text) {
+    if (text.isEmpty) return text;
+    final lines = text.split('\n');
+    final processedLines = <String>[];
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      if (line.trim().startsWith('## ') && i > 0) {
+        processedLines.add('');
+        processedLines.add('---');
+        processedLines.add('');
+      }
+      processedLines.add(line);
+    }
+    return processedLines.join('\n');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -200,23 +216,59 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage>
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                child: MarkdownBody(
-                  data: _isBulletMode ? _bulletText! : _paragraphText!,
-                  styleSheet: MarkdownStyleSheet(
-                    p: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
-                    h1: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      height: 1.5,
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 24.0),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24.0),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
                     ),
-                    h2: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      height: 1.5,
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.shadow.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: MarkdownBody(
+                    data: _preprocessMarkdown(_isBulletMode ? _bulletText! : _paragraphText!),
+                    styleSheet: MarkdownStyleSheet(
+                      p: theme.textTheme.bodyLarge?.copyWith(
+                        height: 1.7,
+                        color: colorScheme.onSurface.withValues(alpha: 0.9),
+                      ),
+                      h1: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                        height: 1.5,
+                      ),
+                      h2: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                        height: 1.6,
+                      ),
+                      h3: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                      listBullet: theme.textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.primary,
+                      ),
+                      h1Padding: const EdgeInsets.only(top: 16, bottom: 8),
+                      h2Padding: const EdgeInsets.only(top: 16, bottom: 8),
+                      horizontalRuleDecoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            width: 1,
+                          ),
+                        ),
+                      ),
                     ),
-                    listBullet: theme.textTheme.bodyLarge,
                   ),
                 ),
               ),
@@ -230,7 +282,7 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage>
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detailed Summary')),
+      appBar: AppBar(title: const Text('Orbit Insights Deep Dive')),
       body: body,
     );
   }
