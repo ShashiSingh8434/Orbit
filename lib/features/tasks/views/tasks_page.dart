@@ -127,17 +127,25 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     }).toList();
 
     // 2. Sort
-    filtered.sort((a, b) {
-      if (a.dueDate != null && b.dueDate != null) {
-        return a.dueDate!.compareTo(b.dueDate!);
-      } else if (a.dueDate != null) {
-        return -1;
-      } else if (b.dueDate != null) {
-        return 1;
-      } else {
-        return b.createdAt.compareTo(a.createdAt);
-      }
-    });
+    if (_currentFilter == TaskFilter.completed) {
+      filtered.sort((a, b) {
+        final aTime = a.completedAt ?? a.createdAt;
+        final bTime = b.completedAt ?? b.createdAt;
+        return bTime.compareTo(aTime);
+      });
+    } else {
+      filtered.sort((a, b) {
+        if (a.dueDate != null && b.dueDate != null) {
+          return a.dueDate!.compareTo(b.dueDate!);
+        } else if (a.dueDate != null) {
+          return -1;
+        } else if (b.dueDate != null) {
+          return 1;
+        } else {
+          return b.createdAt.compareTo(a.createdAt);
+        }
+      });
+    }
 
     return filtered;
   }

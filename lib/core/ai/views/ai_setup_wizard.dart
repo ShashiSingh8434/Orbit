@@ -256,7 +256,7 @@ class _AiSetupWizardState extends ConsumerState<AiSetupWizard> {
         _isConnecting = false;
         _connectionResult = success;
         if (!success) {
-          _errorMessage = 'Invalid API key. Please check and try again.';
+          _errorMessage = 'Test Failed. Please try again.';
         }
       });
     }

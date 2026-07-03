@@ -6,7 +6,7 @@ import '../../../shared/widgets/image_picker_dialog.dart';
 import '../models/academic_schedule.dart';
 import '../providers/academic_provider.dart';
 import '../widgets/class_card.dart';
-import '../../../core/widgets/home_widget_pin_service.dart';
+import '../services/home_widget_pin_service.dart';
 
 /// The main page representing the AI-powered Academic Timetable Planner.
 class AcademicPage extends ConsumerStatefulWidget {
