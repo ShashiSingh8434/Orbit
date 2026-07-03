@@ -5,7 +5,7 @@ import '../data/event_repository.dart';
 import '../models/event_model.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
-import '../../../core/widgets/paginated_list_notifier.dart';
+import '../../../core/providers/paginated_list_notifier.dart';
 import 'event_edit_page.dart';
 import '../../../core/widgets/orbit_card.dart';
 
@@ -112,7 +112,9 @@ class EventListPage extends ConsumerWidget {
                           title: e.title,
                           description: e.time != null
                               ? '${e.time}${e.description.isNotEmpty ? ' · ${e.description}' : ''}'
-                              : (e.description.isNotEmpty ? e.description : null),
+                              : (e.description.isNotEmpty
+                                    ? e.description
+                                    : null),
                           onTap: () => EventEditPage.push(context, event: e),
                           trailing: e.metadata?.createdBy == 'ai'
                               ? Tooltip(
@@ -120,7 +122,9 @@ class EventListPage extends ConsumerWidget {
                                   child: Icon(
                                     Icons.auto_awesome_rounded,
                                     size: 14,
-                                    color: colorScheme.primary.withValues(alpha: 0.6),
+                                    color: colorScheme.primary.withValues(
+                                      alpha: 0.6,
+                                    ),
                                   ),
                                 )
                               : null,

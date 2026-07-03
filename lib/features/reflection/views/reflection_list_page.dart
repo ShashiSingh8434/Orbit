@@ -19,6 +19,28 @@ class ReflectionListPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resolvedDate = dateKey ?? OrbitDateUtils.todayKey();
+
+    final auth = ref.watch(authStateProvider).value;
+    final creationTime = auth?.metadata.creationTime;
+    if (creationTime != null) {
+      final limitDate = DateTime(creationTime.year, creationTime.month, creationTime.day);
+      final parsedDate = OrbitDateUtils.parseKey(resolvedDate);
+      final targetDate = DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+      if (targetDate.isBefore(limitDate)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Cannot access reflections before your account creation date.'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            context.go(AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(limitDate)));
+          }
+        });
+      }
+    }
+
     final reflectionsAsync = ref.watch(reflectionsProvider(resolvedDate));
     Theme.of(context);
 
@@ -34,57 +56,85 @@ class ReflectionListPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: reflectionsAsync.when(
-        data: (reflections) => reflections.isEmpty
-            ? _EmptyState()
-            : Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.tonalIcon(
-                        onPressed: () {
-                          context.push(
-                            AppRoutes.detailedSummary,
-                            extra: {
-                              'date': OrbitDateUtils.parseKey(resolvedDate),
-                            },
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity == null) return;
+          if (details.primaryVelocity! < -300) {
+            // Swipe Right-to-Left -> Next Day
+            final nextDate = OrbitDateUtils.parseKey(resolvedDate).add(const Duration(days: 1));
+            context.go(AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(nextDate)));
+          } else if (details.primaryVelocity! > 300) {
+            // Swipe Left-to-Right -> Previous Day
+            final prevDate = OrbitDateUtils.parseKey(resolvedDate).subtract(const Duration(days: 1));
+            if (creationTime != null) {
+              final limitDate = DateTime(creationTime.year, creationTime.month, creationTime.day);
+              final targetDate = DateTime(prevDate.year, prevDate.month, prevDate.day);
+              if (targetDate.isBefore(limitDate)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Cannot navigate before your account creation date.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
+            }
+            context.go(AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(prevDate)));
+          }
+        },
+        child: reflectionsAsync.when(
+          data: (reflections) => reflections.isEmpty
+              ? _EmptyState()
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.tonalIcon(
+                          onPressed: () {
+                            context.push(
+                              AppRoutes.detailedSummary,
+                              extra: {
+                                'date': OrbitDateUtils.parseKey(resolvedDate),
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.auto_awesome),
+                          label: const Text('Explore Orbit Deep Dive'),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        itemCount: reflections.length,
+                        itemBuilder: (_, i) {
+                          final r = reflections[i];
+                          return ReflectionCard(
+                            reflection: r,
+                            onEdit: () => context.push(
+                              '/home/reflections/edit',
+                              extra: {
+                                'dateKey': resolvedDate,
+                                'reflectionId': r.id,
+                              },
+                            ),
+                            onDelete: () =>
+                                _confirmDelete(context, ref, r, resolvedDate),
                           );
                         },
-                        icon: const Icon(Icons.auto_awesome),
-                        label: const Text('Explore Orbit Deep Dive'),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      itemCount: reflections.length,
-                      itemBuilder: (_, i) {
-                        final r = reflections[i];
-                        return ReflectionCard(
-                          reflection: r,
-                          onEdit: () => context.push(
-                            '/home/reflections/edit',
-                            extra: {
-                              'dateKey': resolvedDate,
-                              'reflectionId': r.id,
-                            },
-                          ),
-                          onDelete: () =>
-                              _confirmDelete(context, ref, r, resolvedDate),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+                  ],
+                ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Error: $e')),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(
@@ -164,6 +214,8 @@ class _EmptyState extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
             Icons.edit_note_rounded,
@@ -174,12 +226,16 @@ class _EmptyState extends StatelessWidget {
           Text(
             'No reflections yet',
             style: Theme.of(context).textTheme.headlineSmall,
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          Text(
-            'Tap the button below to capture your first thought.',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Text(
+              'Tap the button below to capture your first thought.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
         ],
       ),

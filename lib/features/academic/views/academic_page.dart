@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/router/app_routes.dart';
-import '../../../shared/widgets/image_picker_dialog.dart';
+import '../../../core/widgets/image_picker_dialog.dart';
 import '../models/academic_schedule.dart';
 import '../providers/academic_provider.dart';
 import '../widgets/class_card.dart';

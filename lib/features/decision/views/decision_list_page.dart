@@ -5,7 +5,7 @@ import '../data/decision_repository.dart';
 import '../models/decision_model.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
-import '../../../core/widgets/paginated_list_notifier.dart';
+import '../../../core/providers/paginated_list_notifier.dart';
 import 'decision_edit_page.dart';
 import '../../../core/widgets/orbit_card.dart';
 
@@ -120,7 +120,9 @@ class DecisionListPage extends ConsumerWidget {
                                   child: Icon(
                                     Icons.auto_awesome_rounded,
                                     size: 14,
-                                    color: colorScheme.primary.withValues(alpha: 0.6),
+                                    color: colorScheme.primary.withValues(
+                                      alpha: 0.6,
+                                    ),
                                   ),
                                 )
                               : null,

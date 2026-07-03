@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import '../../../shared/widgets/space_painter.dart';
+import '../../../core/widgets/space_painter.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../../core/ai/engine/detailed_summary_pipeline.dart';
 
@@ -235,7 +235,9 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage>
                     ],
                   ),
                   child: MarkdownBody(
-                    data: _preprocessMarkdown(_isBulletMode ? _bulletText! : _paragraphText!),
+                    data: _preprocessMarkdown(
+                      _isBulletMode ? _bulletText! : _paragraphText!,
+                    ),
                     styleSheet: MarkdownStyleSheet(
                       p: theme.textTheme.bodyLarge?.copyWith(
                         height: 1.7,
@@ -263,7 +265,9 @@ class _DetailedSummaryPageState extends ConsumerState<DetailedSummaryPage>
                       horizontalRuleDecoration: BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            color: colorScheme.outlineVariant.withValues(
+                              alpha: 0.5,
+                            ),
                             width: 1,
                           ),
                         ),

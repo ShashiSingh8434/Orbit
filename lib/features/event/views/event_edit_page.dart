@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../../shared/widgets/ai_form.dart';
-import '../../../shared/widgets/date_picker_tile.dart';
-import '../../../shared/widgets/form_text_field.dart';
-import '../../../shared/widgets/styled_tab_bar.dart';
+import '../../../core/widgets/ai_form.dart';
+import '../../../core/widgets/date_picker_tile.dart';
+import '../../../core/widgets/form_text_field.dart';
+import '../../../core/widgets/styled_tab_bar.dart';
+import '../../../core/widgets/subtle_space_background.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../day/data/day_repository.dart';
 import '../../../core/ai/engine/ai_request_manager.dart';
@@ -260,65 +261,69 @@ class _EventEditPageState extends ConsumerState<EventEditPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        scrolledUnderElevation: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          _isEditing ? 'Edit Event' : 'New Event',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
+    return SubtleSpaceBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close_rounded),
+            onPressed: () => Navigator.pop(context),
           ),
-        ),
-        centerTitle: true,
-        actions: [
-          if (_isEditing)
-            IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
-              tooltip: 'Delete',
-              onPressed: _delete,
+          title: Text(
+            _isEditing ? 'Edit Event' : 'New Event',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
             ),
-        ],
-        bottom: _isEditing
-            ? null
-            : PreferredSize(
-                preferredSize: const Size.fromHeight(48),
-                child: StyledTabBar(controller: _tabController),
+          ),
+          centerTitle: true,
+          actions: [
+            if (_isEditing)
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.red,
+                ),
+                tooltip: 'Delete',
+                onPressed: _delete,
               ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: [
-          _EventManualForm(
-            titleCtrl: _titleCtrl,
-            descCtrl: _descCtrl,
-            timeCtrl: _timeCtrl,
-            locationCtrl: _locationCtrl,
-            selectedDate: _selectedDate,
-            onDateChanged: (date) => setState(() => _selectedDate = date),
-            onSave: _saveManual,
-          ),
-          if (!_isEditing)
-            AiForm(
-              promptCtrl: _aiPromptCtrl,
-              isLoading: _isAiLoading,
-              error: _aiError,
-              hintText:
-                  'e.g., Schedule a Team Meeting tomorrow at 3:00 PM in Conference Room B.',
-              onSubmit: _submitAi,
-              infoText:
-                  'Describe your event in plain language — Orbit AI will extract and schedule it for you.',
+          ],
+          bottom: _isEditing
+              ? null
+              : PreferredSize(
+                  preferredSize: const Size.fromHeight(48),
+                  child: StyledTabBar(controller: _tabController),
+                ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            _EventManualForm(
+              titleCtrl: _titleCtrl,
+              descCtrl: _descCtrl,
+              timeCtrl: _timeCtrl,
+              locationCtrl: _locationCtrl,
+              selectedDate: _selectedDate,
+              onDateChanged: (date) => setState(() => _selectedDate = date),
+              onSave: _saveManual,
             ),
-        ],
+            if (!_isEditing)
+              AiForm(
+                promptCtrl: _aiPromptCtrl,
+                isLoading: _isAiLoading,
+                error: _aiError,
+                hintText:
+                    'e.g., Schedule a Team Meeting tomorrow at 3:00 PM in Conference Room B.',
+                onSubmit: _submitAi,
+                infoText:
+                    'Describe your event in plain language — Orbit AI will extract and schedule it for you.',
+              ),
+          ],
+        ),
       ),
     );
   }

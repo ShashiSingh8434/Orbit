@@ -13,6 +13,7 @@ import '../../features/event/views/event_list_page.dart';
 import '../../features/learning/views/learning_list_page.dart';
 import '../../features/settings/views/settings_page.dart';
 import '../../features/home/views/guide_page.dart';
+import '../../features/home/views/bonus_page.dart';
 import '../../features/day/views/detailed_summary_page.dart';
 import '../../core/ai/analytics/ai_analytics_page.dart';
 import '../../features/academic/models/academic_schedule.dart';
@@ -122,6 +123,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'ai-analytics',
             builder: (_, _) => const AiAnalyticsPage(),
+          ),
+          // Bonus Page
+          GoRoute(
+            path: 'bonus',
+            builder: (_, _) => const BonusPage(),
           ),
         ],
       ),

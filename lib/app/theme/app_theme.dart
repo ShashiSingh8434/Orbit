@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 abstract final class AppTheme {
@@ -49,15 +50,21 @@ abstract final class AppTheme {
       brightness: Brightness.light,
       colorScheme: colorScheme,
       textTheme: textTheme,
-      scaffoldBackgroundColor: colorScheme.surface,
+      scaffoldBackgroundColor: Colors.transparent,
+      canvasColor: Colors.transparent,
 
       // ── AppBar ──
       appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme.surface,
+        backgroundColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
-        scrolledUnderElevation: 1,
+        scrolledUnderElevation: 0,
         centerTitle: false,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
         titleTextStyle: textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,
           letterSpacing: -0.3,
@@ -66,7 +73,7 @@ abstract final class AppTheme {
 
       // ── Card — slightly warm white so they lift off the blue-grey scaffold ──
       cardTheme: CardThemeData(
-        color: const Color(0xFFFFFFFF),
+        color: const Color(0xF2FFFFFF),
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -77,18 +84,18 @@ abstract final class AppTheme {
       // ── Input Fields ──
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFFEBEFF8),
+        fillColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.23)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.23)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.8), width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -224,13 +231,13 @@ abstract final class AppTheme {
       primary: _primaryDark,
       onPrimary: const Color(0xFF0A0E1A),
       secondary: const Color(0xFF64B5F6),
-      surface: const Color(0xFF0A0E1A),
+      surface: const Color(0xFF07070F), // Near-black boundary matching background gradient
       onSurface: const Color(0xFFF0F0F8),
-      surfaceContainerHighest: const Color(0xFF1A2035),
+      surfaceContainerHighest: const Color(0xFF2E3B4E),
       error: const Color(0xFFEF5350),
       onError: const Color(0xFF1A0000),
       // Slightly richer container tints for depth
-      primaryContainer: const Color(0xFF1A2E4A),
+      primaryContainer: const Color(0xFF2E3B4E),
       onPrimaryContainer: const Color(0xFFBADAFF),
       errorContainer: const Color(0xFF3B0F0F),
       onErrorContainer: const Color(0xFFFFB4AB),
@@ -243,15 +250,21 @@ abstract final class AppTheme {
       brightness: Brightness.dark,
       colorScheme: colorScheme,
       textTheme: textTheme,
-      scaffoldBackgroundColor: colorScheme.surface,
+      scaffoldBackgroundColor: Colors.transparent,
+      canvasColor: Colors.transparent,
 
       // ── AppBar ──
       appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme.surface,
+        backgroundColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
-        scrolledUnderElevation: 1,
+        scrolledUnderElevation: 0,
         centerTitle: false,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
         titleTextStyle: textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,
           letterSpacing: -0.3,
@@ -260,7 +273,7 @@ abstract final class AppTheme {
 
       // ── Card ──
       cardTheme: CardThemeData(
-        color: const Color(0xFF111827),
+        color: const Color(0xF21E2030), // Translucent midnight space container
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -271,18 +284,18 @@ abstract final class AppTheme {
       // ── Input Fields ──
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF1A2035),
+        fillColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.23)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.23)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.8), width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -358,7 +371,7 @@ abstract final class AppTheme {
 
       // ── Dialog ──
       dialogTheme: DialogThemeData(
-        backgroundColor: const Color(0xFF111827),
+        backgroundColor: const Color(0xFF1E2030),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
@@ -376,7 +389,7 @@ abstract final class AppTheme {
 
       // ── BottomSheet ──
       bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: Color(0xFF111827),
+        backgroundColor: Color(0xFF1E2030),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -385,7 +398,7 @@ abstract final class AppTheme {
 
       // ── Drawer ──
       drawerTheme: const DrawerThemeData(
-        backgroundColor: Color(0xFF0F1420),
+        backgroundColor: Color(0xFF1E2030),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
@@ -394,14 +407,14 @@ abstract final class AppTheme {
 
       // ── Chip ──
       chipTheme: ChipThemeData(
-        backgroundColor: const Color(0xFF1A2035),
+        backgroundColor: const Color(0xFF2E3B4E),
         side: BorderSide(color: colorScheme.outlineVariant.withAlpha(50)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
 
       // ── PopupMenu ──
       popupMenuTheme: PopupMenuThemeData(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF1E2030),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 4,

@@ -41,5 +41,8 @@ abstract final class AppRoutes {
   static const guide = '/home/guide';
 
   /// AI Analytics dashboard.
-  static const aiAnalytics = '/home/ai-analytics';
+  static const String aiAnalytics = '/home/ai-analytics';
+
+  /// Saturn space bonus page.
+  static const String bonus = '/home/bonus';
 }

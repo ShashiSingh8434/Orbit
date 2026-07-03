@@ -12,6 +12,7 @@ class OrbitCard extends StatelessWidget {
     this.margin,
     this.accentColor,
     this.borderColor,
+    this.backgroundColor,
     this.titleStyle,
     this.descriptionStyle,
     this.bottomContent,
@@ -26,6 +27,7 @@ class OrbitCard extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final Color? accentColor;
   final Color? borderColor;
+  final Color? backgroundColor;
   final TextStyle? titleStyle;
   final TextStyle? descriptionStyle;
   final Widget? bottomContent;
@@ -39,6 +41,7 @@ class OrbitCard extends StatelessWidget {
     return Card(
       elevation: 1,
       shadowColor: colorScheme.shadow.withValues(alpha: 0.08),
+      color: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(

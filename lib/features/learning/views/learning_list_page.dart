@@ -5,7 +5,7 @@ import '../data/learning_repository.dart';
 import '../models/learning_model.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/models/paginated_result.dart';
-import '../../../core/widgets/paginated_list_notifier.dart';
+import '../../../core/providers/paginated_list_notifier.dart';
 import 'learning_edit_page.dart';
 import '../../../core/widgets/orbit_card.dart';
 
@@ -113,7 +113,9 @@ class LearningListPage extends ConsumerWidget {
                           description: l.description,
                           onTap: () =>
                               LearningEditPage.push(context, learning: l),
-                          trailing: (l.occurrenceCount > 1 || l.metadata?.createdBy == 'ai')
+                          trailing:
+                              (l.occurrenceCount > 1 ||
+                                  l.metadata?.createdBy == 'ai')
                               ? Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -125,13 +127,16 @@ class LearningListPage extends ConsumerWidget {
                                         ),
                                         decoration: BoxDecoration(
                                           color: colorScheme.primaryContainer,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                         child: Text(
                                           '${l.occurrenceCount}x',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: colorScheme.onPrimaryContainer,
+                                            color:
+                                                colorScheme.onPrimaryContainer,
                                           ),
                                         ),
                                       ),
@@ -142,7 +147,9 @@ class LearningListPage extends ConsumerWidget {
                                         child: Icon(
                                           Icons.auto_awesome_rounded,
                                           size: 14,
-                                          color: colorScheme.primary.withValues(alpha: 0.6),
+                                          color: colorScheme.primary.withValues(
+                                            alpha: 0.6,
+                                          ),
                                         ),
                                       ),
                                     ],

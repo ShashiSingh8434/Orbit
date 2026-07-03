@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/voice/voice_input_button.dart';
-import '../../core/voice/voice_provider.dart';
-import '../../core/voice/voice_controller.dart';
+import '../voice/voice_input_button.dart';
+import '../voice/voice_provider.dart';
+import '../voice/voice_controller.dart';
 
 class AiForm extends ConsumerStatefulWidget {
   final TextEditingController promptCtrl;

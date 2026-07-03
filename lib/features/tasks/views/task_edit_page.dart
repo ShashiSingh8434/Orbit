@@ -1,5 +1,5 @@
 import 'dart:convert';
-import '../../../shared/widgets/ai_form.dart';
+import '../../../core/widgets/ai_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/controllers/auth_controller.dart';

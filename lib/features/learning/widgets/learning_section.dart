@@ -126,6 +126,8 @@ class LearningSection extends StatelessWidget {
         ...learnings!.map<Widget>(
           (l) => OrbitCard(
             margin: const EdgeInsets.only(bottom: 8),
+            backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
+            borderColor: colorScheme.primary.withValues(alpha: 0.23),
             leading: const Icon(Icons.lightbulb_outline, color: Colors.amber),
             title: l.title,
             description: l.description,

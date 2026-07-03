@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../shared/widgets/space_painter.dart';
+import '../../../core/widgets/space_painter.dart';
 import '../controllers/auth_controller.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../core/utils/app_logger.dart';

@@ -67,6 +67,8 @@ class DaySummarySection extends StatelessWidget {
     if (day == null || day!.summary.isEmpty) {
       return OrbitCard(
         margin: const EdgeInsets.only(bottom: 8),
+        backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
+        borderColor: colorScheme.primary.withValues(alpha: 0.23),
         leading: Icon(
           Icons.insights_rounded,
           color: colorScheme.primary,
@@ -82,6 +84,8 @@ class DaySummarySection extends StatelessWidget {
 
     return OrbitCard(
       margin: const EdgeInsets.only(bottom: 8),
+      backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
+      borderColor: colorScheme.primary.withValues(alpha: 0.23),
       leading: Icon(
         Icons.insights_rounded,
         color: colorScheme.primary,

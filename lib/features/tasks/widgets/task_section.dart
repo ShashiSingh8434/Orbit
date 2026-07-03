@@ -127,6 +127,8 @@ class TaskSection extends StatelessWidget {
         ...tasks!.map<Widget>(
           (t) => OrbitCard(
             margin: const EdgeInsets.only(bottom: 8),
+            backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
+            borderColor: colorScheme.primary.withValues(alpha: 0.23),
             leading: Icon(
               t.status == 'completed'
                   ? Icons.check_circle

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/router/app_routes.dart';
 import '../../auth/controllers/auth_controller.dart';
+import 'drawer_body_space_background.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -13,45 +14,48 @@ class AppDrawer extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final user = ref.watch(authStateProvider).value;
 
-    return Drawer(
-      child: Column(
-        children: [
-          // ── Profile Header ──────────────────────────────────────────────
-          UserAccountsDrawerHeader(
-            decoration: BoxDecoration(color: colorScheme.primary),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: colorScheme.onPrimary,
-              backgroundImage: user?.photoURL != null
-                  ? NetworkImage(user!.photoURL!)
-                  : null,
-              child: user?.photoURL == null
-                  ? Icon(
-                      Icons.person_rounded,
-                      size: 36,
-                      color: colorScheme.primary,
-                    )
-                  : null,
-            ),
-            accountName: Text(
-              user?.displayName ?? 'Orbit User',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: colorScheme.onPrimary,
-                fontWeight: FontWeight.w600,
+    return SafeArea(
+      bottom: false,
+      child: Drawer(
+        child: Column(
+          children: [
+            // ── Profile Header ──────────────────────────────────────────────
+            UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(color: Colors.transparent),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: colorScheme.primaryContainer,
+                backgroundImage: user?.photoURL != null
+                    ? NetworkImage(user!.photoURL!)
+                    : null,
+                child: user?.photoURL == null
+                    ? Icon(
+                        Icons.person_rounded,
+                        size: 36,
+                        color: colorScheme.onPrimaryContainer,
+                      )
+                    : null,
+              ),
+              accountName: Text(
+                user?.displayName ?? 'Orbit User',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              accountEmail: Text(
+                user?.email ?? '',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
-            accountEmail: Text(
-              user?.email ?? '',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onPrimary.withAlpha(200),
-              ),
-            ),
-          ),
 
-          // ── Navigation Items ────────────────────────────────────────────
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              children: [
+            // ── Navigation Items ────────────────────────────────────────────
+            Expanded(
+              child: DrawerBodySpaceBackground(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  children: [
                 // Core
                 _DrawerItem(
                   icon: Icons.home_rounded,
@@ -157,15 +161,25 @@ class AppDrawer extends ConsumerWidget {
                     context.push(AppRoutes.settings);
                   },
                 ),
-
+                const Divider(height: 24),
+                _DrawerItem(
+                  icon: Icons.star_rounded,
+                  label: 'Bonus',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.bonus);
+                  },
+                ),
                 SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  ),
+);
+}
 }
 
 // ── Drawer Item ───────────────────────────────────────────────────────────────
@@ -200,8 +214,9 @@ class _DrawerItem extends StatelessWidget {
         ),
       ),
       selected: selected,
-      selectedTileColor: colorScheme.primary.withAlpha(20),
+      // selectedTileColor: colorScheme.primary.withAlpha(20),
       onTap: onTap,
     );
   }
 }
+
