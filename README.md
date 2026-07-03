@@ -6,6 +6,12 @@ Built using **Flutter**, **Firebase**, and **Material 3**.
 
 ---
 
+# Release Notes
+
+📄 [View Release Notes (v1.0.1)](docs/RELEASE_NOTES-v1.0.1.md)
+
+---
+
 ## 📸 Media
 
 <table align="center" cellpadding="12" cellspacing="12">
