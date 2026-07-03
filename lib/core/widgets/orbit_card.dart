@@ -40,12 +40,12 @@ class OrbitCard extends StatelessWidget {
 
     return Card(
       elevation: 1,
-      shadowColor: colorScheme.shadow.withValues(alpha: 0.08),
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.25), 
       color: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: borderColor ?? colorScheme.outlineVariant.withValues(alpha: 0.8),
+          color: borderColor ?? colorScheme.outlineVariant.withValues(alpha: 0.9),
           width: 1,
         ),
       ),
