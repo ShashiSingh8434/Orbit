@@ -31,18 +31,33 @@ Follow these strict instructions:
     return Schema.object(
       properties: {
         'courses': Schema.array(
-          description: 'List of all unique courses found in the timetable documents.',
+          description:
+              'List of all unique courses found in the timetable documents.',
           items: Schema.object(
             properties: {
               'code': Schema.string(description: 'Course code, e.g., CSE3001'),
-              'name': Schema.string(description: 'Course name, e.g., Database Management Systems'),
-              'faculty': Schema.string(description: 'Faculty or instructor name'),
-              'room': Schema.string(description: 'Room, Venue or classroom location, e.g., LC-002'),
-              'slot': Schema.string(description: 'Slot name, e.g., A11+A12+A13'),
-              'credits': Schema.integer(description: 'Number of credits for the course'),
+              'name': Schema.string(
+                description: 'Course name, e.g., Database Management Systems',
+              ),
+              'faculty': Schema.string(
+                description: 'Faculty or instructor name',
+              ),
+              'room': Schema.string(
+                description: 'Room, Venue or classroom location, e.g., LC-002',
+              ),
+              'slot': Schema.string(
+                description: 'Slot name, e.g., A11+A12+A13',
+              ),
+              'credits': Schema.integer(
+                description: 'Number of credits for the course',
+              ),
               'type': Schema.string(description: 'Lecture, Lab, Seminar, etc.'),
-              'category': Schema.string(description: 'Programme Core, University Elective, etc.'),
-              'classNo': Schema.string(description: 'Unique class or registration number'),
+              'category': Schema.string(
+                description: 'Programme Core, University Elective, etc.',
+              ),
+              'classNo': Schema.string(
+                description: 'Unique class or registration number',
+              ),
             },
             requiredProperties: ['code', 'name'],
           ),

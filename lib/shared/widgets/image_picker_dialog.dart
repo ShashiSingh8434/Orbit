@@ -7,10 +7,7 @@ class ImagePickerDialog extends StatelessWidget {
   /// Whether to allow selecting multiple images from the gallery.
   final bool allowMultiple;
 
-  const ImagePickerDialog({
-    super.key,
-    this.allowMultiple = true,
-  });
+  const ImagePickerDialog({super.key, this.allowMultiple = true});
 
   /// Shows the dialog and returns the picked [XFile]s, or null/empty if cancelled.
   static Future<List<XFile>?> show(
@@ -76,7 +73,11 @@ class ImagePickerDialog extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: ElevatedButton.icon(
-                icon: Icon(allowMultiple ? Icons.photo_library_rounded : Icons.photo_rounded),
+                icon: Icon(
+                  allowMultiple
+                      ? Icons.photo_library_rounded
+                      : Icons.photo_rounded,
+                ),
                 label: const Text('Gallery'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
@@ -86,9 +87,13 @@ class ImagePickerDialog extends StatelessWidget {
                 onPressed: () async {
                   try {
                     if (allowMultiple) {
-                      final files = await picker.pickMultiImage(imageQuality: 85);
+                      final files = await picker.pickMultiImage(
+                        imageQuality: 85,
+                      );
                       if (context.mounted) {
-                        Navigator.of(context).pop(files.isNotEmpty ? files : null);
+                        Navigator.of(
+                          context,
+                        ).pop(files.isNotEmpty ? files : null);
                       }
                     } else {
                       final file = await picker.pickImage(

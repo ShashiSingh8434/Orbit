@@ -115,7 +115,9 @@ class FirebaseAcademicRepository implements AcademicRepository {
           .doc('data')
           .set(schedule.toJson());
     } catch (e) {
-      AppLogger.error('FirebaseAcademicRepository: Failed to save schedule to Firestore: $e');
+      AppLogger.error(
+        'FirebaseAcademicRepository: Failed to save schedule to Firestore: $e',
+      );
     }
   }
 

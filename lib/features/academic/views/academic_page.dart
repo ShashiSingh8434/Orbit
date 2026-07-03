@@ -90,14 +90,22 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
 
   List<ClassSession> _getSessionsForDay(WeekSchedule schedule, String day) {
     switch (day) {
-      case 'Monday': return schedule.monday;
-      case 'Tuesday': return schedule.tuesday;
-      case 'Wednesday': return schedule.wednesday;
-      case 'Thursday': return schedule.thursday;
-      case 'Friday': return schedule.friday;
-      case 'Saturday': return schedule.saturday;
-      case 'Sunday': return schedule.sunday;
-      default: return [];
+      case 'Monday':
+        return schedule.monday;
+      case 'Tuesday':
+        return schedule.tuesday;
+      case 'Wednesday':
+        return schedule.wednesday;
+      case 'Thursday':
+        return schedule.thursday;
+      case 'Friday':
+        return schedule.friday;
+      case 'Saturday':
+        return schedule.saturday;
+      case 'Sunday':
+        return schedule.sunday;
+      default:
+        return [];
     }
   }
 
@@ -111,7 +119,9 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
     if (!isSupported) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Home screen widget pinning is not supported by your launcher.'),
+          content: Text(
+            'Home screen widget pinning is not supported by your launcher.',
+          ),
         ),
       );
       return;
@@ -149,7 +159,10 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
           ],
           if (hasTimetable) ...[
             IconButton(
-              icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),
+              icon: const Icon(
+                Icons.delete_sweep_rounded,
+                color: Colors.redAccent,
+              ),
               tooltip: 'Delete Timetable',
               onPressed: () async {
                 final confirm = await showDialog<bool>(
@@ -167,7 +180,10 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.redAccent),
+                        ),
                       ),
                     ],
                   ),
@@ -179,7 +195,9 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
             ),
           ],
           IconButton(
-            icon: Icon(hasTimetable ? Icons.refresh_rounded : Icons.upload_file_rounded),
+            icon: Icon(
+              hasTimetable ? Icons.refresh_rounded : Icons.upload_file_rounded,
+            ),
             tooltip: hasTimetable ? 'Upload Again' : 'Upload Timetable',
             onPressed: _handleUploadPressed,
           ),
@@ -190,7 +208,10 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
         child: () {
           // 1. Loading States (Upload or Parse in progress)
           if (isUploading) {
-            return _buildProgressOverlay('Reading upload images...', colorScheme);
+            return _buildProgressOverlay(
+              'Reading upload images...',
+              colorScheme,
+            );
           }
           if (isParsing) {
             return _buildProgressOverlay(
@@ -239,13 +260,19 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                     color: colorScheme.primaryContainer.withAlpha(50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: colorScheme.primary.withAlpha(60)),
+                      side: BorderSide(
+                        color: colorScheme.primary.withAlpha(60),
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          Icon(Icons.auto_awesome_rounded, color: colorScheme.primary, size: 28),
+                          Icon(
+                            Icons.auto_awesome_rounded,
+                            color: colorScheme.primary,
+                            size: 28,
+                          ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(
@@ -282,7 +309,7 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
 
               // Horizontal Day Navigation Chips
               _buildDaySelector(colorScheme),
-              
+
               // PageView swiper
               Expanded(
                 child: PageView.builder(
@@ -329,9 +356,9 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
               message,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -346,21 +373,25 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline_rounded, color: colorScheme.error, size: 56),
+            Icon(
+              Icons.error_outline_rounded,
+              color: colorScheme.error,
+              size: 56,
+            ),
             const SizedBox(height: 16),
             Text(
               'Parsing Failed',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               message,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -377,8 +408,6 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
       ),
     );
   }
-
-
 
   Widget _buildDaySelector(ColorScheme colorScheme) {
     return Container(
@@ -399,7 +428,9 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
               selected: isSelected,
               onSelected: (selected) {
                 if (selected) {
-                  final currentPage = _pageController.page?.round() ?? (_basePage + _currentPageIndex);
+                  final currentPage =
+                      _pageController.page?.round() ??
+                      (_basePage + _currentPageIndex);
                   final currentDayIndex = currentPage % 7;
                   final difference = index - currentDayIndex;
 
@@ -412,7 +443,9 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
               },
               selectedColor: colorScheme.primaryContainer,
               labelStyle: TextStyle(
-                color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+                color: isSelected
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurface,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -422,7 +455,11 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
     );
   }
 
-  Widget _buildDaySchedule(String day, List<ClassSession> sessions, ColorScheme colorScheme) {
+  Widget _buildDaySchedule(
+    String day,
+    List<ClassSession> sessions,
+    ColorScheme colorScheme,
+  ) {
     final schedule = ref.watch(academicStateProvider).schedule;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -430,7 +467,7 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          
+
           // Day Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -438,15 +475,15 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
               Text(
                 day,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 'Total Classes: ${sessions.length}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -459,14 +496,12 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          '🎉',
-                          style: TextStyle(fontSize: 48),
-                        ),
+                        const Text('🎉', style: TextStyle(fontSize: 48)),
                         const SizedBox(height: 12),
                         Text(
                           'No Classes Today',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -474,9 +509,8 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                         const SizedBox(height: 6),
                         Text(
                           'Enjoy your free time or add a class manually below!',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -490,7 +524,9 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                         session: session,
                         onTap: () {
                           final course = schedule?.courses.firstWhere(
-                            (c) => c.code.trim().toUpperCase() == session.code.trim().toUpperCase(),
+                            (c) =>
+                                c.code.trim().toUpperCase() ==
+                                session.code.trim().toUpperCase(),
                             orElse: () => Course(
                               code: session.code,
                               name: session.name,
@@ -513,5 +549,3 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
     );
   }
 }
-
-

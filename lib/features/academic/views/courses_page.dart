@@ -12,13 +12,16 @@ class CoursesPage extends ConsumerWidget {
   String _formatFacultyName(String name) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return 'Not specified';
-    return trimmed.split(' ').map((word) {
-      if (word.isEmpty) return '';
-      if (word.length <= 2 && word.endsWith('.')) {
-        return word.toUpperCase();
-      }
-      return word[0].toUpperCase() + word.substring(1).toLowerCase();
-    }).join(' ');
+    return trimmed
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return '';
+          if (word.length <= 2 && word.endsWith('.')) {
+            return word.toUpperCase();
+          }
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
   }
 
   @override
@@ -173,7 +176,11 @@ class CoursesPage extends ConsumerWidget {
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: Icon(Icons.edit_outlined, size: 18, color: colorScheme.primary),
+                              icon: Icon(
+                                Icons.edit_outlined,
+                                size: 18,
+                                color: colorScheme.primary,
+                              ),
                               constraints: const BoxConstraints(),
                               padding: EdgeInsets.zero,
                               onPressed: () {

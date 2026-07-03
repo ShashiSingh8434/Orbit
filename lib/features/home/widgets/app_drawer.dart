@@ -120,7 +120,9 @@ class AppDrawer extends ConsumerWidget {
                 _DrawerItem(
                   icon: Icons.school_rounded,
                   label: 'Academic',
-                  selected: GoRouterState.of(context).matchedLocation == AppRoutes.academic,
+                  selected:
+                      GoRouterState.of(context).matchedLocation ==
+                      AppRoutes.academic,
                   onTap: () {
                     Navigator.pop(context);
                     context.push(AppRoutes.academic);

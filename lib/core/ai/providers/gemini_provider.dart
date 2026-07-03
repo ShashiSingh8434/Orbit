@@ -58,9 +58,9 @@ class GeminiProvider extends AiProvider {
             : null,
       );
 
-      final response = await generativeModel.generateContent([
-        Content.text(request.prompt),
-      ]).timeout(const Duration(seconds: 25));
+      final response = await generativeModel
+          .generateContent([Content.text(request.prompt)])
+          .timeout(const Duration(seconds: 25));
 
       stopwatch.stop();
 

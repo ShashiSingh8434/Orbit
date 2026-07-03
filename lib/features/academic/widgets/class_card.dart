@@ -9,11 +9,7 @@ class ClassCard extends StatelessWidget {
   /// Triggered when the card is tapped.
   final VoidCallback onTap;
 
-  const ClassCard({
-    super.key,
-    required this.session,
-    required this.onTap,
-  });
+  const ClassCard({super.key, required this.session, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +37,10 @@ class ClassCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(8),
@@ -67,7 +66,7 @@ class ClassCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Course Name
               Text(
                 session.name,
@@ -79,7 +78,7 @@ class ClassCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
-              
+
               // Course Code
               Text(
                 session.code,
@@ -89,7 +88,7 @@ class ClassCard extends StatelessWidget {
                   letterSpacing: 0.5,
                 ),
               ),
-              
+
               const Divider(height: 24, thickness: 0.5),
 
               // Instructor & Location Row
@@ -100,12 +99,18 @@ class ClassCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.person_outline_rounded, size: 16, color: colorScheme.onSurfaceVariant),
+                        Icon(
+                          Icons.person_outline_rounded,
+                          size: 16,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             _formatFacultyName(session.faculty),
-                            style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -117,10 +122,16 @@ class ClassCard extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.location_on_outlined, size: 16, color: colorScheme.onSurfaceVariant),
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 8),
                       Text(
-                        session.room.isNotEmpty ? session.room : 'Not specified',
+                        session.room.isNotEmpty
+                            ? session.room
+                            : 'Not specified',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
@@ -132,16 +143,22 @@ class ClassCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               if (session.slot.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.tag_rounded, size: 16, color: colorScheme.onSurfaceVariant),
+                    Icon(
+                      Icons.tag_rounded,
+                      size: 16,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Slot: ${session.slot}',
-                      style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -156,13 +173,16 @@ class ClassCard extends StatelessWidget {
   String _formatFacultyName(String name) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return 'Not specified';
-    return trimmed.split(' ').map((word) {
-      if (word.isEmpty) return '';
-      if (word.length <= 2 && word.endsWith('.')) {
-        return word.toUpperCase();
-      }
-      return word[0].toUpperCase() + word.substring(1).toLowerCase();
-    }).join(' ');
+    return trimmed
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return '';
+          if (word.length <= 2 && word.endsWith('.')) {
+            return word.toUpperCase();
+          }
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
   }
 
   static String format24to12Hr(String timeStr) {

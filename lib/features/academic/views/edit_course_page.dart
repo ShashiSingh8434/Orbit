@@ -9,10 +9,7 @@ class EditCoursePage extends ConsumerStatefulWidget {
   /// The course to edit, or null if creating a new one.
   final Course? course;
 
-  const EditCoursePage({
-    super.key,
-    this.course,
-  });
+  const EditCoursePage({super.key, this.course});
 
   @override
   ConsumerState<EditCoursePage> createState() => _EditCoursePageState();
@@ -39,7 +36,9 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
     _facultyController = TextEditingController(text: c?.faculty ?? '');
     _roomController = TextEditingController(text: c?.room ?? '');
     _slotController = TextEditingController(text: c?.slot ?? '');
-    _creditsController = TextEditingController(text: c?.credits.toString() ?? '4');
+    _creditsController = TextEditingController(
+      text: c?.credits.toString() ?? '4',
+    );
     _typeController = TextEditingController(text: c?.type ?? 'Lecture');
     _categoryController = TextEditingController(text: c?.category ?? '');
     _classNoController = TextEditingController(text: c?.classNo ?? '');
@@ -113,7 +112,9 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
     );
 
     if (confirm == true && mounted) {
-      await ref.read(academicStateProvider.notifier).deleteCourse(widget.course!.code);
+      await ref
+          .read(academicStateProvider.notifier)
+          .deleteCourse(widget.course!.code);
       if (mounted) {
         context.pop();
       }
@@ -173,10 +174,14 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                   decoration: const InputDecoration(
                     hintText: 'e.g. Database Management Systems',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                   ),
-                  validator: (val) =>
-                      val == null || val.trim().isEmpty ? 'Enter course name' : null,
+                  validator: (val) => val == null || val.trim().isEmpty
+                      ? 'Enter course name'
+                      : null,
                 ),
                 const SizedBox(height: 24),
 
@@ -193,10 +198,15 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                             decoration: const InputDecoration(
                               hintText: 'e.g. CSE3001',
                               border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                             validator: (val) =>
-                                val == null || val.trim().isEmpty ? 'Enter course code' : null,
+                                val == null || val.trim().isEmpty
+                                ? 'Enter course code'
+                                : null,
                           ),
                         ],
                       ),
@@ -213,10 +223,15 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                             decoration: const InputDecoration(
                               hintText: 'e.g. A11+A12+A13',
                               border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                             validator: (val) =>
-                                val == null || val.trim().isEmpty ? 'Enter slot code(s)' : null,
+                                val == null || val.trim().isEmpty
+                                ? 'Enter slot code(s)'
+                                : null,
                           ),
                         ],
                       ),
@@ -238,7 +253,10 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                             decoration: const InputDecoration(
                               hintText: 'e.g. LC-002',
                               border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                           ),
                         ],
@@ -256,10 +274,14 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                             decoration: const InputDecoration(
                               hintText: 'e.g. 4',
                               border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                             validator: (val) {
-                              if (val == null || val.trim().isEmpty) return null;
+                              if (val == null || val.trim().isEmpty)
+                                return null;
                               if (int.tryParse(val.trim()) == null) {
                                 return 'Must be an integer';
                               }
@@ -280,7 +302,10 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                   decoration: const InputDecoration(
                     hintText: 'e.g. Rajneesh Kumar Patel',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -298,7 +323,10 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                             decoration: const InputDecoration(
                               hintText: 'e.g. Lecture or Lab',
                               border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                           ),
                         ],
@@ -316,7 +344,10 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                             decoration: const InputDecoration(
                               hintText: 'e.g. BL2026270100478',
                               border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                           ),
                         ],
@@ -333,7 +364,10 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                   decoration: const InputDecoration(
                     hintText: 'e.g. Programme Core',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -352,7 +386,10 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                   icon: const Icon(Icons.save_rounded),
                   label: Text(
                     isEdit ? 'Save Course Changes' : 'Create Course',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ],

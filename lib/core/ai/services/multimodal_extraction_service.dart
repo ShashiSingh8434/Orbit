@@ -10,9 +10,10 @@ import '../../utils/app_logger.dart';
 import '../../../features/academic/data/static_slots.dart';
 
 /// Provider for [MultimodalExtractionService].
-final multimodalExtractionServiceProvider = Provider<MultimodalExtractionService>((ref) {
-  return MultimodalExtractionService(ref);
-});
+final multimodalExtractionServiceProvider =
+    Provider<MultimodalExtractionService>((ref) {
+      return MultimodalExtractionService(ref);
+    });
 
 /// A simplified service for extracting structured JSON data from documents/images
 /// using Groq's API models with automatic fallbacks.
@@ -39,10 +40,13 @@ class MultimodalExtractionService {
     required List<Uint8List> imageBytesList,
     required List<String> mimeTypes,
     required String prompt,
-    required Schema responseSchema, // Kept in signature to match repository callers
+    required Schema
+    responseSchema, // Kept in signature to match repository callers
   }) async {
     if (imageBytesList.isEmpty) {
-      throw ArgumentError('At least one image is required for document extraction.');
+      throw ArgumentError(
+        'At least one image is required for document extraction.',
+      );
     }
 
     _updateStatus(true, 'Resolving document keys...');
@@ -71,7 +75,9 @@ class MultimodalExtractionService {
             prompt: prompt,
           );
 
-          AppLogger.info('MultimodalExtractionService: Extraction succeeded using model $modelName.');
+          AppLogger.info(
+            'MultimodalExtractionService: Extraction succeeded using model $modelName.',
+          );
           return result;
         } catch (e, stackTrace) {
           lastError = e;
@@ -112,10 +118,7 @@ class MultimodalExtractionService {
     required String prompt,
   }) async {
     final List<Map<String, dynamic>> userContent = [
-      {
-        "type": "text",
-        "text": prompt,
-      }
+      {"type": "text", "text": prompt},
     ];
 
     for (int i = 0; i < imageBytesList.length; i++) {
@@ -124,9 +127,7 @@ class MultimodalExtractionService {
       final base64Str = base64Encode(bytes);
       userContent.add({
         "type": "image_url",
-        "image_url": {
-          "url": "data:$mimeType;base64,$base64Str",
-        }
+        "image_url": {"url": "data:$mimeType;base64,$base64Str"},
       });
     }
 
@@ -134,22 +135,24 @@ class MultimodalExtractionService {
         'You are an AI assistant. You MUST respond with valid JSON matching the requested structure. '
         'No markdown formatting (like ```json), no comments, no explanations. Just raw JSON.';
 
-    final response = await http.post(
-      Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode({
-        'model': modelName,
-        'messages': [
-          {'role': 'system', 'content': systemPrompt},
-          {'role': 'user', 'content': userContent},
-        ],
-        'temperature': 0.1,
-        'response_format': {'type': 'json_object'},
-      }),
-    ).timeout(const Duration(seconds: 25));
+    final response = await http
+        .post(
+          Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $apiKey',
+          },
+          body: jsonEncode({
+            'model': modelName,
+            'messages': [
+              {'role': 'system', 'content': systemPrompt},
+              {'role': 'user', 'content': userContent},
+            ],
+            'temperature': 0.1,
+            'response_format': {'type': 'json_object'},
+          }),
+        )
+        .timeout(const Duration(seconds: 25));
 
     if (response.statusCode == 200) {
       final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -167,7 +170,9 @@ class MultimodalExtractionService {
   // ── JSON Helper ────────────────────────────────────────────────────────────
 
   Map<String, dynamic> _parseJsonResponse(String text) {
-    AppLogger.info('MultimodalExtractionService: Raw response from model: $text');
+    AppLogger.info(
+      'MultimodalExtractionService: Raw response from model: $text',
+    );
     var cleanText = text.trim();
     final firstBrace = cleanText.indexOf('{');
     final lastBrace = cleanText.lastIndexOf('}');
@@ -198,22 +203,34 @@ class MultimodalExtractionService {
 
     // 2. Generate the weekly schedule dynamically using the static slot mapping
     final Map<String, dynamic> staticSlotMapRaw = jsonDecode(staticSlotsJson);
-    final Map<String, List<Map<String, String>>> staticSlotMap = staticSlotMapRaw.map((key, value) {
-      return MapEntry(
-        key,
-        (value as List).map((item) => Map<String, String>.from(item as Map)).toList(),
-      );
-    });
+    final Map<String, List<Map<String, String>>> staticSlotMap =
+        staticSlotMapRaw.map((key, value) {
+          return MapEntry(
+            key,
+            (value as List)
+                .map((item) => Map<String, String>.from(item as Map))
+                .toList(),
+          );
+        });
 
     final generatedSchedule = <String, List<dynamic>>{};
-    for (final day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']) {
+    for (final day in [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ]) {
       generatedSchedule[day] = [];
     }
 
     for (final course in uniqueCourses) {
       if (course is Map) {
         final rawSlots = course['slot'] as String? ?? '';
-        final courseSlots = rawSlots.toUpperCase()
+        final courseSlots = rawSlots
+            .toUpperCase()
             .split(RegExp(r'[\+\s,\/]+'))
             .map((s) => s.trim())
             .where((s) => s.isNotEmpty)
@@ -248,7 +265,9 @@ class MultimodalExtractionService {
     }
 
     data['schedule'] = generatedSchedule;
-    AppLogger.info('MultimodalExtractionService: Successfully parsed and normalized JSON data.');
+    AppLogger.info(
+      'MultimodalExtractionService: Successfully parsed and normalized JSON data.',
+    );
     return data;
   }
 }

@@ -68,8 +68,11 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _handleWidgetUri(Uri uri) {
-    final isAcademic = (uri.scheme == 'orbit' && uri.host == 'academic') ||
-                       (uri.scheme == 'orbit' && uri.host == 'home' && uri.path == '/academic');
+    final isAcademic =
+        (uri.scheme == 'orbit' && uri.host == 'academic') ||
+        (uri.scheme == 'orbit' &&
+            uri.host == 'home' &&
+            uri.path == '/academic');
     if (isAcademic) {
       if (mounted) {
         context.go(AppRoutes.academic);

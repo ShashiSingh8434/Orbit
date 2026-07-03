@@ -33,7 +33,8 @@ abstract class ClassSession with _$ClassSession {
     @Default('') String slot,
   }) = _ClassSession;
 
-  factory ClassSession.fromJson(Map<String, dynamic> json) => _$ClassSessionFromJson(json);
+  factory ClassSession.fromJson(Map<String, dynamic> json) =>
+      _$ClassSessionFromJson(json);
 }
 
 @freezed
@@ -49,7 +50,8 @@ abstract class WeekSchedule with _$WeekSchedule {
     @JsonKey(name: 'Sunday') @Default([]) List<ClassSession> sunday,
   }) = _WeekSchedule;
 
-  factory WeekSchedule.fromJson(Map<String, dynamic> json) => _$WeekScheduleFromJson(json);
+  factory WeekSchedule.fromJson(Map<String, dynamic> json) =>
+      _$WeekScheduleFromJson(json);
 }
 
 @freezed
@@ -60,5 +62,6 @@ abstract class AcademicSchedule with _$AcademicSchedule {
     required WeekSchedule schedule,
   }) = _AcademicSchedule;
 
-  factory AcademicSchedule.fromJson(Map<String, dynamic> json) => _$AcademicScheduleFromJson(json);
+  factory AcademicSchedule.fromJson(Map<String, dynamic> json) =>
+      _$AcademicScheduleFromJson(json);
 }

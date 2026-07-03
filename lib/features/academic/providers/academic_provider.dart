@@ -57,9 +57,8 @@ class AcademicState {
 }
 
 /// Provider for the [AcademicController].
-final academicStateProvider = NotifierProvider<AcademicController, AcademicState>(
-  AcademicController.new,
-);
+final academicStateProvider =
+    NotifierProvider<AcademicController, AcademicState>(AcademicController.new);
 
 /// Controller managing state and user actions for the Academic feature.
 class AcademicController extends Notifier<AcademicState> {
@@ -98,7 +97,11 @@ class AcademicController extends Notifier<AcademicState> {
     final uid = _getUid();
     if (uid == null) return;
 
-    state = state.copyWith(isLoading: true, isUploading: true, errorMessage: null);
+    state = state.copyWith(
+      isLoading: true,
+      isUploading: true,
+      errorMessage: null,
+    );
 
     try {
       final List<Uint8List> bytesList = [];
@@ -116,10 +119,7 @@ class AcademicController extends Notifier<AcademicState> {
       final parsedSchedule = await _repo.parseTimetable(bytesList, mimeTypes);
       await _repo.saveSchedule(uid, parsedSchedule);
 
-      state = AcademicState(
-        schedule: parsedSchedule,
-        isSuccess: true,
-      );
+      state = AcademicState(schedule: parsedSchedule, isSuccess: true);
       WidgetSyncService.syncSchedule(parsedSchedule);
     } catch (e) {
       state = AcademicState(
@@ -149,11 +149,15 @@ class AcademicController extends Notifier<AcademicState> {
 
   /// Updates a course details globally and regenerates the weekly schedule.
   Future<void> editCourse(String oldCode, Course updatedCourse) async {
-    final schedule = state.schedule ?? const AcademicSchedule(courses: [], schedule: WeekSchedule());
-    
+    final schedule =
+        state.schedule ??
+        const AcademicSchedule(courses: [], schedule: WeekSchedule());
+
     // 1. Update the course in the unique courses list
     final courses = List<Course>.from(schedule.courses);
-    final index = courses.indexWhere((c) => c.code.trim().toUpperCase() == oldCode.trim().toUpperCase());
+    final index = courses.indexWhere(
+      (c) => c.code.trim().toUpperCase() == oldCode.trim().toUpperCase(),
+    );
     if (index != -1) {
       courses[index] = updatedCourse;
     } else {
@@ -177,7 +181,9 @@ class AcademicController extends Notifier<AcademicState> {
     if (schedule == null) return;
 
     final courses = List<Course>.from(schedule.courses);
-    courses.removeWhere((c) => c.code.trim().toUpperCase() == code.trim().toUpperCase());
+    courses.removeWhere(
+      (c) => c.code.trim().toUpperCase() == code.trim().toUpperCase(),
+    );
 
     final WeekSchedule regeneratedWeek = _generateScheduleFromCourses(courses);
 
@@ -191,15 +197,22 @@ class AcademicController extends Notifier<AcademicState> {
 
   /// Adds a course globally and regenerates the weekly schedule.
   Future<void> addCourse(Course newCourse) async {
-    final schedule = state.schedule ?? const AcademicSchedule(courses: [], schedule: WeekSchedule());
+    final schedule =
+        state.schedule ??
+        const AcademicSchedule(courses: [], schedule: WeekSchedule());
     final courses = List<Course>.from(schedule.courses);
-    
+
     // Check if course already exists
-    final exists = courses.any((c) => c.code.trim().toUpperCase() == newCourse.code.trim().toUpperCase());
+    final exists = courses.any(
+      (c) => c.code.trim().toUpperCase() == newCourse.code.trim().toUpperCase(),
+    );
     if (!exists) {
       courses.add(newCourse);
     } else {
-      final idx = courses.indexWhere((c) => c.code.trim().toUpperCase() == newCourse.code.trim().toUpperCase());
+      final idx = courses.indexWhere(
+        (c) =>
+            c.code.trim().toUpperCase() == newCourse.code.trim().toUpperCase(),
+      );
       if (idx != -1) courses[idx] = newCourse;
     }
 
@@ -215,21 +228,33 @@ class AcademicController extends Notifier<AcademicState> {
 
   WeekSchedule _generateScheduleFromCourses(List<Course> uniqueCourses) {
     final Map<String, dynamic> staticSlotMapRaw = jsonDecode(staticSlotsJson);
-    final Map<String, List<Map<String, String>>> staticSlotMap = staticSlotMapRaw.map((key, value) {
-      return MapEntry(
-        key,
-        (value as List).map((item) => Map<String, String>.from(item as Map)).toList(),
-      );
-    });
+    final Map<String, List<Map<String, String>>> staticSlotMap =
+        staticSlotMapRaw.map((key, value) {
+          return MapEntry(
+            key,
+            (value as List)
+                .map((item) => Map<String, String>.from(item as Map))
+                .toList(),
+          );
+        });
 
     final generatedSchedule = <String, List<ClassSession>>{};
-    for (final day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']) {
+    for (final day in [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ]) {
       generatedSchedule[day] = [];
     }
 
     for (final course in uniqueCourses) {
       final rawSlots = course.slot;
-      final courseSlots = rawSlots.toUpperCase()
+      final courseSlots = rawSlots
+          .toUpperCase()
           .split(RegExp(r'[\+\s,\/]+'))
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
@@ -239,15 +264,17 @@ class AcademicController extends Notifier<AcademicState> {
         for (final slotInfo in staticSlotMap[day]!) {
           final slotCode = slotInfo['slot']!.toUpperCase();
           if (courseSlots.contains(slotCode)) {
-            generatedSchedule[day]!.add(ClassSession(
-              startTime: slotInfo['startTime']!,
-              endTime: slotInfo['endTime']!,
-              code: course.code,
-              name: course.name,
-              faculty: course.faculty,
-              room: course.room,
-              slot: slotCode,
-            ));
+            generatedSchedule[day]!.add(
+              ClassSession(
+                startTime: slotInfo['startTime']!,
+                endTime: slotInfo['endTime']!,
+                code: course.code,
+                name: course.name,
+                faculty: course.faculty,
+                room: course.room,
+                slot: slotCode,
+              ),
+            );
           }
         }
       }
@@ -255,7 +282,9 @@ class AcademicController extends Notifier<AcademicState> {
 
     // Sort class sessions chronologically by startTime
     for (final day in generatedSchedule.keys) {
-      generatedSchedule[day]!.sort((a, b) => a.startTime.compareTo(b.startTime));
+      generatedSchedule[day]!.sort(
+        (a, b) => a.startTime.compareTo(b.startTime),
+      );
     }
 
     return WeekSchedule(
@@ -271,18 +300,35 @@ class AcademicController extends Notifier<AcademicState> {
 
   /// Adds a class session manually on a specific day.
   Future<void> addSession(String day, ClassSession newSession) async {
-    final schedule = state.schedule ?? const AcademicSchedule(courses: [], schedule: WeekSchedule());
+    final schedule =
+        state.schedule ??
+        const AcademicSchedule(courses: [], schedule: WeekSchedule());
     final week = schedule.schedule;
     List<ClassSession> list;
     switch (day) {
-      case 'Monday': list = List.from(week.monday); break;
-      case 'Tuesday': list = List.from(week.tuesday); break;
-      case 'Wednesday': list = List.from(week.wednesday); break;
-      case 'Thursday': list = List.from(week.thursday); break;
-      case 'Friday': list = List.from(week.friday); break;
-      case 'Saturday': list = List.from(week.saturday); break;
-      case 'Sunday': list = List.from(week.sunday); break;
-      default: return;
+      case 'Monday':
+        list = List.from(week.monday);
+        break;
+      case 'Tuesday':
+        list = List.from(week.tuesday);
+        break;
+      case 'Wednesday':
+        list = List.from(week.wednesday);
+        break;
+      case 'Thursday':
+        list = List.from(week.thursday);
+        break;
+      case 'Friday':
+        list = List.from(week.friday);
+        break;
+      case 'Saturday':
+        list = List.from(week.saturday);
+        break;
+      case 'Sunday':
+        list = List.from(week.sunday);
+        break;
+      default:
+        return;
     }
 
     list.add(newSession);
@@ -292,15 +338,20 @@ class AcademicController extends Notifier<AcademicState> {
 
     // Ensure course exists in course metadata list
     final courses = List<Course>.from(schedule.courses);
-    final hasCourse = courses.any((c) => c.code.trim().toUpperCase() == newSession.code.trim().toUpperCase());
+    final hasCourse = courses.any(
+      (c) =>
+          c.code.trim().toUpperCase() == newSession.code.trim().toUpperCase(),
+    );
     if (!hasCourse) {
-      courses.add(Course(
-        code: newSession.code,
-        name: newSession.name,
-        faculty: newSession.faculty,
-        room: newSession.room,
-        slot: newSession.slot,
-      ));
+      courses.add(
+        Course(
+          code: newSession.code,
+          name: newSession.name,
+          faculty: newSession.faculty,
+          room: newSession.room,
+          slot: newSession.slot,
+        ),
+      );
     }
 
     final updatedSchedule = schedule.copyWith(
@@ -312,21 +363,40 @@ class AcademicController extends Notifier<AcademicState> {
   }
 
   /// Edits an existing class session.
-  Future<void> editSession(String day, int index, ClassSession updatedSession) async {
+  Future<void> editSession(
+    String day,
+    int index,
+    ClassSession updatedSession,
+  ) async {
     final schedule = state.schedule;
     if (schedule == null) return;
 
     final week = schedule.schedule;
     List<ClassSession> list;
     switch (day) {
-      case 'Monday': list = List.from(week.monday); break;
-      case 'Tuesday': list = List.from(week.tuesday); break;
-      case 'Wednesday': list = List.from(week.wednesday); break;
-      case 'Thursday': list = List.from(week.thursday); break;
-      case 'Friday': list = List.from(week.friday); break;
-      case 'Saturday': list = List.from(week.saturday); break;
-      case 'Sunday': list = List.from(week.sunday); break;
-      default: return;
+      case 'Monday':
+        list = List.from(week.monday);
+        break;
+      case 'Tuesday':
+        list = List.from(week.tuesday);
+        break;
+      case 'Wednesday':
+        list = List.from(week.wednesday);
+        break;
+      case 'Thursday':
+        list = List.from(week.thursday);
+        break;
+      case 'Friday':
+        list = List.from(week.friday);
+        break;
+      case 'Saturday':
+        list = List.from(week.saturday);
+        break;
+      case 'Sunday':
+        list = List.from(week.sunday);
+        break;
+      default:
+        return;
     }
 
     if (index >= 0 && index < list.length) {
@@ -351,14 +421,29 @@ class AcademicController extends Notifier<AcademicState> {
     final week = schedule.schedule;
     List<ClassSession> list;
     switch (day) {
-      case 'Monday': list = List.from(week.monday); break;
-      case 'Tuesday': list = List.from(week.tuesday); break;
-      case 'Wednesday': list = List.from(week.wednesday); break;
-      case 'Thursday': list = List.from(week.thursday); break;
-      case 'Friday': list = List.from(week.friday); break;
-      case 'Saturday': list = List.from(week.saturday); break;
-      case 'Sunday': list = List.from(week.sunday); break;
-      default: return;
+      case 'Monday':
+        list = List.from(week.monday);
+        break;
+      case 'Tuesday':
+        list = List.from(week.tuesday);
+        break;
+      case 'Wednesday':
+        list = List.from(week.wednesday);
+        break;
+      case 'Thursday':
+        list = List.from(week.thursday);
+        break;
+      case 'Friday':
+        list = List.from(week.friday);
+        break;
+      case 'Saturday':
+        list = List.from(week.saturday);
+        break;
+      case 'Sunday':
+        list = List.from(week.sunday);
+        break;
+      default:
+        return;
     }
 
     if (index >= 0 && index < list.length) {
@@ -391,16 +476,28 @@ class AcademicController extends Notifier<AcademicState> {
     }
   }
 
-  WeekSchedule _updateWeekDayList(WeekSchedule week, String day, List<ClassSession> list) {
+  WeekSchedule _updateWeekDayList(
+    WeekSchedule week,
+    String day,
+    List<ClassSession> list,
+  ) {
     switch (day) {
-      case 'Monday': return week.copyWith(monday: list);
-      case 'Tuesday': return week.copyWith(tuesday: list);
-      case 'Wednesday': return week.copyWith(wednesday: list);
-      case 'Thursday': return week.copyWith(thursday: list);
-      case 'Friday': return week.copyWith(friday: list);
-      case 'Saturday': return week.copyWith(saturday: list);
-      case 'Sunday': return week.copyWith(sunday: list);
-      default: return week;
+      case 'Monday':
+        return week.copyWith(monday: list);
+      case 'Tuesday':
+        return week.copyWith(tuesday: list);
+      case 'Wednesday':
+        return week.copyWith(wednesday: list);
+      case 'Thursday':
+        return week.copyWith(thursday: list);
+      case 'Friday':
+        return week.copyWith(friday: list);
+      case 'Saturday':
+        return week.copyWith(saturday: list);
+      case 'Sunday':
+        return week.copyWith(sunday: list);
+      default:
+        return week;
     }
   }
 }

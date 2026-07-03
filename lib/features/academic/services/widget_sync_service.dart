@@ -7,7 +7,8 @@ import '../widgets/class_card.dart';
 class WidgetSyncService {
   static const String _dataKey = 'timetable_data';
   static const String _widgetName = 'TimetableWidgetReceiver';
-  static const String _androidProviderName = 'com.example.orbit.widget.TimetableWidgetReceiver';
+  static const String _androidProviderName =
+      'com.example.orbit.widget.TimetableWidgetReceiver';
 
   /// Serializes and sends the updated academic schedule to the native widget.
   static Future<void> syncSchedule(AcademicSchedule? schedule) async {
@@ -15,9 +16,12 @@ class WidgetSyncService {
       await HomeWidget.saveWidgetData<String>(_dataKey, '{}');
     } else {
       final Map<String, dynamic> jsonPayload = _serializeSchedule(schedule);
-      await HomeWidget.saveWidgetData<String>(_dataKey, json.encode(jsonPayload));
+      await HomeWidget.saveWidgetData<String>(
+        _dataKey,
+        json.encode(jsonPayload),
+      );
     }
-    
+
     // Request widget update from home_widget plugin
     await HomeWidget.updateWidget(
       name: _widgetName,
@@ -40,7 +44,9 @@ class WidgetSyncService {
     return payload;
   }
 
-  static List<Map<String, dynamic>> _serializeSessions(List<ClassSession> sessions) {
+  static List<Map<String, dynamic>> _serializeSessions(
+    List<ClassSession> sessions,
+  ) {
     return sessions.map((s) {
       return {
         'name': s.name,

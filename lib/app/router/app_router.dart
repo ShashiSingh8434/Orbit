@@ -96,17 +96,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'academic',
             builder: (_, _) => const AcademicPage(),
             routes: [
-              GoRoute(
-                path: 'courses',
-                builder: (_, _) => const CoursesPage(),
-              ),
+              GoRoute(path: 'courses', builder: (_, _) => const CoursesPage()),
               GoRoute(
                 path: 'edit-course',
                 builder: (_, state) {
                   final extra = state.extra as Map<String, dynamic>?;
-                  return EditCoursePage(
-                    course: extra?['course'] as Course?,
-                  );
+                  return EditCoursePage(course: extra?['course'] as Course?);
                 },
               ),
             ],
