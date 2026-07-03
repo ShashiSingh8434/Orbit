@@ -6,6 +6,7 @@ import '../../auth/controllers/auth_controller.dart';
 import '../data/academic_repository.dart';
 import '../models/academic_schedule.dart';
 import '../data/static_slots.dart';
+import '../services/widget_sync_service.dart';
 
 /// Represents the local state of the academic schedule module.
 class AcademicState {
@@ -82,6 +83,7 @@ class AcademicController extends Notifier<AcademicState> {
     try {
       final schedule = await _repo.getSchedule(uid);
       state = AcademicState(schedule: schedule, isSuccess: true);
+      WidgetSyncService.syncSchedule(schedule);
     } catch (e) {
       state = AcademicState(errorMessage: e.toString());
     }
@@ -118,6 +120,7 @@ class AcademicController extends Notifier<AcademicState> {
         schedule: parsedSchedule,
         isSuccess: true,
       );
+      WidgetSyncService.syncSchedule(parsedSchedule);
     } catch (e) {
       state = AcademicState(
         schedule: state.schedule,
@@ -135,6 +138,7 @@ class AcademicController extends Notifier<AcademicState> {
     try {
       await _repo.saveSchedule(uid, updated);
       state = AcademicState(schedule: updated, isSuccess: true);
+      WidgetSyncService.syncSchedule(updated);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -378,6 +382,7 @@ class AcademicController extends Notifier<AcademicState> {
     try {
       await _repo.clearSchedule(uid);
       state = const AcademicState(isSuccess: true);
+      WidgetSyncService.syncSchedule(null);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

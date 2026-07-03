@@ -55,7 +55,7 @@ class ClassCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          '${_format24to12Hr(session.startTime)} - ${_format24to12Hr(session.endTime)}',
+                          '${format24to12Hr(session.startTime)} - ${format24to12Hr(session.endTime)}',
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: colorScheme.onPrimaryContainer,
                             fontWeight: FontWeight.bold,
@@ -165,7 +165,7 @@ class ClassCard extends StatelessWidget {
     }).join(' ');
   }
 
-  String _format24to12Hr(String timeStr) {
+  static String format24to12Hr(String timeStr) {
     if (timeStr.isEmpty) return '';
     try {
       final upper = timeStr.toUpperCase();

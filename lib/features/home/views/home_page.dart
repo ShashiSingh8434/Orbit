@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:home_widget/home_widget.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../auth/controllers/auth_controller.dart';
@@ -49,6 +50,31 @@ class _HomePageState extends ConsumerState<HomePage> {
         ref.read(aiQueueManagerProvider).scanAndProcessUnextracted(user.uid);
       }
     });
+    _setupWidgetLaunchListener();
+  }
+
+  void _setupWidgetLaunchListener() {
+    HomeWidget.widgetClicked.listen((Uri? uri) {
+      if (uri != null) {
+        _handleWidgetUri(uri);
+      }
+    });
+
+    HomeWidget.initiallyLaunchedFromHomeWidget().then((Uri? uri) {
+      if (uri != null) {
+        _handleWidgetUri(uri);
+      }
+    });
+  }
+
+  void _handleWidgetUri(Uri uri) {
+    final isAcademic = (uri.scheme == 'orbit' && uri.host == 'academic') ||
+                       (uri.scheme == 'orbit' && uri.host == 'home' && uri.path == '/academic');
+    if (isAcademic) {
+      if (mounted) {
+        context.go(AppRoutes.academic);
+      }
+    }
   }
 
   @override
