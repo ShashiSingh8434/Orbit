@@ -12,7 +12,7 @@ import '../../decision/widgets/decision_section.dart';
 import '../../event/widgets/event_section.dart';
 import '../../day/providers/day_data_provider.dart';
 import '../widgets/day_skeleton_loader.dart';
-import '../../ai/engine/ai_queue_manager.dart';
+import '../../../core/ai/engine/ai_queue_manager.dart';
 import '../widgets/arc_action_fab.dart';
 import '../widgets/first_run_overlay.dart';
 

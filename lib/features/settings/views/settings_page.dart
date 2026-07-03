@@ -5,9 +5,9 @@ import '../../../app/router/app_routes.dart';
 import '../../../app/theme/theme_notifier.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../ai/controllers/ai_settings_controller.dart';
-import '../../ai/engine/ai_health_monitor.dart';
-import '../../ai/views/ai_setup_wizard.dart';
+import '../../../core/ai/controllers/ai_settings_controller.dart';
+import '../../../core/ai/engine/ai_health_monitor.dart';
+import '../../../core/ai/views/ai_setup_wizard.dart';
 
 /// Settings page — theme, AI preferences, account info, sign out.
 class SettingsPage extends ConsumerStatefulWidget {

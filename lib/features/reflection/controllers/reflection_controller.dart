@@ -5,7 +5,7 @@ import '../../auth/controllers/auth_controller.dart';
 import '../../reflection/data/reflection_repository.dart';
 import '../../reflection/data/reflection_local_draft_store.dart';
 import '../../reflection/models/reflection_model.dart';
-import '../../ai/engine/understanding_pipeline.dart';
+import '../../../core/ai/engine/understanding_pipeline.dart';
 
 // ── Stream Provider ───────────────────────────────────────────────────────────
 

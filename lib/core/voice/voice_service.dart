@@ -5,7 +5,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../features/ai/storage/secure_key_storage.dart';
+import '../ai/storage/secure_key_storage.dart';
 import '../utils/app_logger.dart';
 
 /// Encapsulates all audio recording and transcription interactions.

@@ -14,7 +14,7 @@ import '../../features/learning/views/learning_list_page.dart';
 import '../../features/settings/views/settings_page.dart';
 import '../../features/home/views/guide_page.dart';
 import '../../features/day/views/detailed_summary_page.dart';
-import '../../features/ai/analytics/ai_analytics_page.dart';
+import '../../core/ai/analytics/ai_analytics_page.dart';
 import 'app_routes.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────

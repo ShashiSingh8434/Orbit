@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../shared/widgets/space_painter.dart';
 import '../../auth/controllers/auth_controller.dart';
-import '../../ai/engine/detailed_summary_pipeline.dart';
+import '../../../core/ai/engine/detailed_summary_pipeline.dart';
 
 enum SummaryState { loading, loaded, error }
 
