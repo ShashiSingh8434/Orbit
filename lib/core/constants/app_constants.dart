@@ -9,6 +9,6 @@ abstract final class AppConstants {
 
   // ── App Metadata ──
   static const String appName = 'Orbit';
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '1.0.1';
   static const String appTagline = 'Your AI-powered companion for college life';
 }
