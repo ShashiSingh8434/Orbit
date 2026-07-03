@@ -280,8 +280,9 @@ class _EditCoursePageState extends ConsumerState<EditCoursePage> {
                               ),
                             ),
                             validator: (val) {
-                              if (val == null || val.trim().isEmpty)
+                              if (val == null || val.trim().isEmpty) {
                                 return null;
+                              }
                               if (int.tryParse(val.trim()) == null) {
                                 return 'Must be an integer';
                               }
