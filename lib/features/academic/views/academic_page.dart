@@ -6,6 +6,7 @@ import '../../../shared/widgets/image_picker_dialog.dart';
 import '../models/academic_schedule.dart';
 import '../providers/academic_provider.dart';
 import '../widgets/class_card.dart';
+import '../../../core/widgets/home_widget_pin_service.dart';
 
 /// The main page representing the AI-powered Academic Timetable Planner.
 class AcademicPage extends ConsumerStatefulWidget {
@@ -104,6 +105,20 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
     context.push(AppRoutes.academicEditCourse);
   }
 
+  Future<void> _handlePinWidget() async {
+    final isSupported = await HomeWidgetPinService.isWidgetPinningSupported();
+    if (!mounted) return;
+    if (!isSupported) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Home screen widget pinning is not supported by your launcher.'),
+        ),
+      );
+      return;
+    }
+    await HomeWidgetPinService.requestWidgetPin();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -179,7 +194,7 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
           }
           if (isParsing) {
             return _buildProgressOverlay(
-              'Gemini is reading and structuring your timetable. Please wait...',
+              'AI is reading and structuring your timetable. Please wait...',
               colorScheme,
             );
           }
@@ -197,6 +212,24 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
           // 4. Default View (Manually edited or AI parsed)
           return Column(
             children: [
+              // Pin Widget Button for loaded timetable
+              if (hasTimetable)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: FilledButton.icon(
+                    onPressed: _handlePinWidget,
+                    icon: const Icon(Icons.widgets_outlined),
+                    label: const Text('Pin Timetable Widget'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      backgroundColor: colorScheme.secondaryContainer,
+                      foregroundColor: colorScheme.onSecondaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
               // Prompt to upload timetable via AI at the top if not uploaded yet
               if (!hasTimetable)
                 Padding(
@@ -227,7 +260,7 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Upload your timetable image to extract all classes automatically using Gemini.',
+                                  'Upload your timetable image to extract all classes automatically using AI.',
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
