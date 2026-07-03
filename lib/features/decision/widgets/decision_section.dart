@@ -126,7 +126,9 @@ class DecisionSection extends StatelessWidget {
         ...decisions!.map<Widget>(
           (d) => OrbitCard(
             margin: const EdgeInsets.only(bottom: 8),
-            backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
+            backgroundColor: colorScheme.primaryContainer.withValues(
+              alpha: 0.39,
+            ),
             borderColor: colorScheme.primary.withValues(alpha: 0.23),
             leading: Icon(
               d.status == 'Superseded'

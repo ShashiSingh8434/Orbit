@@ -91,7 +91,9 @@ class TaskTile extends StatelessWidget {
     return OrbitCard(
       margin: const EdgeInsets.only(bottom: 8),
       accentColor: accentColor,
-      borderColor: overdue && !completed ? cs.error.withValues(alpha: 0.3) : null,
+      borderColor: overdue && !completed
+          ? cs.error.withValues(alpha: 0.3)
+          : null,
       onTap: onEdit,
       leading: GestureDetector(
         onTap: () => onToggle(!completed),

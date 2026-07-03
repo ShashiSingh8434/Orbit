@@ -121,21 +121,24 @@ class _SolarSystemPainter extends CustomPainter {
 
       // Slower twinkle effect (reduced multiplier from 10 to 4)
       final twinklePhase = random.nextDouble() * math.pi * 2;
-      final twinkle = math.sin(progress * math.pi * 4 + twinklePhase) * 0.5 + 0.5;
+      final twinkle =
+          math.sin(progress * math.pi * 4 + twinklePhase) * 0.5 + 0.5;
 
       final baseColor = isDark ? Colors.white : colorScheme.primary;
       // Reduced base alpha and twinkle intensity for a subtler look
-      paint.color = baseColor.withValues(alpha: (isDark ? 0.03 : 0.05) + (twinkle * 0.1));
+      paint.color = baseColor.withValues(
+        alpha: (isDark ? 0.03 : 0.05) + (twinkle * 0.1),
+      );
       canvas.drawCircle(Offset(x, y), baseRadius, paint);
     }
   }
 
   void _drawSolarSystem(Canvas canvas, Size size, Paint paint) {
     final center = Offset(size.width * 0.5, size.height * 0.5);
-    
+
     // Slant configuration for 3D perspective
     const double flattenRatio = 0.35; // How flat the orbits look (0 to 1)
-    
+
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(-math.pi / 8); // Tilt the whole system
@@ -143,11 +146,37 @@ class _SolarSystemPainter extends CustomPainter {
     // --- Planet Configurations ---
     // [Radius from sun, Planet Size, Orbit Speed multiplier, Color]
     final planets = [
-      _PlanetData(size.width * 0.15, 2.5, 4.0, isDark ? Colors.grey[400]! : Colors.grey[600]!), // Mercury-ish
-      _PlanetData(size.width * 0.28, 4.5, 2.5, isDark ? Colors.orange[300]! : Colors.orange[400]!), // Venus-ish
-      _PlanetData(size.width * 0.45, 5.0, 1.5, colorScheme.primary, hasMoon: true), // Earth-ish
-      _PlanetData(size.width * 0.60, 3.5, 1.0, isDark ? Colors.redAccent[100]! : Colors.red[400]!), // Mars-ish
-      _PlanetData(size.width * 0.85, 8.0, 0.5, colorScheme.tertiary), // Jupiter-ish
+      _PlanetData(
+        size.width * 0.15,
+        2.5,
+        4.0,
+        isDark ? Colors.grey[400]! : Colors.grey[600]!,
+      ), // Mercury-ish
+      _PlanetData(
+        size.width * 0.28,
+        4.5,
+        2.5,
+        isDark ? Colors.orange[300]! : Colors.orange[400]!,
+      ), // Venus-ish
+      _PlanetData(
+        size.width * 0.45,
+        5.0,
+        1.5,
+        colorScheme.primary,
+        hasMoon: true,
+      ), // Earth-ish
+      _PlanetData(
+        size.width * 0.60,
+        3.5,
+        1.0,
+        isDark ? Colors.redAccent[100]! : Colors.red[400]!,
+      ), // Mars-ish
+      _PlanetData(
+        size.width * 0.85,
+        8.0,
+        0.5,
+        colorScheme.tertiary,
+      ), // Jupiter-ish
     ];
 
     for (int i = 0; i < planets.length; i++) {
@@ -157,9 +186,10 @@ class _SolarSystemPainter extends CustomPainter {
       paint.style = PaintingStyle.stroke;
       paint.strokeWidth = 0.5;
       // Reduced orbit opacity to make lines fainter
-      paint.color = (isDark ? Colors.white : colorScheme.primary)
-          .withValues(alpha: isDark ? 0.03 : 0.08);
-      
+      paint.color = (isDark ? Colors.white : colorScheme.primary).withValues(
+        alpha: isDark ? 0.03 : 0.08,
+      );
+
       canvas.drawOval(
         Rect.fromCenter(
           center: Offset.zero,
@@ -172,7 +202,7 @@ class _SolarSystemPainter extends CustomPainter {
       // Calculate Planet Position
       final startingAngle = i * (math.pi / 1.5);
       final angle = (progress * math.pi * 2 * p.speed) + startingAngle;
-      
+
       final px = p.orbitRadius * math.cos(angle);
       final py = (p.orbitRadius * flattenRatio) * math.sin(angle);
 
@@ -186,14 +216,15 @@ class _SolarSystemPainter extends CustomPainter {
       if (p.hasMoon) {
         final moonOrbitRadius = p.size * 2.5;
         // Reduced moon speed from 15 to 6 so it orbits more calmly
-        final moonAngle = (progress * math.pi * 2 * 6) + startingAngle; 
-        
+        final moonAngle = (progress * math.pi * 2 * 6) + startingAngle;
+
         final mx = px + moonOrbitRadius * math.cos(moonAngle);
         final my = py + (moonOrbitRadius * flattenRatio) * math.sin(moonAngle);
 
         // Faded moon colors
-        paint.color = (isDark ? Colors.white70 : Colors.blueGrey)
-            .withValues(alpha: isDark ? 0.4 : 0.5);
+        paint.color = (isDark ? Colors.white70 : Colors.blueGrey).withValues(
+          alpha: isDark ? 0.4 : 0.5,
+        );
         canvas.drawCircle(Offset(mx, my), p.size * 0.3, paint);
       }
     }
@@ -217,5 +248,11 @@ class _PlanetData {
   final Color color;
   final bool hasMoon;
 
-  _PlanetData(this.orbitRadius, this.size, this.speed, this.color, {this.hasMoon = false});
+  _PlanetData(
+    this.orbitRadius,
+    this.size,
+    this.speed,
+    this.color, {
+    this.hasMoon = false,
+  });
 }

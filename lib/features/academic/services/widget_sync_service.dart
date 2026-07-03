@@ -7,8 +7,7 @@ import '../widgets/class_card.dart';
 class WidgetSyncService {
   static const String _dataKey = 'timetable_data';
   static const String _widgetName = 'TimetableWidgetReceiver';
-  static const String _androidProviderName =
-      'widget.TimetableWidgetReceiver';
+  static const String _androidProviderName = 'widget.TimetableWidgetReceiver';
 
   /// Serializes and sends the updated academic schedule to the native widget.
   static Future<void> syncSchedule(AcademicSchedule? schedule) async {

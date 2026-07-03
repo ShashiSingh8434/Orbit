@@ -126,7 +126,9 @@ class EventSection extends StatelessWidget {
         ..._getSortedEvents().map<Widget>(
           (e) => OrbitCard(
             margin: const EdgeInsets.only(bottom: 8),
-            backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
+            backgroundColor: colorScheme.primaryContainer.withValues(
+              alpha: 0.39,
+            ),
             borderColor: colorScheme.primary.withValues(alpha: 0.23),
             leading: const Icon(Icons.event, color: Colors.deepPurple),
             title: e.title,
@@ -134,7 +136,10 @@ class EventSection extends StatelessWidget {
                 ? '${e.time}${e.description.isNotEmpty ? ' · ${e.description}' : ''}'
                 : (e.description.isNotEmpty ? e.description : null),
             trailing: e.location != null
-                ? Icon(Icons.location_on_outlined, color: colorScheme.onSurfaceVariant)
+                ? Icon(
+                    Icons.location_on_outlined,
+                    color: colorScheme.onSurfaceVariant,
+                  )
                 : null,
           ),
         ),

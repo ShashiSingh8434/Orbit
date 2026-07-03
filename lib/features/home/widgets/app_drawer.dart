@@ -19,16 +19,16 @@ class AppDrawer extends ConsumerWidget {
     // Light → airy sky:   cool white-blue → soft indigo tint
     final gradientColors = isDark
         ? const [
-  Color(0xFF05070F), // Space Black
-  Color(0xFF0D1535), // Deep Navy
-  Color(0xFF2A2452), // Deep Violet Nebula
-  Color(0xFF060A15), // Midnight Black
+            Color(0xFF05070F), // Space Black
+            Color(0xFF0D1535), // Deep Navy
+            Color(0xFF2A2452), // Deep Violet Nebula
+            Color(0xFF060A15), // Midnight Black
           ]
         : const [
-        Color(0xFFF8FAFF), // Pure Sky White
-        Color(0xFFE9F1FF), // Soft Blue
-        Color(0xFFE8E6FF), // Lavender Mist
-        Color(0xFFF6F8FF), // White Glows
+            Color(0xFFF8FAFF), // Pure Sky White
+            Color(0xFFE9F1FF), // Soft Blue
+            Color(0xFFE8E6FF), // Lavender Mist
+            Color(0xFFF6F8FF), // White Glows
           ];
 
     // ── Per-theme text / icon colours ────────────────────────────────────────
@@ -76,9 +76,7 @@ class AppDrawer extends ConsumerWidget {
                     end: Alignment.bottomRight,
                     colors: headerColors,
                   ),
-                  border: Border(
-                    bottom: BorderSide(color: headerBorder),
-                  ),
+                  border: Border(bottom: BorderSide(color: headerBorder)),
                 ),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: colorScheme.primary.withValues(alpha: 0.20),
@@ -113,13 +111,18 @@ class AppDrawer extends ConsumerWidget {
               // ── Navigation Items ────────────────────────────────────────────
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   children: [
                     _DrawerItem(
                       icon: Icons.home_rounded,
                       label: 'Home',
                       isDark: isDark,
-                      selected: GoRouterState.of(context).matchedLocation == AppRoutes.home,
+                      selected:
+                          GoRouterState.of(context).matchedLocation ==
+                          AppRoutes.home,
                       selectedHighlight: selectedHighlight,
                       colorScheme: colorScheme,
                       onTap: () {
@@ -128,7 +131,11 @@ class AppDrawer extends ConsumerWidget {
                       },
                     ),
 
-                    _SectionDivider(label: 'FEATURES', labelColor: labelColor, dividerColor: dividerColor),
+                    _SectionDivider(
+                      label: 'FEATURES',
+                      labelColor: labelColor,
+                      dividerColor: dividerColor,
+                    ),
 
                     _DrawerItem(
                       icon: Icons.auto_awesome_rounded,
@@ -189,7 +196,9 @@ class AppDrawer extends ConsumerWidget {
                       icon: Icons.school_rounded,
                       label: 'Academic',
                       isDark: isDark,
-                      selected: GoRouterState.of(context).matchedLocation == AppRoutes.academic,
+                      selected:
+                          GoRouterState.of(context).matchedLocation ==
+                          AppRoutes.academic,
                       selectedHighlight: selectedHighlight,
                       colorScheme: colorScheme,
                       onTap: () {
@@ -198,7 +207,11 @@ class AppDrawer extends ConsumerWidget {
                       },
                     ),
 
-                    _SectionDivider(label: 'MORE', labelColor: labelColor, dividerColor: dividerColor),
+                    _SectionDivider(
+                      label: 'MORE',
+                      labelColor: labelColor,
+                      dividerColor: dividerColor,
+                    ),
 
                     _DrawerItem(
                       icon: Icons.help_outline_rounded,
@@ -223,20 +236,6 @@ class AppDrawer extends ConsumerWidget {
                       },
                     ),
 
-                    Divider(height: 24, color: dividerColor),
-
-                    _DrawerItem(
-                      icon: Icons.star_rounded,
-                      label: 'Bonus',
-                      isDark: isDark,
-                      accent: true,
-                      selectedHighlight: selectedHighlight,
-                      colorScheme: colorScheme,
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push(AppRoutes.bonus);
-                      },
-                    ),
                     SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
                   ],
                 ),
@@ -295,8 +294,7 @@ class _DrawerItem extends StatelessWidget {
     required this.selectedHighlight,
     required this.colorScheme,
     this.selected = false,
-    this.accent = false,
-  });
+  }) : accent = false;
 
   final IconData icon;
   final String label;

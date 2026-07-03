@@ -87,15 +87,22 @@ abstract final class AppTheme {
         fillColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.23)),
+          borderSide: BorderSide(
+            color: colorScheme.primary.withValues(alpha: 0.23),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.23)),
+          borderSide: BorderSide(
+            color: colorScheme.primary.withValues(alpha: 0.23),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.8), width: 2),
+          borderSide: BorderSide(
+            color: colorScheme.primary.withValues(alpha: 0.8),
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -231,7 +238,9 @@ abstract final class AppTheme {
       primary: _primaryDark,
       onPrimary: const Color(0xFF0A0E1A),
       secondary: const Color(0xFF64B5F6),
-      surface: const Color(0xFF07070F), // Near-black boundary matching background gradient
+      surface: const Color(
+        0xFF07070F,
+      ), // Near-black boundary matching background gradient
       onSurface: const Color(0xFFF0F0F8),
       surfaceContainerHighest: const Color(0xFF2E3B4E),
       error: const Color(0xFFEF5350),
@@ -287,15 +296,22 @@ abstract final class AppTheme {
         fillColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.23)),
+          borderSide: BorderSide(
+            color: colorScheme.primary.withValues(alpha: 0.23),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.23)),
+          borderSide: BorderSide(
+            color: colorScheme.primary.withValues(alpha: 0.23),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary.withValues(alpha: 0.8), width: 2),
+          borderSide: BorderSide(
+            color: colorScheme.primary.withValues(alpha: 0.8),
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

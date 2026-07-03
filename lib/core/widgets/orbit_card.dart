@@ -16,7 +16,10 @@ class OrbitCard extends StatelessWidget {
     this.titleStyle,
     this.descriptionStyle,
     this.bottomContent,
-  }) : assert(title != null || titleWidget != null, 'Either title or titleWidget must be provided');
+  }) : assert(
+         title != null || titleWidget != null,
+         'Either title or titleWidget must be provided',
+       );
 
   final String? title;
   final Widget? titleWidget;
@@ -40,19 +43,17 @@ class OrbitCard extends StatelessWidget {
 
     return Card(
       elevation: 1,
-      shadowColor: colorScheme.shadow.withValues(alpha: 0.25), 
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.25),
       color: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: borderColor ?? colorScheme.outlineVariant.withValues(alpha: 0.9),
+          color:
+              borderColor ?? colorScheme.outlineVariant.withValues(alpha: 0.9),
           width: 1,
         ),
       ),
-      margin: margin ?? const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 6,
-      ),
+      margin: margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -60,11 +61,7 @@ class OrbitCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (accentColor != null)
-                Container(
-                  width: 4,
-                  color: accentColor,
-                ),
+              if (accentColor != null) Container(width: 4, color: accentColor),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -84,13 +81,16 @@ class OrbitCard extends StatelessWidget {
                                   const SizedBox(width: 8),
                                 ],
                                 Expanded(
-                                  child: titleWidget ??
+                                  child:
+                                      titleWidget ??
                                       Text(
                                         title!,
-                                        style: titleStyle ??
-                                            theme.textTheme.titleMedium?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                        style:
+                                            titleStyle ??
+                                            theme.textTheme.titleMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                       ),
                                 ),
                               ],
@@ -98,14 +98,17 @@ class OrbitCard extends StatelessWidget {
                             if (hasDesc) ...[
                               const SizedBox(height: 8),
                               Divider(
-                                color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                                color: colorScheme.outlineVariant.withValues(
+                                  alpha: 0.5,
+                                ),
                                 height: 1,
                                 thickness: 1,
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 description!,
-                                style: descriptionStyle ??
+                                style:
+                                    descriptionStyle ??
                                     theme.textTheme.bodyMedium?.copyWith(
                                       color: colorScheme.onSurfaceVariant,
                                     ),

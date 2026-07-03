@@ -69,10 +69,7 @@ class DaySummarySection extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
         borderColor: colorScheme.primary.withValues(alpha: 0.23),
-        leading: Icon(
-          Icons.insights_rounded,
-          color: colorScheme.primary,
-        ),
+        leading: Icon(Icons.insights_rounded, color: colorScheme.primary),
         title: 'Orbit Insights',
         description: emptyText,
         descriptionStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -86,20 +83,14 @@ class DaySummarySection extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.39),
       borderColor: colorScheme.primary.withValues(alpha: 0.23),
-      leading: Icon(
-        Icons.insights_rounded,
-        color: colorScheme.primary,
-      ),
+      leading: Icon(Icons.insights_rounded, color: colorScheme.primary),
       title: 'Orbit Insights',
       description: day!.summary,
       bottomContent: Align(
         alignment: Alignment.centerRight,
         child: FilledButton.tonalIcon(
           onPressed: () {
-            context.push(
-              AppRoutes.detailedSummary,
-              extra: {'date': date},
-            );
+            context.push(AppRoutes.detailedSummary, extra: {'date': date});
           },
           icon: const Icon(Icons.auto_awesome),
           label: const Text('Explore Orbit Deep Dive'),

@@ -23,19 +23,31 @@ class ReflectionListPage extends ConsumerWidget {
     final auth = ref.watch(authStateProvider).value;
     final creationTime = auth?.metadata.creationTime;
     if (creationTime != null) {
-      final limitDate = DateTime(creationTime.year, creationTime.month, creationTime.day);
+      final limitDate = DateTime(
+        creationTime.year,
+        creationTime.month,
+        creationTime.day,
+      );
       final parsedDate = OrbitDateUtils.parseKey(resolvedDate);
-      final targetDate = DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+      final targetDate = DateTime(
+        parsedDate.year,
+        parsedDate.month,
+        parsedDate.day,
+      );
       if (targetDate.isBefore(limitDate)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Cannot access reflections before your account creation date.'),
+                content: Text(
+                  'Cannot access reflections before your account creation date.',
+                ),
                 behavior: SnackBarBehavior.floating,
               ),
             );
-            context.go(AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(limitDate)));
+            context.go(
+              AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(limitDate)),
+            );
           }
         });
       }
@@ -62,25 +74,43 @@ class ReflectionListPage extends ConsumerWidget {
           if (details.primaryVelocity == null) return;
           if (details.primaryVelocity! < -300) {
             // Swipe Right-to-Left -> Next Day
-            final nextDate = OrbitDateUtils.parseKey(resolvedDate).add(const Duration(days: 1));
-            context.go(AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(nextDate)));
+            final nextDate = OrbitDateUtils.parseKey(
+              resolvedDate,
+            ).add(const Duration(days: 1));
+            context.go(
+              AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(nextDate)),
+            );
           } else if (details.primaryVelocity! > 300) {
             // Swipe Left-to-Right -> Previous Day
-            final prevDate = OrbitDateUtils.parseKey(resolvedDate).subtract(const Duration(days: 1));
+            final prevDate = OrbitDateUtils.parseKey(
+              resolvedDate,
+            ).subtract(const Duration(days: 1));
             if (creationTime != null) {
-              final limitDate = DateTime(creationTime.year, creationTime.month, creationTime.day);
-              final targetDate = DateTime(prevDate.year, prevDate.month, prevDate.day);
+              final limitDate = DateTime(
+                creationTime.year,
+                creationTime.month,
+                creationTime.day,
+              );
+              final targetDate = DateTime(
+                prevDate.year,
+                prevDate.month,
+                prevDate.day,
+              );
               if (targetDate.isBefore(limitDate)) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Cannot navigate before your account creation date.'),
+                    content: Text(
+                      'Cannot navigate before your account creation date.',
+                    ),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
                 return;
               }
             }
-            context.go(AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(prevDate)));
+            context.go(
+              AppRoutes.reflectionByDate(OrbitDateUtils.dateKey(prevDate)),
+            );
           }
         },
         child: reflectionsAsync.when(
