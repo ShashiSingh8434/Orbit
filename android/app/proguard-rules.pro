@@ -50,3 +50,33 @@
 -keepattributes SourceFile,LineNumberTable
 -keepattributes Signature
 -keepattributes Exceptions
+
+# ============================================================
+# Glance AppWidget — prevent R8 from stripping widget classes.
+# Glance uses reflection and coroutines internally; minification
+# breaks the widget silently in release builds without these rules.
+# ============================================================
+-keep class androidx.glance.** { *; }
+-keep class androidx.glance.appwidget.** { *; }
+-dontwarn androidx.glance.**
+
+# Keep the entire widget package: receiver, widget, and all actions
+-keep class com.example.orbit.widget.** { *; }
+
+# Keep ActionCallback implementations (PrevDayAction, NextDayAction, ResetDayAction)
+# Glance resolves these by class name at runtime
+-keep class * extends androidx.glance.action.ActionCallback { *; }
+
+# ============================================================
+# Kotlin Coroutines — Glance is coroutine-based; R8 strips
+# internal coroutine machinery in release without these rules.
+# ============================================================
+-keep class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.coroutines.**
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}
+
+# Kotlin serialization / reflection used by Glance state
+-keep class kotlin.reflect.** { *; }
+-dontwarn kotlin.reflect.**
