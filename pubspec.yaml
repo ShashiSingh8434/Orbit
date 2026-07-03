@@ -62,8 +62,11 @@ dependencies:
   url_launcher: ^6.3.1
   package_info_plus: ^8.0.0
 
-  # ── Charts ──
+  # ── AI Charts ──
   fl_chart: ^0.70.2
+
+  # ── Image Picking ──
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

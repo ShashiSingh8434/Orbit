@@ -117,6 +117,15 @@ class AppDrawer extends ConsumerWidget {
                     context.push(AppRoutes.learnings);
                   },
                 ),
+                _DrawerItem(
+                  icon: Icons.school_rounded,
+                  label: 'Academic',
+                  selected: GoRouterState.of(context).matchedLocation == AppRoutes.academic,
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.academic);
+                  },
+                ),
 
                 const Divider(height: 24),
                 Padding(

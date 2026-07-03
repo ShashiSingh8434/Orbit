@@ -28,6 +28,15 @@ abstract final class AppRoutes {
   /// App settings. Deep-link: `orbit://settings`
   static const settings = '/home/settings';
 
+  /// Academic Timetable.
+  static const academic = '/home/academic';
+
+  /// Courses Directory.
+  static const academicCourses = '/home/academic/courses';
+
+  /// Add/Edit Registered Course.
+  static const academicEditCourse = '/home/academic/edit-course';
+
   /// App guide.
   static const guide = '/home/guide';
 

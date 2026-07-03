@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import 'ai_provider.dart';
@@ -59,7 +60,7 @@ class GeminiProvider extends AiProvider {
 
       final response = await generativeModel.generateContent([
         Content.text(request.prompt),
-      ]);
+      ]).timeout(const Duration(seconds: 25));
 
       stopwatch.stop();
 
@@ -81,6 +82,13 @@ class GeminiProvider extends AiProvider {
         inputTokens: usage?.promptTokenCount,
         outputTokens: usage?.candidatesTokenCount,
         latency: stopwatch.elapsed,
+      );
+    } on TimeoutException catch (e) {
+      stopwatch.stop();
+      throw AiException(
+        type: AiErrorType.networkError,
+        message: 'Gemini request timed out: ${e.message}',
+        providerId: _id,
       );
     } on GenerativeAIException catch (e) {
       stopwatch.stop();

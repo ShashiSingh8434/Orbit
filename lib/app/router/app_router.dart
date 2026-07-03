@@ -15,6 +15,10 @@ import '../../features/settings/views/settings_page.dart';
 import '../../features/home/views/guide_page.dart';
 import '../../features/day/views/detailed_summary_page.dart';
 import '../../core/ai/analytics/ai_analytics_page.dart';
+import '../../features/academic/models/academic_schedule.dart';
+import '../../features/academic/views/academic_page.dart';
+import '../../features/academic/views/courses_page.dart';
+import '../../features/academic/views/edit_course_page.dart';
 import 'app_routes.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
@@ -86,6 +90,27 @@ final routerProvider = Provider<GoRouter>((ref) {
 
           // Guide
           GoRoute(path: 'guide', builder: (_, _) => const GuidePage()),
+
+          // Academic
+          GoRoute(
+            path: 'academic',
+            builder: (_, _) => const AcademicPage(),
+            routes: [
+              GoRoute(
+                path: 'courses',
+                builder: (_, _) => const CoursesPage(),
+              ),
+              GoRoute(
+                path: 'edit-course',
+                builder: (_, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return EditCoursePage(
+                    course: extra?['course'] as Course?,
+                  );
+                },
+              ),
+            ],
+          ),
 
           // Settings
           GoRoute(path: 'settings', builder: (_, _) => const SettingsPage()),
