@@ -7,11 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [Released]
+
+## [1.0.1] - 2026-07-03
 
 ### Added
-- Open source infrastructure setup: GitHub Action workflows, Dependabot, Pull Request, and Issue templates.
-- Explicit developer onboarding documentation in the `docs/` directory.
+- **Academic Timetable Planner**:
+  - Integrated AI-powered multimodal extraction using Groq fallback LLM models (`llama-4-scout-17b`, `qwen3.6-27b`) to parse uploaded timetable screenshots automatically.
+  - Multi-day swipeable calendar interface with weekday navigation chips.
+  - Interactive Course Directory to view, search, and manage enrolled courses (credits, faculty, slots).
+  - Course editor allowing manual additions, edits, and deletions of classes and slots.
+- **Home Screen Widget & Pinning**:
+  - Native Android home screen widget to show the daily academic schedule at a glance.
+  - `WidgetSyncService` to serialize and push updated schedules to native home screens.
+  - One-click native Android interactive widget pinning using platform MethodChannels (`com.example.orbit/widget_pin`).
 
 ### Changed
 - Centralized all console logging to use the secure `AppLogger` utility.
