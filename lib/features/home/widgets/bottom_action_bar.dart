@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../decision/views/decision_edit_page.dart';
-import '../../learning/views/learning_edit_page.dart';
-import '../../event/views/event_edit_page.dart';
-import '../../tasks/views/task_edit_page.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_routes.dart';
 
 /// A premium bottom action bar matching the custom curved dome design,
 /// displaying Action items: Decision, Learning, Reflection (+), Event, and Task.
@@ -142,18 +140,18 @@ class BottomActionBar extends StatelessWidget {
                 context,
                 icon: Icons.gavel_rounded,
                 color: const Color(0xFFF59E0B),
-                label: 'Decision',
-                tooltip: 'Add Decision',
-                onTap: () => DecisionEditPage.push(context),
+                label: 'Decisions',
+                tooltip: 'Decisions',
+                onTap: () => context.push(AppRoutes.decisions),
               ),
               // 2. Learning Button (Orange)
               _buildBarItem(
                 context,
                 icon: Icons.lightbulb_rounded,
                 color: const Color(0xFFF97316),
-                label: 'Learning',
-                tooltip: 'Add Learning',
-                onTap: () => LearningEditPage.push(context),
+                label: 'Learnings',
+                tooltip: 'Learnings',
+                onTap: () => context.push(AppRoutes.learnings),
               ),
               // 3. Placeholder for Center Plus Button (Reflection text)
               Tooltip(
@@ -195,18 +193,18 @@ class BottomActionBar extends StatelessWidget {
                 context,
                 icon: Icons.event_rounded,
                 color: const Color(0xFF3B82F6),
-                label: 'Event',
-                tooltip: 'Add Event',
-                onTap: () => EventEditPage.push(context),
+                label: 'Events',
+                tooltip: 'Events',
+                onTap: () => context.push(AppRoutes.events),
               ),
               // 5. Task Button (Green)
               _buildBarItem(
                 context,
                 icon: Icons.task_alt_rounded,
                 color: const Color(0xFF22C55E),
-                label: 'Task',
-                tooltip: 'Add Task',
-                onTap: () => TaskEditPage.push(context),
+                label: 'Tasks',
+                tooltip: 'Tasks',
+                onTap: () => context.push(AppRoutes.tasks),
               ),
             ],
           ),

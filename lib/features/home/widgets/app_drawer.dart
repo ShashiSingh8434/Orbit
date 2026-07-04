@@ -160,17 +160,6 @@ class AppDrawer extends ConsumerWidget {
                       },
                     ),
                     _DrawerItem(
-                      icon: Icons.gavel_rounded,
-                      label: 'Decisions',
-                      isDark: isDark,
-                      selectedHighlight: selectedHighlight,
-                      colorScheme: colorScheme,
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push(AppRoutes.decisions);
-                      },
-                    ),
-                    _DrawerItem(
                       icon: Icons.event_rounded,
                       label: 'Events',
                       isDark: isDark,
@@ -190,6 +179,17 @@ class AppDrawer extends ConsumerWidget {
                       onTap: () {
                         Navigator.pop(context);
                         context.push(AppRoutes.learnings);
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Icons.gavel_rounded,
+                      label: 'Decisions',
+                      isDark: isDark,
+                      selectedHighlight: selectedHighlight,
+                      colorScheme: colorScheme,
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push(AppRoutes.decisions);
                       },
                     ),
                     _DrawerItem(

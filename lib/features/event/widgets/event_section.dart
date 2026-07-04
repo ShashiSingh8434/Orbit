@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_routes.dart';
 import '../../../core/widgets/pulsing_skeleton.dart';
 import '../../../core/widgets/orbit_card.dart';
 import '../models/event_model.dart';
@@ -125,6 +127,7 @@ class EventSection extends StatelessWidget {
         ),
         ..._getSortedEvents().map<Widget>(
           (e) => OrbitCard(
+            onTap: () => context.push(AppRoutes.events),
             margin: const EdgeInsets.only(bottom: 8),
             backgroundColor: colorScheme.primaryContainer.withValues(
               alpha: 0.39,

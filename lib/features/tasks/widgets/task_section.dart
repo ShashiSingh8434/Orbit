@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_routes.dart';
 import '../../../core/widgets/pulsing_skeleton.dart';
 import '../../../core/widgets/orbit_card.dart';
 import '../models/task_model.dart';
+import '../controllers/task_controller.dart';
 
-class TaskSection extends StatelessWidget {
+class TaskSection extends ConsumerWidget {
   final List<TaskModel>? tasks;
   final bool isLoading;
   final DateTime date;
@@ -16,7 +20,7 @@ class TaskSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -126,18 +130,29 @@ class TaskSection extends StatelessWidget {
         ),
         ...tasks!.map<Widget>(
           (t) => OrbitCard(
+            onTap: () => context.push(AppRoutes.tasks),
             margin: const EdgeInsets.only(bottom: 8),
             backgroundColor: colorScheme.primaryContainer.withValues(
               alpha: 0.39,
             ),
             borderColor: colorScheme.primary.withValues(alpha: 0.23),
-            leading: Icon(
-              t.status == 'completed'
-                  ? Icons.check_circle
-                  : Icons.radio_button_unchecked,
-              color: t.status == 'completed'
-                  ? Colors.green
-                  : colorScheme.onSurfaceVariant,
+            leading: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                final nextDone = t.status != 'completed';
+                ref.read(taskControllerProvider.notifier).toggleDone(t, nextDone);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(
+                  t.status == 'completed'
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                  color: t.status == 'completed'
+                      ? Colors.green
+                      : colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
             title: t.title,
             titleStyle: theme.textTheme.titleMedium?.copyWith(

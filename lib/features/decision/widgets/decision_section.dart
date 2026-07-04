@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_routes.dart';
 import '../../../core/widgets/pulsing_skeleton.dart';
 import '../../../core/widgets/orbit_card.dart';
 import '../models/decision_model.dart';
@@ -125,6 +127,7 @@ class DecisionSection extends StatelessWidget {
         ),
         ...decisions!.map<Widget>(
           (d) => OrbitCard(
+            onTap: () => context.push(AppRoutes.decisions),
             margin: const EdgeInsets.only(bottom: 8),
             backgroundColor: colorScheme.primaryContainer.withValues(
               alpha: 0.39,
