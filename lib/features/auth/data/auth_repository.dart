@@ -16,6 +16,7 @@ abstract class AuthRepository {
   Stream<User?> get authStateChanges;
   Future<UserCredential?> signInWithGoogle();
   Future<void> signOut();
+  Future<void> deleteAccount();
 }
 
 // ── Firebase Implementation ───────────────────────────────────────────────────
@@ -50,6 +51,76 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final uid = user.uid;
+    final batch = _db.batch();
+
+    // 1. Tasks
+    final tasks = await _db.collection('users').doc(uid).collection('tasks').get();
+    for (final doc in tasks.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // 2. Decisions
+    final decisions = await _db.collection('users').doc(uid).collection('decisions').get();
+    for (final doc in decisions.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // 3. Events
+    final events = await _db.collection('users').doc(uid).collection('events').get();
+    for (final doc in events.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // 4. Learnings
+    final learnings = await _db.collection('users').doc(uid).collection('learnings').get();
+    for (final doc in learnings.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // 5. Days
+    final days = await _db.collection('users').doc(uid).collection('days').get();
+    for (final doc in days.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // 6. Academic
+    final academic = await _db.collection('users').doc(uid).collection('academic').get();
+    for (final doc in academic.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // 7. Reflections
+    final reflectionDates = await _db.collection('users').doc(uid).collection('reflections').get();
+    for (final dateDoc in reflectionDates.docs) {
+      final entries = await dateDoc.reference.collection('entries').get();
+      for (final entry in entries.docs) {
+        batch.delete(entry.reference);
+      }
+      batch.delete(dateDoc.reference);
+    }
+
+    // 8. Security Data
+    final securityData = await _db.collection('users').doc(uid).collection('security').get();
+    for (final doc in securityData.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // 9. User Document
+    batch.delete(_db.collection('users').doc(uid));
+
+    await batch.commit();
+
+    // Delete auth account
+    await user.delete();
+    await _googleSignIn.signOut();
   }
 
   // ── Private ──

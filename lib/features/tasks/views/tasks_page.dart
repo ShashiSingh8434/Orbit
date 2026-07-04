@@ -4,6 +4,7 @@ import '../controllers/task_controller.dart';
 import '../widgets/task_tile.dart';
 import '../models/task_model.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../core/security/exceptions/crypto_exceptions.dart';
 import 'task_edit_page.dart';
 
 enum TaskFilter { pending, completed, today }
@@ -92,7 +93,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(e.userFriendlyMessage)),
             ),
           ),
         ],

@@ -232,6 +232,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             title: Text('Sign Out', style: TextStyle(color: colorScheme.error)),
             onTap: () => _confirmSignOut(context),
           ),
+          ListTile(
+            leading: Icon(Icons.delete_forever_rounded, color: colorScheme.error),
+            title: Text('Delete Account', style: TextStyle(color: colorScheme.error)),
+            onTap: () => _confirmDeleteAccount(context),
+          ),
         ],
       ),
     );
@@ -255,6 +260,36 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             },
             child: Text(
               'Sign Out',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteAccount(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Account?'),
+        content: const Text(
+          'Are you sure you want to permanently delete your account?\n\n'
+          'This action will remove all your data from the Orbit cloud database '
+          'and is completely irreversible.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(authControllerProvider.notifier).deleteAccount();
+            },
+            child: Text(
+              'Delete Permanently',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
