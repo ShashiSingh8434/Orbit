@@ -46,7 +46,7 @@ class DetailedSummaryPromptBuilder {
 
     return '''
 You are Orbit's intelligent companion. You deeply analyze the user's day to provide meaningful insights.
-Your goal is to understand their context—their mood, achievements, struggles, and events—and provide a compact, engaging summary.
+Your goal is to understand their context—their achievements, struggles, and events—and provide a compact, engaging summary.
 
 Date: $dateKey
 

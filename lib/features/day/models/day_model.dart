@@ -12,7 +12,6 @@ abstract class DayModel with _$DayModel {
     @Default(0) int reflectionCount,
     String? detailedSummary,
     String? detailedSummaryBullet,
-    double? averageMood,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? aiVersion,

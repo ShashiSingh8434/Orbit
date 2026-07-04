@@ -30,12 +30,14 @@ class EventSyncService {
         .toList();
   }
 
-  Future<void> syncEvents(
+  Future<(int created, int updated)> syncEvents(
     String uid,
     List<EventDto> extractedEvents,
     String reflectionId,
   ) async {
     final existingEvents = await _repository.getEvents(uid);
+    int created = 0;
+    int updated = 0;
 
     for (final dto in extractedEvents) {
       // Parse eventDate safely, fallback to today
@@ -71,18 +73,38 @@ class EventSyncService {
       }
 
       if (existingIndex != -1) {
-        // Duplicate found. Update missing info.
+        // Duplicate found. Update missing/changed info.
         var existingEvent = existingEvents[existingIndex];
-        var updatedEvent = existingEvent.copyWith(
-          description: dto.description != null && dto.description!.isNotEmpty
-              ? dto.description!
-              : existingEvent.description,
-          time: dto.time ?? existingEvent.time,
-          location: dto.location ?? existingEvent.location,
-          updatedAt: DateTime.now(),
-        );
-        await _repository.updateEvent(uid, updatedEvent);
-        existingEvents[existingIndex] = updatedEvent;
+        bool isUpdated = false;
+
+        final newDesc = dto.description ?? existingEvent.description;
+        final newTime = dto.time ?? existingEvent.time;
+        final newLocation = dto.location ?? existingEvent.location;
+
+        // Check if anything has actually changed to avoid redundant writes
+        if (existingEvent.eventDate.year != parsedDate.year ||
+            existingEvent.eventDate.month != parsedDate.month ||
+            existingEvent.eventDate.day != parsedDate.day ||
+            existingEvent.description != newDesc ||
+            existingEvent.time != newTime ||
+            existingEvent.location != newLocation) {
+          isUpdated = true;
+        }
+
+        if (isUpdated) {
+          var updatedEvent = existingEvent.copyWith(
+            eventDate: parsedDate,
+            description: dto.description != null && dto.description!.isNotEmpty
+                ? dto.description!
+                : existingEvent.description,
+            time: dto.time ?? existingEvent.time,
+            location: dto.location ?? existingEvent.location,
+            updatedAt: DateTime.now(),
+          );
+          await _repository.updateEvent(uid, updatedEvent);
+          existingEvents[existingIndex] = updatedEvent;
+          updated++;
+        }
       } else {
         // Create new
         final event = EventModel(
@@ -101,7 +123,9 @@ class EventSyncService {
         );
         await _repository.saveEvent(uid, event);
         existingEvents.add(event);
+        created++;
       }
     }
+    return (created, updated);
   }
 }

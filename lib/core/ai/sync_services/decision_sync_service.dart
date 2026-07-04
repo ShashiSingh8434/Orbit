@@ -18,13 +18,15 @@ class DecisionSyncService {
   String _normalize(String input) =>
       input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
-  Future<void> syncDecisions(
+  Future<(int created, int updated)> syncDecisions(
     String uid,
     List<DecisionDto> extractedDecisions,
     String reflectionId,
     DateTime dayDate,
   ) async {
     final existingDecisions = await _repository.getDecisions(uid);
+    int created = 0;
+    int updated = 0;
 
     for (final dto in extractedDecisions) {
       final normalizedNewDecision = _normalize(dto.decision);
@@ -47,6 +49,7 @@ class DecisionSyncService {
 
         await _repository.updateDecision(uid, supersededDecision);
         existingDecisions[conflictingIndex] = supersededDecision;
+        updated++;
       }
 
       final decision = DecisionModel(
@@ -63,6 +66,8 @@ class DecisionSyncService {
       );
       await _repository.saveDecision(uid, decision);
       existingDecisions.add(decision);
+      created++;
     }
+    return (created, updated);
   }
 }

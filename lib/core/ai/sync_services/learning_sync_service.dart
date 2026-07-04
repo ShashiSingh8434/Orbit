@@ -18,13 +18,15 @@ class LearningSyncService {
   String _normalize(String input) =>
       input.toLowerCase().replaceAll(RegExp(r'\s+'), '');
 
-  Future<void> syncLearnings(
+  Future<(int created, int updated)> syncLearnings(
     String uid,
     List<LearningDto> extractedLearnings,
     String reflectionId,
     DateTime dayDate,
   ) async {
     final existingLearnings = await _repository.getLearnings(uid);
+    int created = 0;
+    int updated = 0;
 
     for (final dto in extractedLearnings) {
       final normalizedNewTitle = _normalize(dto.title);
@@ -46,6 +48,7 @@ class LearningSyncService {
 
         await _repository.updateLearning(uid, updatedLearning);
         existingLearnings[existingIndex] = updatedLearning;
+        updated++;
       } else {
         final learning = LearningModel(
           id: _uuid.v4(),
@@ -62,7 +65,9 @@ class LearningSyncService {
         );
         await _repository.saveLearning(uid, learning);
         existingLearnings.add(learning);
+        created++;
       }
     }
+    return (created, updated);
   }
 }

@@ -50,7 +50,6 @@ class _ReflectionEditPageState extends ConsumerState<ReflectionEditPage> {
     'learning',
     'focus',
     'energy',
-    'mood',
     'decision',
     'challenge',
     'win',

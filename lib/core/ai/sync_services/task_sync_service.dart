@@ -23,7 +23,7 @@ class TaskSyncService {
     return allTasks.where((t) => t.status == 'pending').toList();
   }
 
-  Future<void> syncTasks(
+  Future<(int created, int updated)> syncTasks(
     String uid,
     List<TaskDto> extractedTasks,
     String reflectionId,
@@ -31,6 +31,8 @@ class TaskSyncService {
   ) async {
     // Fetch existing tasks to perform duplicate and completion detection
     final existingTasks = await _repository.getTasks(uid);
+    int created = 0;
+    int updated = 0;
 
     for (final dto in extractedTasks) {
       int existingIndex = -1;
@@ -52,27 +54,34 @@ class TaskSyncService {
         // Update existing task
         var existingTask = existingTasks[existingIndex];
 
-        // Manual override preservation: don't overwrite user-set status or dates unless AI explicitly detects completion
+        // Manual override preservation: don't overwrite user-set status or dates unless AI explicitly detects completion or update
         var updatedTask = existingTask.copyWith(updatedAt: DateTime.now());
+        bool isUpdated = false;
 
         if (dto.status == 'completed' && existingTask.status != 'completed') {
           updatedTask = updatedTask.copyWith(
             status: 'completed',
             completedAt: DateTime.now(),
           );
+          isUpdated = true;
         }
 
-        if (dto.dueDate != null && existingTask.dueDate == null) {
-          updatedTask = updatedTask.copyWith(
-            dueDate: DateTime.tryParse(dto.dueDate!),
-            dueTime: dto.dueTime,
-          );
+        if (dto.dueDate != null) {
+          final parsedDueDate = DateTime.tryParse(dto.dueDate!);
+          if (parsedDueDate != existingTask.dueDate || dto.dueTime != existingTask.dueTime) {
+            updatedTask = updatedTask.copyWith(
+              dueDate: parsedDueDate,
+              dueTime: dto.dueTime,
+            );
+            isUpdated = true;
+          }
         }
 
-        await _repository.updateTask(uid, updatedTask);
-
-        // Update the list in memory for subsequent checks
-        existingTasks[existingIndex] = updatedTask;
+        if (isUpdated) {
+          await _repository.updateTask(uid, updatedTask);
+          existingTasks[existingIndex] = updatedTask;
+          updated++;
+        }
       } else {
         // Create new task
         final task = TaskModel(
@@ -93,7 +102,9 @@ class TaskSyncService {
         );
         await _repository.saveTask(uid, task);
         existingTasks.add(task);
+        created++;
       }
     }
+    return (created, updated);
   }
 }

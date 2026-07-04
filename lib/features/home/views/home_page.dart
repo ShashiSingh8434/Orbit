@@ -16,6 +16,7 @@ import '../widgets/day_skeleton_loader.dart';
 import '../../../core/ai/engine/ai_queue_manager.dart';
 import '../widgets/arc_action_fab.dart';
 import '../widgets/first_run_overlay.dart';
+import '../../../core/ai/providers/ai_notification_provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -93,6 +94,18 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AiNotification?>(aiNotificationProvider, (previous, next) {
+      if (next != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.message),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    });
+
     final user = ref.watch(authStateProvider).value;
     final creationTime =
         user?.metadata.creationTime ??
@@ -396,14 +409,6 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
               ),
               const SizedBox(height: 16),
             ],
-            // if (data.moods.isNotEmpty) ...[
-            //   MoodSection(
-            //     moods: data.moods,
-            //     isLoading: false,
-            //     date: widget.date,
-            //   ),
-            //   const SizedBox(height: 16),
-            // ],
           ],
         );
       },

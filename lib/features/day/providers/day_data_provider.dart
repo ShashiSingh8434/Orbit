@@ -10,8 +10,6 @@ import '../../decision/data/decision_repository.dart';
 import '../../decision/models/decision_model.dart';
 import '../../event/data/event_repository.dart';
 import '../../event/models/event_model.dart';
-import '../../mood/data/mood_repository.dart';
-import '../../mood/models/mood_model.dart';
 import '../../../core/utils/date_utils.dart';
 
 class DayData {
@@ -20,7 +18,6 @@ class DayData {
   final List<LearningModel> learnings;
   final List<DecisionModel> decisions;
   final List<EventModel> events;
-  final List<MoodModel> moods;
 
   DayData({
     required this.day,
@@ -28,7 +25,6 @@ class DayData {
     required this.learnings,
     required this.decisions,
     required this.events,
-    required this.moods,
   });
 
   bool get isEmpty =>
@@ -36,8 +32,7 @@ class DayData {
       tasks.isEmpty &&
       learnings.isEmpty &&
       decisions.isEmpty &&
-      events.isEmpty &&
-      moods.isEmpty;
+      events.isEmpty;
 }
 
 // Keep the individual day stream providers for clean dependency matching, but return typed lists:
@@ -118,17 +113,6 @@ final dayEventsStreamProvider =
       });
     });
 
-final dayMoodsStreamProvider = StreamProvider.family<List<MoodModel>, DateTime>(
-  (ref, date) {
-    final user = ref.watch(authStateProvider).value;
-    if (user == null) return const Stream.empty();
-    return ref.watch(moodRepositoryProvider).watchMoods(user.uid).map((moods) {
-      final key = OrbitDateUtils.dateKey(date);
-      return moods.where((m) => OrbitDateUtils.dateKey(m.date) == key).toList();
-    });
-  },
-);
-
 // Unified Day Data Provider
 final dayDataProvider = Provider.family<AsyncValue<DayData>, DateTime>((
   ref,
@@ -139,14 +123,12 @@ final dayDataProvider = Provider.family<AsyncValue<DayData>, DateTime>((
   final learningsAsync = ref.watch(dayLearningsStreamProvider(date));
   final decisionsAsync = ref.watch(dayDecisionsStreamProvider(date));
   final eventsAsync = ref.watch(dayEventsStreamProvider(date));
-  final moodsAsync = ref.watch(dayMoodsStreamProvider(date));
 
   if (dayAsync.isLoading ||
       tasksAsync.isLoading ||
       learningsAsync.isLoading ||
       decisionsAsync.isLoading ||
-      eventsAsync.isLoading ||
-      moodsAsync.isLoading) {
+      eventsAsync.isLoading) {
     return const AsyncValue.loading();
   }
 
@@ -165,9 +147,6 @@ final dayDataProvider = Provider.family<AsyncValue<DayData>, DateTime>((
   if (eventsAsync.hasError) {
     return AsyncValue.error(eventsAsync.error!, eventsAsync.stackTrace!);
   }
-  if (moodsAsync.hasError) {
-    return AsyncValue.error(moodsAsync.error!, moodsAsync.stackTrace!);
-  }
 
   return AsyncValue.data(
     DayData(
@@ -176,7 +155,6 @@ final dayDataProvider = Provider.family<AsyncValue<DayData>, DateTime>((
       learnings: learningsAsync.value ?? [],
       decisions: decisionsAsync.value ?? [],
       events: eventsAsync.value ?? [],
-      moods: moodsAsync.value ?? [],
     ),
   );
 });

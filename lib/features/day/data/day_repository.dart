@@ -65,7 +65,6 @@ class FirebaseDayRepository implements DayRepository {
       reflectionCount: d['reflectionCount'] as int? ?? 0,
       detailedSummary: d['detailedSummary'] as String?,
       detailedSummaryBullet: d['detailedSummaryBullet'] as String?,
-      averageMood: (d['averageMood'] as num?)?.toDouble(),
       createdAt: d['createdAt'] != null
           ? (d['createdAt'] as Timestamp).toDate()
           : null,
@@ -82,7 +81,6 @@ class FirebaseDayRepository implements DayRepository {
     'reflectionCount': d.reflectionCount,
     'detailedSummary': d.detailedSummary,
     'detailedSummaryBullet': d.detailedSummaryBullet,
-    'averageMood': d.averageMood,
     'createdAt': d.createdAt != null ? Timestamp.fromDate(d.createdAt!) : null,
     'updatedAt': d.updatedAt != null ? Timestamp.fromDate(d.updatedAt!) : null,
     'aiVersion': d.aiVersion,

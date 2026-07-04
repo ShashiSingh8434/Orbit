@@ -464,12 +464,6 @@ class _DashboardFeatures extends StatelessWidget {
       body:
           'Tap the microphone in the reflection editor to speak your thoughts. Orbit transcribes instantly.',
     ),
-    _FeatureData(
-      icon: Icons.mood_rounded,
-      title: 'Mood tracking',
-      body:
-          'Describe how you felt and Orbit logs your mood alongside your entries automatically.',
-    ),
   ];
 
   @override

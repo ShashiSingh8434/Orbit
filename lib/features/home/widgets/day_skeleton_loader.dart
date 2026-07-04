@@ -5,7 +5,6 @@ import '../../tasks/widgets/task_section.dart';
 import '../../learning/widgets/learning_section.dart';
 import '../../decision/widgets/decision_section.dart';
 import '../../event/widgets/event_section.dart';
-import '../../mood/widgets/mood_section.dart';
 
 class DaySkeletonLoader extends StatelessWidget {
   final DateTime date;
@@ -27,8 +26,6 @@ class DaySkeletonLoader extends StatelessWidget {
         DecisionSection(decisions: null, isLoading: true, date: date),
         const SizedBox(height: 16),
         EventSection(events: null, isLoading: true, date: date),
-        const SizedBox(height: 16),
-        MoodSection(moods: null, isLoading: true, date: date),
       ],
     );
   }
