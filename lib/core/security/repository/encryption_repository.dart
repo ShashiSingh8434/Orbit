@@ -77,7 +77,7 @@ class EncryptionRepository {
   ///
   /// Firestore [Timestamp] values in [plaintextFields] are preserved as-is
   /// (they are passed through without any conversion by this layer).
-  
+
   Future<Map<String, dynamic>> encryptDocument(
     String uid,
     String collection,

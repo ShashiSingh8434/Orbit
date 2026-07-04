@@ -233,8 +233,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             onTap: () => _confirmSignOut(context),
           ),
           ListTile(
-            leading: Icon(Icons.delete_forever_rounded, color: colorScheme.error),
-            title: Text('Delete Account', style: TextStyle(color: colorScheme.error)),
+            leading: Icon(
+              Icons.delete_forever_rounded,
+              color: colorScheme.error,
+            ),
+            title: Text(
+              'Delete Account',
+              style: TextStyle(color: colorScheme.error),
+            ),
             onTap: () => _confirmDeleteAccount(context),
           ),
         ],

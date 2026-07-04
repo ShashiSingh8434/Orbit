@@ -62,43 +62,71 @@ class FirebaseAuthRepository implements AuthRepository {
     final batch = _db.batch();
 
     // 1. Tasks
-    final tasks = await _db.collection('users').doc(uid).collection('tasks').get();
+    final tasks = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('tasks')
+        .get();
     for (final doc in tasks.docs) {
       batch.delete(doc.reference);
     }
 
     // 2. Decisions
-    final decisions = await _db.collection('users').doc(uid).collection('decisions').get();
+    final decisions = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('decisions')
+        .get();
     for (final doc in decisions.docs) {
       batch.delete(doc.reference);
     }
 
     // 3. Events
-    final events = await _db.collection('users').doc(uid).collection('events').get();
+    final events = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('events')
+        .get();
     for (final doc in events.docs) {
       batch.delete(doc.reference);
     }
 
     // 4. Learnings
-    final learnings = await _db.collection('users').doc(uid).collection('learnings').get();
+    final learnings = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('learnings')
+        .get();
     for (final doc in learnings.docs) {
       batch.delete(doc.reference);
     }
 
     // 5. Days
-    final days = await _db.collection('users').doc(uid).collection('days').get();
+    final days = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('days')
+        .get();
     for (final doc in days.docs) {
       batch.delete(doc.reference);
     }
 
     // 6. Academic
-    final academic = await _db.collection('users').doc(uid).collection('academic').get();
+    final academic = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('academic')
+        .get();
     for (final doc in academic.docs) {
       batch.delete(doc.reference);
     }
 
     // 7. Reflections
-    final reflectionDates = await _db.collection('users').doc(uid).collection('reflections').get();
+    final reflectionDates = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('reflections')
+        .get();
     for (final dateDoc in reflectionDates.docs) {
       final entries = await dateDoc.reference.collection('entries').get();
       for (final entry in entries.docs) {
@@ -108,7 +136,11 @@ class FirebaseAuthRepository implements AuthRepository {
     }
 
     // 8. Security Data
-    final securityData = await _db.collection('users').doc(uid).collection('security').get();
+    final securityData = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('security')
+        .get();
     for (final doc in securityData.docs) {
       batch.delete(doc.reference);
     }

@@ -168,7 +168,7 @@ class _RouterNotifier extends ChangeNotifier {
   /// 3. Authenticated and encryption state needsSetup → /setup-passphrase
   /// 4. Authenticated and encryption state needsRecovery → /recover-passphrase
   /// 5. Authenticated and encryption state ready → /home
-  
+
   String? redirect(BuildContext context, GoRouterState state) {
     final loc = state.matchedLocation;
     final authValue = _ref.read(authStateProvider);
