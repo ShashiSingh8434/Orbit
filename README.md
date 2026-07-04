@@ -188,7 +188,9 @@ We welcome community contributions! Please read our [CONTRIBUTING.md](CONTRIBUTI
 
 ## 📄 License
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for more details.
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
+
+See the [LICENSE](LICENSE) file for details.
 
 ---
 
