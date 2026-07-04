@@ -19,6 +19,7 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   AiMode? _selectedMode;
+  bool _isDeleting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,221 +31,250 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     _selectedMode ??= aiSettings.mode;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        leading: BackButton(onPressed: () => context.pop()),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        children: [
-          // ── Account Section ───────────────────────────────────────────
-          _SectionHeader(label: 'Account'),
-          ListTile(
-            leading: CircleAvatar(
-              backgroundImage: user?.photoURL != null
-                  ? NetworkImage(user!.photoURL!)
-                  : null,
-              backgroundColor: colorScheme.primary,
-              child: user?.photoURL == null
-                  ? Icon(Icons.person_rounded, color: colorScheme.onPrimary)
-                  : null,
-            ),
-            title: Text(user?.displayName ?? 'Orbit User'),
-            subtitle: Text(user?.email ?? ''),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: const Text('Settings'),
+            leading: BackButton(onPressed: () => context.pop()),
           ),
-
-          const Divider(),
-
-          // ── Appearance Section ────────────────────────────────────────
-          _SectionHeader(label: 'Appearance'),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: RadioGroup<ThemeMode>(
-              groupValue: themeMode,
-              onChanged: (ThemeMode? value) {
-                if (value != null) {
-                  ref.read(themeNotifierProvider.notifier).setThemeMode(value);
-                }
-              },
-              child: const Column(
-                children: [
-                  _ThemeOptionTile(
-                    icon: Icons.brightness_auto_rounded,
-                    label: 'System Default',
-                    value: ThemeMode.system,
-                  ),
-                  _ThemeOptionTile(
-                    icon: Icons.light_mode_rounded,
-                    label: 'Light Mode',
-                    value: ThemeMode.light,
-                  ),
-                  _ThemeOptionTile(
-                    icon: Icons.dark_mode_rounded,
-                    label: 'Dark Mode',
-                    value: ThemeMode.dark,
-                  ),
-                ],
+          body: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: [
+              // ── Account Section ───────────────────────────────────────────
+              _SectionHeader(label: 'Account'),
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: user?.photoURL != null
+                      ? NetworkImage(user!.photoURL!)
+                      : null,
+                  backgroundColor: colorScheme.primary,
+                  child: user?.photoURL == null
+                      ? Icon(Icons.person_rounded, color: colorScheme.onPrimary)
+                      : null,
+                ),
+                title: Text(user?.displayName ?? 'Orbit User'),
+                subtitle: Text(user?.email ?? ''),
               ),
-            ),
-          ),
 
-          const Divider(),
+              const Divider(),
 
-          // ── AI Preferences Section ─────────────────────────────────────
-          _SectionHeader(label: 'AI Preferences'),
-
-          ListTile(
-            leading: Icon(Icons.bar_chart_rounded, color: colorScheme.primary),
-            title: const Text('AI Analytics Dashboard'),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push(AppRoutes.aiAnalytics),
-          ),
-
-          // Mode toggle
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: SegmentedButton<AiMode>(
-              segments: const [
-                ButtonSegment(
-                  value: AiMode.orbitDefault,
-                  label: Text('Orbit Default'),
-                  icon: Icon(Icons.auto_awesome_rounded),
+              // ── Appearance Section ────────────────────────────────────────
+              _SectionHeader(label: 'Appearance'),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
                 ),
-                ButtonSegment(
-                  value: AiMode.userKey,
-                  label: Text('My API Key'),
-                  icon: Icon(Icons.key_rounded),
-                ),
-              ],
-              selected: {_selectedMode!},
-              onSelectionChanged: (selection) {
-                setState(() {
-                  _selectedMode = selection.first;
-                });
-              },
-            ),
-          ),
-
-          if (_selectedMode != aiSettings.mode)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: FilledButton.icon(
-                onPressed: () async {
-                  if (_selectedMode == AiMode.userKey) {
-                    final hasAnyKey = aiSettings.providers.values.any(
-                      (p) => p.hasUserKey,
-                    );
-                    if (!hasAnyKey) {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('No API Keys Connected'),
-                          content: const Text(
-                            'Please connect at least one AI provider (Google Gemini or Groq) with your own API key before switching to My API Key mode.',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        ),
-                      );
-                      return;
+                child: RadioGroup<ThemeMode>(
+                  groupValue: themeMode,
+                  onChanged: (ThemeMode? value) {
+                    if (value != null) {
+                      ref
+                          .read(themeNotifierProvider.notifier)
+                          .setThemeMode(value);
                     }
-                  }
-                  await ref
-                      .read(aiSettingsProvider.notifier)
-                      .setMode(_selectedMode!);
-                },
-                icon: const Icon(Icons.save_rounded),
-                label: const Text('Save AI Mode'),
-              ),
-            ),
-
-          if (_selectedMode == AiMode.orbitDefault) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
+                  },
+                  child: const Column(
                     children: [
-                      Icon(
-                        Icons.info_outline_rounded,
-                        color: colorScheme.primary,
-                        size: 20,
+                      _ThemeOptionTile(
+                        icon: Icons.brightness_auto_rounded,
+                        label: 'System Default',
+                        value: ThemeMode.system,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Using Orbit\'s built-in AI. Connect your own key for unlimited access.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+                      _ThemeOptionTile(
+                        icon: Icons.light_mode_rounded,
+                        label: 'Light Mode',
+                        value: ThemeMode.light,
+                      ),
+                      _ThemeOptionTile(
+                        icon: Icons.dark_mode_rounded,
+                        label: 'Dark Mode',
+                        value: ThemeMode.dark,
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-          ],
 
-          if (_selectedMode == AiMode.userKey) ...[
-            // Provider cards
-            ...aiSettings.providers.values.map((provider) {
-              return _ProviderCard(provider: provider);
-            }),
-          ],
+              const Divider(),
 
-          const Divider(),
+              // ── AI Preferences Section ─────────────────────────────────────
+              _SectionHeader(label: 'AI Preferences'),
 
-          // ── About ────────────────────────────────────────────────────
-          _SectionHeader(label: 'About'),
-          ListTile(
-            leading: const Icon(Icons.info_outline_rounded),
-            title: const Text('Version'),
-            trailing: Text(
-              AppConstants.appVersion,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+              ListTile(
+                leading: Icon(
+                  Icons.bar_chart_rounded,
+                  color: colorScheme.primary,
+                ),
+                title: const Text('AI Analytics Dashboard'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push(AppRoutes.aiAnalytics),
               ),
-            ),
-          ),
 
-          // ListTile(
-          //   leading: const Icon(Icons.gavel_rounded),
-          //   title: const Text('Licences'),
-          //   trailing: const Icon(Icons.chevron_right_rounded),
-          //   onTap: () => showLicensePage(
-          //     context: context,
-          //     applicationName: AppConstants.appName,
-          //     applicationVersion: AppConstants.appVersion,
-          //   ),
-          // ),
-          const Divider(),
+              // Mode toggle
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: SegmentedButton<AiMode>(
+                  segments: const [
+                    ButtonSegment(
+                      value: AiMode.orbitDefault,
+                      label: Text('Orbit Default'),
+                      icon: Icon(Icons.auto_awesome_rounded),
+                    ),
+                    ButtonSegment(
+                      value: AiMode.userKey,
+                      label: Text('My API Key'),
+                      icon: Icon(Icons.key_rounded),
+                    ),
+                  ],
+                  selected: {_selectedMode!},
+                  onSelectionChanged: (selection) {
+                    setState(() {
+                      _selectedMode = selection.first;
+                    });
+                  },
+                ),
+              ),
 
-          // ── Sign Out ──────────────────────────────────────────────────
-          ListTile(
-            leading: Icon(Icons.logout_rounded, color: colorScheme.error),
-            title: Text('Sign Out', style: TextStyle(color: colorScheme.error)),
-            onTap: () => _confirmSignOut(context),
+              if (_selectedMode != aiSettings.mode)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  child: FilledButton.icon(
+                    onPressed: () async {
+                      if (_selectedMode == AiMode.userKey) {
+                        final hasAnyKey = aiSettings.providers.values.any(
+                          (p) => p.hasUserKey,
+                        );
+                        if (!hasAnyKey) {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('No API Keys Connected'),
+                              content: const Text(
+                                'Please connect at least one AI provider (Google Gemini or Groq) with your own API key before switching to My API Key mode.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                          return;
+                        }
+                      }
+                      await ref
+                          .read(aiSettingsProvider.notifier)
+                          .setMode(_selectedMode!);
+                    },
+                    icon: const Icon(Icons.save_rounded),
+                    label: const Text('Save AI Mode'),
+                  ),
+                ),
+
+              if (_selectedMode == AiMode.orbitDefault) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            color: colorScheme.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Using Orbit\'s built-in AI. Connect your own key for unlimited access.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+
+              if (_selectedMode == AiMode.userKey) ...[
+                // Provider cards
+                ...aiSettings.providers.values.map((provider) {
+                  return _ProviderCard(provider: provider);
+                }),
+              ],
+
+              const Divider(),
+
+              // ── About ────────────────────────────────────────────────────
+              _SectionHeader(label: 'About'),
+              ListTile(
+                leading: const Icon(Icons.info_outline_rounded),
+                title: const Text('Version'),
+                trailing: Text(
+                  AppConstants.appVersion,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+
+              // ListTile(
+              //   leading: const Icon(Icons.gavel_rounded),
+              //   title: const Text('Licences'),
+              //   trailing: const Icon(Icons.chevron_right_rounded),
+              //   onTap: () => showLicensePage(
+              //     context: context,
+              //     applicationName: AppConstants.appName,
+              //     applicationVersion: AppConstants.appVersion,
+              //   ),
+              // ),
+              const Divider(),
+
+              // ── Sign Out ──────────────────────────────────────────────────
+              ListTile(
+                leading: Icon(Icons.logout_rounded, color: colorScheme.error),
+                title: Text(
+                  'Sign Out',
+                  style: TextStyle(color: colorScheme.error),
+                ),
+                onTap: () => _confirmSignOut(context),
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.delete_forever_rounded,
+                  color: colorScheme.error,
+                ),
+                title: Text(
+                  'Delete Account',
+                  style: TextStyle(color: colorScheme.error),
+                ),
+                onTap: () => _confirmDeleteAccount(context),
+              ),
+            ],
           ),
-          ListTile(
-            leading: Icon(
-              Icons.delete_forever_rounded,
-              color: colorScheme.error,
-            ),
-            title: Text(
-              'Delete Account',
-              style: TextStyle(color: colorScheme.error),
-            ),
-            onTap: () => _confirmDeleteAccount(context),
+        ),
+        if (_isDeleting)
+          Container(
+            color: Colors.black54,
+            child: const Center(child: CircularProgressIndicator()),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -290,9 +320,32 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              ref.read(authControllerProvider.notifier).deleteAccount();
+
+              setState(() {
+                _isDeleting = true;
+              });
+
+              try {
+                await ref.read(authControllerProvider.notifier).deleteAccount();
+                // No manual route pop needed here, GoRouter redirects reactively
+              } catch (_) {
+                if (mounted) {
+                  setState(() {
+                    _isDeleting = false;
+                  });
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Failed to delete account. Please try again.',
+                        ),
+                      ),
+                    );
+                  }
+                }
+              }
             },
             child: Text(
               'Delete Permanently',

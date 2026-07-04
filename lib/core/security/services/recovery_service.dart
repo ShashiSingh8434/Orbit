@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../utils/app_logger.dart';
 import 'key_manager.dart';
 import '../repository/encryption_repository.dart';
@@ -59,6 +60,17 @@ class RecoveryService {
   /// 3. No blob anywhere → [EncryptionState.needsSetup]
   Future<EncryptionState> getEncryptionState(String uid) async {
     AppLogger.debug('RecoveryService: Checking encryption state for uid=$uid');
+
+    // Guard: Prevent querying Firestore if the requested user doesn't match
+    // the currently authenticated Auth session (e.g. during logout transition).
+    final currentAuthUid = FirebaseAuth.instance.currentUser?.uid;
+    if (currentAuthUid != uid) {
+      AppLogger.warning(
+        'RecoveryService: Current Auth UID ($currentAuthUid) does not match target UID ($uid). '
+        'Aborting Firestore check to prevent permission-denied.',
+      );
+      return EncryptionState.needsSetup;
+    }
 
     final keyPresent = await _keyManager.isMasterKeyPresent(uid);
     if (keyPresent) {
@@ -131,27 +143,21 @@ class RecoveryService {
 ///
 /// This is watched by the router's redirect guard. The state is re-evaluated
 /// whenever [authStateProvider] changes.
-///
-/// This provider is intentionally **not auto-disposed** — the encryption state
-/// should persist across route changes.
-final encryptionStateProvider = FutureProvider.family<EncryptionState, String>((
-  ref,
-  uid,
-) async {
-  final service = ref.read(recoveryServiceProvider);
-  return service.getEncryptionState(uid);
-}, name: 'encryptionStateProvider');
+final encryptionStateProvider = FutureProvider.family
+    .autoDispose<EncryptionState, String>((ref, uid) async {
+      final service = ref.read(recoveryServiceProvider);
+      return service.getEncryptionState(uid);
+    }, name: 'encryptionStateProvider');
 
 /// Reactively tracks the encryption state of the currently signed-in user.
 ///
 /// When the user signs out or the auth state changes, this resolves to null.
 /// When the user's encryptionStateProvider is updated or invalidated, this provider
 /// also updates, notifying GoRouter via the router notifier listener.
-final currentEncryptionStateProvider = FutureProvider<EncryptionState?>((
-  ref,
-) async {
-  final authState = ref.watch(authStateProvider);
-  final user = authState.value;
-  if (user == null) return null;
-  return ref.watch(encryptionStateProvider(user.uid).future);
-}, name: 'currentEncryptionStateProvider');
+final currentEncryptionStateProvider =
+    FutureProvider.autoDispose<EncryptionState?>((ref) async {
+      final authState = ref.watch(authStateProvider);
+      final user = authState.value;
+      if (user == null) return null;
+      return ref.watch(encryptionStateProvider(user.uid).future);
+    }, name: 'currentEncryptionStateProvider');

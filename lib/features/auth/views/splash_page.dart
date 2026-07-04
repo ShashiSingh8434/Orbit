@@ -5,6 +5,7 @@ import '../../../core/widgets/space_painter.dart';
 import '../controllers/auth_controller.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/security/services/recovery_service.dart';
 import '../../app_update/providers/app_update_provider.dart';
 import '../../app_update/views/update_dialog.dart';
 
@@ -80,7 +81,18 @@ class _SplashPageState extends ConsumerState<SplashPage>
         }
 
         if (mounted) {
-          context.go(AppRoutes.home);
+          final encState = await ref.read(
+            currentEncryptionStateProvider.future,
+          );
+          if (mounted) {
+            if (encState == EncryptionState.needsSetup) {
+              context.go(AppRoutes.setupPassphrase);
+            } else if (encState == EncryptionState.needsRecovery) {
+              context.go(AppRoutes.recoverPassphrase);
+            } else {
+              context.go(AppRoutes.home);
+            }
+          }
         }
       } else {
         context.go(AppRoutes.login);

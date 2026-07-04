@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/utils/app_logger.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
 
@@ -152,6 +153,7 @@ class FirebaseAuthRepository implements AuthRepository {
 
     // Delete auth account
     await user.delete();
+    await _auth.signOut();
     await _googleSignIn.signOut();
   }
 
@@ -159,15 +161,43 @@ class FirebaseAuthRepository implements AuthRepository {
 
   Future<void> _ensureUserDocument(User user) async {
     final docRef = _db.collection('users').doc(user.uid);
-    final doc = await docRef.get();
-    if (!doc.exists) {
-      await docRef.set({
-        'uid': user.uid,
-        'name': user.displayName ?? '',
-        'email': user.email ?? '',
-        'photoUrl': user.photoURL ?? '',
-        'createdAt': Timestamp.now(),
-      });
+    int attempts = 0;
+    while (true) {
+      try {
+        final doc = await docRef.get();
+        if (!doc.exists) {
+          await docRef.set({
+            'uid': user.uid,
+            'name': user.displayName ?? '',
+            'email': user.email ?? '',
+            'photoUrl': user.photoURL ?? '',
+            'createdAt': Timestamp.now(),
+          });
+        }
+        break;
+      } catch (e, stackTrace) {
+        attempts++;
+        final errString = e.toString();
+        final isPermissionDenied =
+            errString.contains('permission-denied') ||
+            errString.contains('PERMISSION_DENIED') ||
+            (e is FirebaseException && e.code == 'permission-denied');
+
+        if (isPermissionDenied && attempts < 4) {
+          AppLogger.warning(
+            'AuthRepository: Permission denied while ensuring user document for uid=${user.uid}. '
+            'Retrying in ${200 * attempts}ms...',
+          );
+          await Future.delayed(Duration(milliseconds: 200 * attempts));
+          continue;
+        }
+        AppLogger.error(
+          'AuthRepository: Failed to ensure user document for uid=${user.uid} after $attempts attempts',
+          e,
+          stackTrace,
+        );
+        rethrow;
+      }
     }
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/app_logger.dart';
@@ -77,8 +78,48 @@ class KeyManager {
 
   /// Returns `true` if an [EncryptedKeyBlob] exists in Firestore for [uid].
   Future<bool> isKeyBlobPresent(String uid) async {
-    final doc = await _keyBlobRef(uid).get();
-    return doc.exists;
+    int attempts = 0;
+    final currentAuthUid = FirebaseAuth.instance.currentUser?.uid;
+    AppLogger.info(
+      'KeyManager: isKeyBlobPresent called. Target uid: $uid, Auth uid: $currentAuthUid',
+    );
+
+    while (true) {
+      try {
+        final doc = await _keyBlobRef(uid).get();
+        AppLogger.info('KeyManager: Fetch keyData successful for uid: $uid');
+        return doc.exists;
+      } catch (e, stackTrace) {
+        attempts++;
+        final errString = e.toString();
+        final errType = e.runtimeType;
+        AppLogger.warning(
+          'KeyManager: Error fetching keyData for uid: $uid. Attempt: $attempts. '
+          'Type: $errType, Error: $errString',
+          e,
+          stackTrace,
+        );
+
+        final isPermissionDenied =
+            errString.contains('permission-denied') ||
+            errString.contains('PERMISSION_DENIED') ||
+            (e is FirebaseException && e.code == 'permission-denied');
+
+        if (isPermissionDenied && attempts < 4) {
+          AppLogger.warning(
+            'KeyManager: Permission denied while checking key blob for uid=$uid. '
+            'Retrying in ${150 * attempts}ms...',
+          );
+          await Future.delayed(Duration(milliseconds: 150 * attempts));
+          continue;
+        }
+        AppLogger.error(
+          'KeyManager: Failed to check key blob presence for uid=$uid after attempts',
+          e,
+        );
+        rethrow;
+      }
+    }
   }
 
   /// Loads the raw 32-byte master key from secure storage.
@@ -127,7 +168,37 @@ class KeyManager {
     AppLogger.info('KeyManager: Generating new master key for uid=$uid');
     final masterKey = _generateRandomBytes(32);
     final blob = await _encryptMasterKey(masterKey, passphrase);
-    await _keyBlobRef(uid).set(blob.toJson());
+
+    int attempts = 0;
+    while (true) {
+      try {
+        await _keyBlobRef(uid).set(blob.toJson());
+        break;
+      } catch (e, stackTrace) {
+        attempts++;
+        final errString = e.toString();
+        final isPermissionDenied =
+            errString.contains('permission-denied') ||
+            errString.contains('PERMISSION_DENIED') ||
+            (e is FirebaseException && e.code == 'permission-denied');
+
+        if (isPermissionDenied && attempts < 4) {
+          AppLogger.warning(
+            'KeyManager: Permission denied while persisting master key blob for uid=$uid. '
+            'Retrying in ${200 * attempts}ms...',
+          );
+          await Future.delayed(Duration(milliseconds: 200 * attempts));
+          continue;
+        }
+        AppLogger.error(
+          'KeyManager: Failed to persist master key blob for uid=$uid after $attempts attempts',
+          e,
+          stackTrace,
+        );
+        rethrow;
+      }
+    }
+
     await _secureStorage.writeKey(masterKeyId(uid), masterKey);
     AppLogger.info('KeyManager: Master key created and persisted for uid=$uid');
   }
