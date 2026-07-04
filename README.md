@@ -1,6 +1,6 @@
 # Orbit
 
-Orbit is an AI-powered Personal Operating System for students designed to handle the cognitive load of student life. By allowing you to braindump your day in a single reflection, Orbit's AI brain parses your text and automatically organizes your classes, tasks, decisions, learnings, and mood updates.
+Orbit is an AI-powered Personal Companion Mobile Application for students designed to handle the cognitive load of student life. By allowing you to braindump your day in a single reflection, Orbit's AI brain parses your text and automatically organizes your classes, tasks, decisions, learnings, and events.
 
 Built using **Flutter**, **Firebase**, and **Material 3**.
 
@@ -8,7 +8,8 @@ Built using **Flutter**, **Firebase**, and **Material 3**.
 
 # Release Notes
 
-📄 [View Release Notes (v1.0.1)](docs/RELEASE_NOTES-v1.0.1.md)
+📄 [View Release Notes (v2.0.0)](docs/RELEASE_NOTES%20-%20v2.0.0.md)
+📄 [View Release Notes (v1.0.1)](docs/RELEASE_NOTES%20-%20v1.0.1.md)
 
 ---
 
@@ -96,20 +97,24 @@ https://github.com/user-attachments/assets/968c53c1-ad7e-49ac-8578-c9b403b301b6
 
 ---
 
-## 🏗️ Architecture & folder Structure
+## 🏗️ Architecture & Folder Structure
 
 Orbit follows a **Feature-First Architecture** combined with Riverpod state management.
 
 ```text
 lib/
-├── app/                  # Global routing and theme notifications
-├── core/                 # Shared widgets, utilities (AppLogger), and voice recording controllers
-└── features/             # Isolated feature components
-    ├── ai/               # AI prompts, synchronizers, and request router
-    ├── auth/             # Google Sign-In and email login views
+├── app/                  # Global routing and theme configuration
+├── core/                 # Shared widgets, utilities (AppLogger), voice recording controllers, and AI engine
+│   └── ai/               # AI prompts, sync services, and pipeline engine
+└── features/             # Isolated feature domains
+    ├── auth/             # Google Sign-In and session flow
     ├── day/              # Daily summary aggregates
     ├── tasks/            # Todo lists and task tracking
-    └── [other domains]   # events, learning, decision, mood, settings, home
+    ├── event/            # Class & personal academic schedules
+    ├── learning/         # Captured insight logs
+    ├── decision/         # Key conclusions tracking
+    ├── reflection/       # Speech-to-text daily reflections
+    └── home/             # App shell, drawer menu, and bottom action bar
 ```
 
 For a detailed look, refer to the documentation:
@@ -157,8 +162,11 @@ flutter build apk --release
 ## 🛣️ Roadmap
 
 - [x] Speech-to-text reflection transcription fallback pipeline.
-- [x] Native response schema compliance.
-- [x] Secure centralized mode-aware logging.
+- [x] Native response schema compliance with Google Gemini validation.
+- [x] Robust AI sync pipeline with duplicate detection and reschedule updates.
+- [x] Curved dome bottom action bar styling with safe area notch pads.
+- [x] Dynamic first-run onboarding overlay arrow asset triggers.
+- [x] Android R8/ProGuard build configuration overrides.
 - [ ] Offline caching support for reflections.
 - [ ] Integration of calendar services (Google Calendar).
 
