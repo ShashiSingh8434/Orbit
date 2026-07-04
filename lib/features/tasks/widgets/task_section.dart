@@ -140,7 +140,9 @@ class TaskSection extends ConsumerWidget {
               behavior: HitTestBehavior.opaque,
               onTap: () {
                 final nextDone = t.status != 'completed';
-                ref.read(taskControllerProvider.notifier).toggleDone(t, nextDone);
+                ref
+                    .read(taskControllerProvider.notifier)
+                    .toggleDone(t, nextDone);
               },
               child: Padding(
                 padding: const EdgeInsets.all(4.0),

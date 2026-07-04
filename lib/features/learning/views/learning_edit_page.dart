@@ -52,7 +52,11 @@ class _LearningEditPageState extends ConsumerState<LearningEditPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _isEditing ? 1 : 2, vsync: this);
+    _tabController = TabController(
+      length: _isEditing ? 1 : 2,
+      vsync: this,
+      initialIndex: _isEditing ? 0 : 1,
+    );
 
     _titleCtrl = TextEditingController(text: widget.learning?.title ?? '');
     _descCtrl = TextEditingController(text: widget.learning?.description ?? '');

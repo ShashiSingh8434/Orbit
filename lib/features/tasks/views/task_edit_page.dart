@@ -48,7 +48,11 @@ class _TaskEditPageState extends ConsumerState<TaskEditPage>
   void initState() {
     super.initState();
     // Editing: only Manual tab. New task: Manual + AI tabs.
-    _tabController = TabController(length: _isEditing ? 1 : 2, vsync: this);
+    _tabController = TabController(
+      length: _isEditing ? 1 : 2,
+      vsync: this,
+      initialIndex: _isEditing ? 0 : 1,
+    );
 
     _titleCtrl = TextEditingController(text: widget.task?.title ?? '');
     _descCtrl = TextEditingController(text: widget.task?.description ?? '');

@@ -55,7 +55,11 @@ class _DecisionEditPageState extends ConsumerState<DecisionEditPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _isEditing ? 1 : 2, vsync: this);
+    _tabController = TabController(
+      length: _isEditing ? 1 : 2,
+      vsync: this,
+      initialIndex: _isEditing ? 0 : 1,
+    );
 
     _decisionCtrl = TextEditingController(
       text: widget.decision?.decision ?? '',
