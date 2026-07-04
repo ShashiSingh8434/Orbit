@@ -15,7 +15,7 @@ class FirstRunOverlay extends ConsumerStatefulWidget {
   /// Key attached to the guide [IconButton] in the AppBar.
   final GlobalKey guideIconKey;
 
-  /// Key attached to the [ArcActionFab].
+  /// Key attached to the [BottomActionBar].
   final GlobalKey fabKey;
 
   const FirstRunOverlay({
@@ -161,7 +161,9 @@ class _OverlayContent extends StatelessWidget {
 
     final guideRect = state._screenRectFor(state.widget.guideIconKey);
     final fabRect = state._screenRectFor(state.widget.fabKey);
-    final targetRect = (state._step == 0 ? guideRect : fabRect)?.inflate(8);
+    final targetRect = state._step == 0
+        ? guideRect?.inflate(8)
+        : fabRect;
 
     return FadeTransition(
       opacity: state._fade,
@@ -176,39 +178,63 @@ class _OverlayContent extends StatelessWidget {
               painter: _SpotlightPainter(
                 targetRect: targetRect,
                 pulseScale: state._pulse.value,
+                step: state._step,
               ),
               child: child,
             );
           },
           child: Stack(
             children: [
-              // ── Animated ring ────────────────────────────────────────────
+              // ── Animated ring / Onboarding indicators ────────────────────
               if (targetRect != null)
                 AnimatedBuilder(
                   animation: state._pulse,
-                  builder: (_, _) {
-                    // Ring diameter matches the painter's spotlight exactly:
-                    //   painter radius  = longestSide/2 + 20
-                    //   ring diameter   = (longestSide + 40) * pulseScale
-                    final double ringDiameter =
-                        (targetRect.longestSide + 40) * state._pulse.value;
-                    return Positioned(
-                      left: targetRect.center.dx - ringDiameter / 2,
-                      top: targetRect.center.dy - ringDiameter / 2,
-                      width: ringDiameter,
-                      height: ringDiameter,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withAlpha(200),
-                            width: 2.5,
+                  builder: (context, _) {
+                    if (state._step == 0) {
+                      // Guide button: circle
+                      final double ringDiameter =
+                          (targetRect.longestSide + 40) * state._pulse.value;
+                      return Positioned(
+                        left: targetRect.center.dx - ringDiameter / 2,
+                        top: targetRect.center.dy - ringDiameter / 2,
+                        width: ringDiameter,
+                        height: ringDiameter,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              width: 2.5,
+                            ),
                           ),
                         ),
-                      ),
-                    );
+                      );
+                    } else {
+                      // Bottom navigation bar: no ring is drawn, handled via assets below
+                      return const SizedBox.shrink();
+                    }
                   },
                 ),
+
+              // ── Navigation Bar Arrow & Text Overlay ──────────────────────
+              if (targetRect != null && state._step == 1) ...[
+                
+                // Hand-drawn arrow asset matching current theme
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: (screenSize.height - targetRect.top) + 30, // 24px gap above the navigation bar
+                  child: Center(
+                    child: Image.asset(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 'assets/arrow_light.png'
+                          : 'assets/arrow_black.png',
+                      height: 85,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ],
 
               // ── Callout card ─────────────────────────────────────────────
               _buildCallout(context, targetRect, screenSize),
@@ -229,7 +255,7 @@ class _OverlayContent extends StatelessWidget {
     final title = isStep0 ? 'Your daily guide' : 'Quick capture';
     final body = isStep0
         ? 'Tap the ⓘ button any time to see how the app works — what to log, how AI helps, and what each section means.'
-        : 'Tap the + button to write a reflection and let AI extract everything.\n\nOr long-press it to instantly open a specific creator — task, decision, event, or learning.';
+        : 'Tap the + button in the middle to write a reflection and let AI extract everything.\n\nOr tap the individual buttons next to it to quickly create tasks, events, learnings, and decisions.';
     final stepLabel = '${state._step + 1} of 2';
     final cta = isStep0 ? 'Got it →' : 'Let\'s go!';
 
@@ -376,25 +402,56 @@ class _CalloutCard extends StatelessWidget {
 class _SpotlightPainter extends CustomPainter {
   final Rect? targetRect;
   final double pulseScale;
+  final int step;
 
-  const _SpotlightPainter({required this.targetRect, required this.pulseScale});
+  const _SpotlightPainter({
+    required this.targetRect,
+    required this.pulseScale,
+    required this.step,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.black.withAlpha(175);
+    final paint = Paint()..color = Colors.black.withValues(alpha: 0.7);
 
     if (targetRect == null) {
       canvas.drawRect(Offset.zero & size, paint);
       return;
     }
 
-    // Radius matches the animated ring formula: (longestSide/2 + 20) * scale
-    final double radius =
-        (targetRect!.longestSide / 2 + 20) * pulseScale.clamp(1.0, 1.15);
-
     final fullPath = Path()..addRect(Offset.zero & size);
-    final spotPath = Path()
-      ..addOval(Rect.fromCircle(center: targetRect!.center, radius: radius));
+    final spotPath = Path();
+
+    if (step == 0) {
+      // Guide icon (circle)
+      final double radius = (targetRect!.longestSide / 2 + 10) * pulseScale.clamp(1.0, 1.15);
+      spotPath.addOval(Rect.fromCircle(center: targetRect!.center, radius: radius));
+    } else {
+      // Bottom navigation bar (custom shape matching BottomActionBar top dome)
+      final double width = size.width;
+      final double barTop = targetRect!.top;
+      const double domeHeight = 15.0; // Dome peak relative to barTop
+      final double height = size.height;
+
+      spotPath.moveTo(0, barTop + 20);
+      spotPath.quadraticBezierTo(0, barTop, 20, barTop);
+      spotPath.lineTo(width / 2 - 50, barTop);
+      spotPath.cubicTo(
+        width / 2 - 30, barTop,
+        width / 2 - 30, barTop - domeHeight,
+        width / 2, barTop - domeHeight,
+      );
+      spotPath.cubicTo(
+        width / 2 + 30, barTop - domeHeight,
+        width / 2 + 30, barTop,
+        width / 2 + 50, barTop,
+      );
+      spotPath.lineTo(width - 20, barTop);
+      spotPath.quadraticBezierTo(width, barTop, width, barTop + 20);
+      spotPath.lineTo(width, height);
+      spotPath.lineTo(0, height);
+      spotPath.close();
+    }
 
     canvas.drawPath(
       Path.combine(PathOperation.difference, fullPath, spotPath),
@@ -404,5 +461,7 @@ class _SpotlightPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SpotlightPainter old) =>
-      old.targetRect != targetRect || old.pulseScale != pulseScale;
+      old.targetRect != targetRect || old.pulseScale != pulseScale || old.step != step;
 }
+
+

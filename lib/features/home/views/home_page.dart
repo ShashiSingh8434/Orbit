@@ -14,7 +14,7 @@ import '../../event/widgets/event_section.dart';
 import '../../day/providers/day_data_provider.dart';
 import '../widgets/day_skeleton_loader.dart';
 import '../../../core/ai/engine/ai_queue_manager.dart';
-import '../widgets/arc_action_fab.dart';
+import '../widgets/bottom_action_bar.dart';
 import '../widgets/first_run_overlay.dart';
 import '../../../core/ai/providers/ai_notification_provider.dart';
 
@@ -211,8 +211,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
       ),
 
-      // ── FAB — GlobalKey attached here ────────────────────────────────────
-      floatingActionButton: ArcActionFab(
+      // ── Bottom Action Bar — GlobalKey attached here ──────────────────────
+      bottomNavigationBar: BottomActionBar(
         key: _fabKey,
         onTap: () {
           final dateKey =

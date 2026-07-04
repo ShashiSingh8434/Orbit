@@ -2,7 +2,7 @@ name: orbit
 description: "Your AI-powered personal orbit — reflections, knowledge, and tasks."
 publish_to: 'none'
 
-version: 1.0.1+2
+version: 2.0.0+3
 
 environment:
   sdk: ^3.12.0
@@ -103,4 +103,6 @@ flutter:
     - assets/app_logo_dark.png
     - assets/app_logo_light.png
     - assets/black.png
+    - assets/arrow_black.png
+    - assets/arrow_light.png
     - .env
