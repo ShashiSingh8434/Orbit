@@ -15,7 +15,7 @@ Built using **Flutter**, **Firebase**, and **Material 3**.
 
 ## 📸 Media
 
-<table align="center" cellpadding="12" cellspacing="12">
+<!-- <table align="center" cellpadding="12" cellspacing="12">
   <tr>
     <td align="center">
       <sub><b>Dashboard</b></sub>
@@ -53,7 +53,15 @@ Built using **Flutter**, **Firebase**, and **Material 3**.
       <img src="https://github.com/user-attachments/assets/dd33ea92-71a1-484b-9115-16493ed42c36" width="220"/><br/>
     </td>
   </tr>
-</table>
+</table> -->
+
+
+| Dashboard | Guide | Reflection list page | Reflection addition |
+| :---: | :---: | :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/05f4a5d2-d0c1-4357-a630-2176d448a183" width="180" alt="Dashboard" /> | <img src="https://github.com/user-attachments/assets/39b07efe-c675-43e0-9466-fb1f0ccfe13e" width="180" alt="Guide" /> | <img src="https://github.com/user-attachments/assets/ff54c2b7-3953-48ee-834a-83aa4a96caf6" width="180" alt="Reflection list page" /> | <img src="https://github.com/user-attachments/assets/3b0bbd17-b50d-446e-9609-0a7f2240aede" width="180" alt="Reflection addition" /> |
+| **Tasks** | **Decision** | **Settings** | **Ai analytics** |
+| <img src="https://github.com/user-attachments/assets/4b8a6e54-355d-4a0e-b065-3c8fc2ea7fac" width="180" alt="Tasks" /> | <img src="https://github.com/user-attachments/assets/226f05b3-eef4-4835-885c-411edc0e58b7" width="180" alt="Decision" /> | <img src="https://github.com/user-attachments/assets/b34d50ba-65e2-41e0-be51-9bc9a3560a6e" width="180" alt="Settings" /> | <img src="https://github.com/user-attachments/assets/fe284e0a-6873-430a-89bd-52db78b45b61" width="180" alt="Ai analytics" /> |
+
 
 ---
 
@@ -61,7 +69,7 @@ Built using **Flutter**, **Firebase**, and **Material 3**.
 
 <div align="center">
 
-https://github.com/user-attachments/assets/968c53c1-ad7e-49ac-8578-c9b403b301b6
+https://github.com/user-attachments/assets/307e1c09-e1d7-444a-a65c-e7576385b858
 
 **Orbit App Demo**
 
@@ -167,7 +175,7 @@ flutter build apk --release
 - [x] Curved dome bottom action bar styling with safe area notch pads.
 - [x] Dynamic first-run onboarding overlay arrow asset triggers.
 - [x] Android R8/ProGuard build configuration overrides.
-- [ ] Offline caching support for reflections.
+- [x] Offline caching support for reflections.
 - [ ] Integration of calendar services (Google Calendar).
 
 ---
