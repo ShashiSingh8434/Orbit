@@ -19,7 +19,12 @@ class UnderstandingPromptBuilder {
         : '1. SUMMARY: Write a brief (1-2 sentence), encouraging summary.';
 
     final pendingTasksStr = pendingTasks.isNotEmpty
-        ? pendingTasks.map((t) => '- [ID: ${t.id}] "${t.title}" (Due: ${t.dueDate != null ? OrbitDateUtils.dateKey(t.dueDate!) : "None"})').join('\n   ')
+        ? pendingTasks
+              .map(
+                (t) =>
+                    '- [ID: ${t.id}] "${t.title}" (Due: ${t.dueDate != null ? OrbitDateUtils.dateKey(t.dueDate!) : "None"})',
+              )
+              .join('\n   ')
         : 'None';
 
     final upcomingEventsStr = upcomingEvents.isNotEmpty
@@ -223,7 +228,13 @@ CRITICAL INSTRUCTION: You MUST output ONLY valid JSON matching the exact schema 
           ),
         ),
       },
-      requiredProperties: ['summary', 'tasks', 'learnings', 'decisions', 'events'],
+      requiredProperties: [
+        'summary',
+        'tasks',
+        'learnings',
+        'decisions',
+        'events',
+      ],
     );
   }
 }

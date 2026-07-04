@@ -174,20 +174,54 @@ class UnderstandingPipeline {
 
       // Construct a nice message of what got created / updated
       final List<String> msgParts = [];
-      if (tasksCreated > 0) msgParts.add('$tasksCreated task${tasksCreated > 1 ? 's' : ''} created');
-      if (tasksUpdated > 0) msgParts.add('$tasksUpdated task${tasksUpdated > 1 ? 's' : ''} updated');
-      if (learningsCreated > 0) msgParts.add('$learningsCreated learning${learningsCreated > 1 ? 's' : ''} created');
-      if (learningsUpdated > 0) msgParts.add('$learningsUpdated learning${learningsUpdated > 1 ? 's' : ''} updated');
-      if (decisionsCreated > 0) msgParts.add('$decisionsCreated decision${decisionsCreated > 1 ? 's' : ''} created');
-      if (decisionsUpdated > 0) msgParts.add('$decisionsUpdated decision${decisionsUpdated > 1 ? 's' : ''} updated');
-      if (eventsCreated > 0) msgParts.add('$eventsCreated event${eventsCreated > 1 ? 's' : ''} created');
-      if (eventsUpdated > 0) msgParts.add('$eventsUpdated event${eventsUpdated > 1 ? 's' : ''} updated');
+      if (tasksCreated > 0) {
+        msgParts.add(
+          '$tasksCreated task${tasksCreated > 1 ? 's' : ''} created',
+        );
+      }
+      if (tasksUpdated > 0) {
+        msgParts.add(
+          '$tasksUpdated task${tasksUpdated > 1 ? 's' : ''} updated',
+        );
+      }
+      if (learningsCreated > 0) {
+        msgParts.add(
+          '$learningsCreated learning${learningsCreated > 1 ? 's' : ''} created',
+        );
+      }
+      if (learningsUpdated > 0) {
+        msgParts.add(
+          '$learningsUpdated learning${learningsUpdated > 1 ? 's' : ''} updated',
+        );
+      }
+      if (decisionsCreated > 0) {
+        msgParts.add(
+          '$decisionsCreated decision${decisionsCreated > 1 ? 's' : ''} created',
+        );
+      }
+      if (decisionsUpdated > 0) {
+        msgParts.add(
+          '$decisionsUpdated decision${decisionsUpdated > 1 ? 's' : ''} updated',
+        );
+      }
+      if (eventsCreated > 0) {
+        msgParts.add(
+          '$eventsCreated event${eventsCreated > 1 ? 's' : ''} created',
+        );
+      }
+      if (eventsUpdated > 0) {
+        msgParts.add(
+          '$eventsUpdated event${eventsUpdated > 1 ? 's' : ''} updated',
+        );
+      }
 
       if (msgParts.isNotEmpty) {
         final message = 'Insights extracted:\n${msgParts.join(',\n')}.';
         ref.read(aiNotificationProvider.notifier).notify(message);
       } else {
-        ref.read(aiNotificationProvider.notifier).notify('Reflection analyzed. No new insights to update.');
+        ref
+            .read(aiNotificationProvider.notifier)
+            .notify('Reflection analyzed. No new insights to update.');
       }
 
       AppLogger.info(

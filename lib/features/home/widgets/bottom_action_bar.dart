@@ -47,7 +47,9 @@ class BottomActionBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface.withValues(alpha: isDark ? 0.7 : 0.8),
+                  color: theme.colorScheme.onSurface.withValues(
+                    alpha: isDark ? 0.7 : 0.8,
+                  ),
                 ),
               ),
             ],
@@ -99,15 +101,17 @@ class BottomActionBar extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    
+
     // Base height for the action bar (excluding the safe area bottom padding)
     const baseHeight = 64.0;
     final totalHeight = baseHeight + bottomPadding;
 
-    final fillColor = isDark 
-        ? Colors.black.withValues(alpha: 0.88) 
+    final fillColor = isDark
+        ? Colors.black.withValues(alpha: 0.88)
         : Colors.white.withValues(alpha: 0.95);
-    final borderColor = colorScheme.outlineVariant.withValues(alpha: isDark ? 0.15 : 0.25);
+    final borderColor = colorScheme.outlineVariant.withValues(
+      alpha: isDark ? 0.15 : 0.25,
+    );
     final shadowColor = isDark ? Colors.black : Colors.grey;
 
     return Stack(
@@ -176,7 +180,9 @@ class BottomActionBar extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface.withValues(alpha: isDark ? 0.7 : 0.8),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: isDark ? 0.7 : 0.8,
+                            ),
                           ),
                         ),
                       ],
@@ -244,37 +250,29 @@ class _BottomBarPainter extends CustomPainter {
     final path = Path();
     // Start at top-left corner
     path.moveTo(0, 20);
-    
+
     // Top-left rounded corner
     path.quadraticBezierTo(0, 0, 20, 0);
-    
+
     // Straight line to dome start
     path.lineTo(width / 2 - 50, 0);
-    
+
     // Dome curve
-    path.cubicTo(
-      width / 2 - 30, 0,
-      width / 2 - 30, topY,
-      width / 2, topY,
-    );
-    path.cubicTo(
-      width / 2 + 30, topY,
-      width / 2 + 30, 0,
-      width / 2 + 50, 0,
-    );
-    
+    path.cubicTo(width / 2 - 30, 0, width / 2 - 30, topY, width / 2, topY);
+    path.cubicTo(width / 2 + 30, topY, width / 2 + 30, 0, width / 2 + 50, 0);
+
     // Straight line to top-right
     path.lineTo(width - 20, 0);
-    
+
     // Top-right rounded corner
     path.quadraticBezierTo(width, 0, width, 20);
-    
+
     // Line down to bottom-right
     path.lineTo(width, height);
-    
+
     // Line across to bottom-left
     path.lineTo(0, height);
-    
+
     path.close();
 
     // Paint shadow (directed upwards)
@@ -296,16 +294,8 @@ class _BottomBarPainter extends CustomPainter {
       ..moveTo(0, 20)
       ..quadraticBezierTo(0, 0, 20, 0)
       ..lineTo(width / 2 - 50, 0)
-      ..cubicTo(
-        width / 2 - 30, 0,
-        width / 2 - 30, topY,
-        width / 2, topY,
-      )
-      ..cubicTo(
-        width / 2 + 30, topY,
-        width / 2 + 30, 0,
-        width / 2 + 50, 0,
-      )
+      ..cubicTo(width / 2 - 30, 0, width / 2 - 30, topY, width / 2, topY)
+      ..cubicTo(width / 2 + 30, topY, width / 2 + 30, 0, width / 2 + 50, 0)
       ..lineTo(width - 20, 0)
       ..quadraticBezierTo(width, 0, width, 20);
 

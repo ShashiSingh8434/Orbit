@@ -161,9 +161,7 @@ class _OverlayContent extends StatelessWidget {
 
     final guideRect = state._screenRectFor(state.widget.guideIconKey);
     final fabRect = state._screenRectFor(state.widget.fabKey);
-    final targetRect = state._step == 0
-        ? guideRect?.inflate(8)
-        : fabRect;
+    final targetRect = state._step == 0 ? guideRect?.inflate(8) : fabRect;
 
     return FadeTransition(
       opacity: state._fade,
@@ -218,12 +216,13 @@ class _OverlayContent extends StatelessWidget {
 
               // ── Navigation Bar Arrow & Text Overlay ──────────────────────
               if (targetRect != null && state._step == 1) ...[
-                
                 // Hand-drawn arrow asset matching current theme
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: (screenSize.height - targetRect.top) + 30, // 24px gap above the navigation bar
+                  bottom:
+                      (screenSize.height - targetRect.top) +
+                      30, // 24px gap above the navigation bar
                   child: Center(
                     child: Image.asset(
                       Theme.of(context).brightness == Brightness.dark
@@ -424,8 +423,11 @@ class _SpotlightPainter extends CustomPainter {
 
     if (step == 0) {
       // Guide icon (circle)
-      final double radius = (targetRect!.longestSide / 2 + 10) * pulseScale.clamp(1.0, 1.15);
-      spotPath.addOval(Rect.fromCircle(center: targetRect!.center, radius: radius));
+      final double radius =
+          (targetRect!.longestSide / 2 + 10) * pulseScale.clamp(1.0, 1.15);
+      spotPath.addOval(
+        Rect.fromCircle(center: targetRect!.center, radius: radius),
+      );
     } else {
       // Bottom navigation bar (custom shape matching BottomActionBar top dome)
       final double width = size.width;
@@ -437,14 +439,20 @@ class _SpotlightPainter extends CustomPainter {
       spotPath.quadraticBezierTo(0, barTop, 20, barTop);
       spotPath.lineTo(width / 2 - 50, barTop);
       spotPath.cubicTo(
-        width / 2 - 30, barTop,
-        width / 2 - 30, barTop - domeHeight,
-        width / 2, barTop - domeHeight,
+        width / 2 - 30,
+        barTop,
+        width / 2 - 30,
+        barTop - domeHeight,
+        width / 2,
+        barTop - domeHeight,
       );
       spotPath.cubicTo(
-        width / 2 + 30, barTop - domeHeight,
-        width / 2 + 30, barTop,
-        width / 2 + 50, barTop,
+        width / 2 + 30,
+        barTop - domeHeight,
+        width / 2 + 30,
+        barTop,
+        width / 2 + 50,
+        barTop,
       );
       spotPath.lineTo(width - 20, barTop);
       spotPath.quadraticBezierTo(width, barTop, width, barTop + 20);
@@ -461,7 +469,7 @@ class _SpotlightPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SpotlightPainter old) =>
-      old.targetRect != targetRect || old.pulseScale != pulseScale || old.step != step;
+      old.targetRect != targetRect ||
+      old.pulseScale != pulseScale ||
+      old.step != step;
 }
-
-

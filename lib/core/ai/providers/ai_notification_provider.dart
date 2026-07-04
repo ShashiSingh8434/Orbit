@@ -17,5 +17,5 @@ class AiNotificationNotifier extends StateNotifier<AiNotification?> {
 
 final aiNotificationProvider =
     StateNotifierProvider<AiNotificationNotifier, AiNotification?>((ref) {
-  return AiNotificationNotifier();
-});
+      return AiNotificationNotifier();
+    });

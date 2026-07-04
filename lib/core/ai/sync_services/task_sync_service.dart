@@ -68,7 +68,8 @@ class TaskSyncService {
 
         if (dto.dueDate != null) {
           final parsedDueDate = DateTime.tryParse(dto.dueDate!);
-          if (parsedDueDate != existingTask.dueDate || dto.dueTime != existingTask.dueTime) {
+          if (parsedDueDate != existingTask.dueDate ||
+              dto.dueTime != existingTask.dueTime) {
             updatedTask = updatedTask.copyWith(
               dueDate: parsedDueDate,
               dueTime: dto.dueTime,
