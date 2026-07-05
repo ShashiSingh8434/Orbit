@@ -8,6 +8,7 @@ Built using **Flutter**, **Firebase**, and **Material 3**.
 
 # Release Notes
 
+📄 [View Release Notes (v3.0.0)](docs/RELEASE_NOTES%20-%20v3.0.0.md)
 📄 [View Release Notes (v2.0.0)](docs/RELEASE_NOTES%20-%20v2.0.0.md)
 📄 [View Release Notes (v1.0.1)](docs/RELEASE_NOTES%20-%20v1.0.1.md)
 
