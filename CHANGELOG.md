@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Released]
 
+## [3.0.0] - 2026-07-05
+
+### Added
+- **Offline-First Architecture**: Integrated local SQLite database via Drift ORM, making reads instantaneous and fully offline-capable across all core repositories.
+- **Cloud Sync Engine**: Created a background outbox synchronizer (`SyncQueueTable` + `SyncService`) supporting automatic queues, retries, and asynchronous cloud synchronization.
+- **Client-Side Transparent Encryption**: Added end-to-end data encryption at rest (AES-256-GCM) with key hierarchies derived via Argon2id (from user passphrase) and HKDF-SHA256.
+- **AI Analytics Dashboard**: Sourced a details page under Settings showing request rates, token estimates, and daily usage charts for LLM, STT, and Multimodal services.
+- **Multimodal Extraction Service**: Enabled image-based schedule parsing in the Academic Timetable planner with automatic AI logging.
+- **New About Page**: Added app principles, privacy practices, developer credits, and user guidance notes.
+- **Auth UX Escape Hatches**: Added logout actions in passphrase setup/recovery views, alongside a secure "Delete Account" flow.
+
+### Changed
+- **Guide Page Refactor**: Monolithic guide page refactored into structured widget components with a swipeable prompt engineering view.
+- **AI Prompt Improvements**: Tuned task due date inference to default to "today" when immediate urgency is detected but no explicit date is given.
+- **Consistent List Sorting**: Standardized data sorting on Decisions, Events, and Learnings list views to group by date and sort descending by creation time.
+
+### Fixed
+- Fixed cached-auth stale state on re-login where the user passphrase check was skipped on the same device.
+- Replaced raw cryptographic stack trace exceptions with user-friendly error messages.
+- Fixed `ReflectionTagChip` theme matching and wired its missing tag-removal callback.
+- Cached profile images in `AppDrawer` using `CachedNetworkImageProvider` to remove loading lag.
+
 ## [2.0.0] - 2026-07-04
 
 ### Added
