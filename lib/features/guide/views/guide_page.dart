@@ -22,13 +22,13 @@ class _GuidePageState extends State<GuidePage> {
       keywords:
           'add task, I need to, finished, mark complete, reschedule to [date]',
       example:
-          '"I need to complete the physics report by Friday. Also, mark the buy book task as completed."',
+          '"I need to complete the project report by Friday. Also, mark the buy book task as completed."',
     ),
     (
       tag: 'EVENTS',
       keywords:
           'schedule, event, went to, attending [event] on [date] at [time]',
-      example: '"Schedule Chemistry Lab for Thursday at 2 PM in Room 302."',
+      example: '"Schedule Club Meet for Thursday at 2 PM in Room 302."',
     ),
     (
       tag: 'LEARNINGS',

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../services/recovery_service.dart';
 import '../exceptions/crypto_exceptions.dart';
 import '../repository/encryption_repository.dart';
+import '../../../features/auth/controllers/auth_controller.dart';
 import '../../../app/router/app_routes.dart';
 
 final _uidProvider = Provider<String?>((ref) {
@@ -99,6 +100,11 @@ class _PassphraseSetupPageState extends ConsumerState<PassphraseSetupPage>
     }
   }
 
+  Future<void> _signOut() async {
+    await ref.read(authControllerProvider.notifier).signOut();
+    if (mounted) context.go(AppRoutes.login);
+  }
+
   // ── UI ──
 
   @override
@@ -145,6 +151,14 @@ class _PassphraseSetupPageState extends ConsumerState<PassphraseSetupPage>
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _signOut,
+                      icon: const Icon(Icons.logout, size: 16),
+                      label: const Text('Logout'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: cs.onSurfaceVariant,
                       ),
                     ),
                   ],

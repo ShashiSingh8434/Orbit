@@ -94,6 +94,38 @@ class _PassphraseRecoveryPageState
     if (mounted) context.go(AppRoutes.login);
   }
 
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Account?'),
+        content: const Text(
+          'Are you sure you want to permanently delete your account?\n\n'
+          'This action will remove all your data from the Orbit cloud database '
+          'and is completely irreversible.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              'Delete Permanently',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await ref.read(authControllerProvider.notifier).deleteAccount();
+    }
+  }
+
   // ── UI ──
 
   @override
@@ -284,6 +316,22 @@ class _PassphraseRecoveryPageState
                     label: const Text('Sign out and use a different account'),
                     style: TextButton.styleFrom(
                       foregroundColor: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+
+                // ── Delete account option ──
+                Center(
+                  child: TextButton.icon(
+                    onPressed: _isLoading ? null : _confirmDeleteAccount,
+                    icon: Icon(
+                      Icons.delete_forever_rounded,
+                      size: 16,
+                      color: cs.error,
+                    ),
+                    label: Text(
+                      'Delete account permanently',
+                      style: TextStyle(color: cs.error),
                     ),
                   ),
                 ),
