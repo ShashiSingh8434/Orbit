@@ -6,7 +6,7 @@ homepage: https://shashisingh8434.vercel.app/projects/orbit
 repository: https://github.com/ShashiSingh8434/Orbit
 issue_tracker: https://github.com/ShashiSingh8434/Orbit/issues
 
-version: 2.2.4+3
+version: 3.0.0+4
 
 environment:
   sdk: ^3.12.0
