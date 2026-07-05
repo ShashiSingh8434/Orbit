@@ -29,6 +29,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final user = ref.watch(authStateProvider).value;
     final aiSettings = ref.watch(aiSettingsProvider);
 
+    ref.listen<AiSettingsState>(aiSettingsProvider, (previous, next) {
+      if (previous?.mode != next.mode) {
+        setState(() {
+          _selectedMode = next.mode;
+        });
+      }
+    });
+
     _selectedMode ??= aiSettings.mode;
 
     return Stack(
@@ -522,15 +530,13 @@ class _ProviderCard extends ConsumerWidget {
     if (!hasUserKey) return cs.onSurfaceVariant;
     switch (status) {
       case ProviderHealthStatus.healthy:
+      case ProviderHealthStatus.unknown:
         return Colors.green;
       case ProviderHealthStatus.rateLimited:
         return Colors.orange;
       case ProviderHealthStatus.offline:
-        return cs.error;
       case ProviderHealthStatus.invalidKey:
         return cs.error;
-      case ProviderHealthStatus.unknown:
-        return cs.onSurfaceVariant;
     }
   }
 
@@ -538,6 +544,7 @@ class _ProviderCard extends ConsumerWidget {
     if (!hasUserKey) return 'Not Connected';
     switch (status) {
       case ProviderHealthStatus.healthy:
+      case ProviderHealthStatus.unknown:
         return 'Connected';
       case ProviderHealthStatus.rateLimited:
         return 'Rate Limited';
@@ -545,8 +552,6 @@ class _ProviderCard extends ConsumerWidget {
         return 'Offline';
       case ProviderHealthStatus.invalidKey:
         return 'Invalid Key';
-      case ProviderHealthStatus.unknown:
-        return 'Not Connected';
     }
   }
 }

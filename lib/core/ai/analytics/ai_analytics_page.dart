@@ -26,6 +26,18 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
       todayOnly: _todayOnly,
     );
     final recentLogs = service.getRecentLogs(count: 5);
+    final allLogs = service.getRecentLogs(count: 500);
+
+    final voiceLogs = allLogs.where((l) {
+      final matchesFilter = l.apiSource == _selectedApiSource;
+      final isVoice = l.provider.contains('(Voice)');
+      if (_todayOnly) {
+        final now = DateTime.now();
+        final todayStart = DateTime(now.year, now.month, now.day);
+        return matchesFilter && isVoice && l.timestamp.isAfter(todayStart);
+      }
+      return matchesFilter && isVoice;
+    }).toList();
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -208,6 +220,13 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                 }),
 
           const SizedBox(height: 24),
+
+          // ── Speech-to-Text Section ──────────────────────────────────────
+          _SpeechToTextSection(
+            voiceLogs: voiceLogs,
+            theme: theme,
+            colorScheme: colorScheme,
+          ),
 
           // ── Daily Trend ─────────────────────────────────────────────────
           if (stats.dailyAggregates.isNotEmpty) ...[
@@ -455,6 +474,159 @@ class _LogTile extends StatelessWidget {
           color: colorScheme.onSurfaceVariant,
         ),
       ),
+    );
+  }
+}
+
+class _SpeechToTextSection extends StatelessWidget {
+  final List<AiUsageLog> voiceLogs;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+
+  const _SpeechToTextSection({
+    required this.voiceLogs,
+    required this.theme,
+    required this.colorScheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (voiceLogs.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final total = voiceLogs.length;
+    final successCount = voiceLogs.where((l) => l.success).length;
+    final successRate = total > 0 ? successCount / total : 0.0;
+    final totalLatency = voiceLogs.fold<int>(0, (sum, l) => sum + l.responseTimeMs);
+    final avgLatency = total > 0 ? totalLatency / total : 0.0;
+
+    // Model breakdown
+    final modelCounts = <String, int>{};
+    for (final log in voiceLogs) {
+      modelCounts[log.modelName] = (modelCounts[log.modelName] ?? 0) + 1;
+    }
+    final sortedModels = modelCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'SPEECH TO TEXT',
+          style: theme.textTheme.labelSmall?.copyWith(
+            letterSpacing: 1.2,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                icon: Icons.keyboard_voice_rounded,
+                label: 'Voice Requests',
+                value: '$total',
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _StatCard(
+                icon: Icons.timer_rounded,
+                label: 'Avg STT Latency',
+                value: '${avgLatency.round()}ms',
+                color: Colors.orange,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Transcription Success Rate',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${(successRate * 100).round()}%',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: successRate,
+                    minHeight: 8,
+                    backgroundColor: Colors.green.withValues(alpha: 0.1),
+                    valueColor: const AlwaysStoppedAnimation(Colors.green),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Transcription Models Used:',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...sortedModels.map((e) {
+                  final fraction = total > 0 ? e.value / total : 0.0;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            e.key,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(2),
+                            child: LinearProgressIndicator(
+                              value: fraction,
+                              minHeight: 4,
+                              backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+                              valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${e.value}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 }
