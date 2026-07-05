@@ -13,7 +13,7 @@ import '../utils/app_logger.dart';
 /// Encapsulates all audio recording and transcription interactions.
 class VoiceService {
   final AiAnalyticsService? _analytics;
-  VoiceService({AiAnalyticsService? analytics}) : _analytics = analytics;
+  VoiceService({this._analytics});
 
   static final AudioRecorder _recorder = AudioRecorder();
   static bool _isAvailable = false;
@@ -339,7 +339,7 @@ class VoiceService {
       queueWaitTimeMs: 0,
       processingTimeMs: responseTimeMs,
     );
-    _analytics!.logRequest(log);
+    _analytics.logRequest(log);
   }
 
   /// Transcribes using Groq's speech-to-text API.

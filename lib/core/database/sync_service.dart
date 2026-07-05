@@ -10,13 +10,6 @@ import '../utils/app_logger.dart';
 import '../utils/date_utils.dart';
 import 'local_database.dart';
 
-import '../../features/day/models/day_model.dart';
-import '../../features/tasks/models/task_model.dart';
-import '../../features/reflection/models/reflection_model.dart';
-import '../../features/learning/models/learning_model.dart';
-import '../../features/event/models/event_model.dart';
-import '../../features/decision/models/decision_model.dart';
-import '../../features/academic/models/academic_schedule.dart';
 import '../../features/auth/controllers/auth_controller.dart';
 
 final syncServiceProvider = Provider<SyncService>((ref) {
