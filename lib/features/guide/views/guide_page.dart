@@ -19,13 +19,15 @@ class _GuidePageState extends State<GuidePage> {
   static const _promptCards = [
     (
       tag: 'TASKS',
-      keywords: 'add task, I need to, finished, mark complete, reschedule to [date]',
+      keywords:
+          'add task, I need to, finished, mark complete, reschedule to [date]',
       example:
           '"I need to complete the physics report by Friday. Also, mark the buy book task as completed."',
     ),
     (
       tag: 'EVENTS',
-      keywords: 'schedule, event, went to, attending [event] on [date] at [time]',
+      keywords:
+          'schedule, event, went to, attending [event] on [date] at [time]',
       example: '"Schedule Chemistry Lab for Thursday at 2 PM in Room 302."',
     ),
     (

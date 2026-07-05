@@ -54,8 +54,8 @@ class AboutPage extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.asset(
-                        'assets/orbit_logo.png',
-                    width:75,
+                    'assets/orbit_logo.png',
+                    width: 75,
                     height: 75,
                     fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => Container(

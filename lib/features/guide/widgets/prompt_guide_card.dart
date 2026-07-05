@@ -15,20 +15,20 @@ class PromptGuideCard extends StatelessWidget {
   });
 
   Color _accentColor(ColorScheme cs) => switch (tag.toUpperCase()) {
-        'TASKS' => Colors.green,
-        'EVENTS' => Colors.blue,
-        'LEARNINGS' => Colors.orange,
-        'DECISIONS' => Colors.purple,
-        _ => cs.primary,
-      };
+    'TASKS' => Colors.green,
+    'EVENTS' => Colors.blue,
+    'LEARNINGS' => Colors.orange,
+    'DECISIONS' => Colors.purple,
+    _ => cs.primary,
+  };
 
   IconData _tagIcon() => switch (tag.toUpperCase()) {
-        'TASKS' => Icons.task_alt_rounded,
-        'EVENTS' => Icons.calendar_today_rounded,
-        'LEARNINGS' => Icons.lightbulb_outline_rounded,
-        'DECISIONS' => Icons.alt_route_rounded,
-        _ => Icons.star_rounded,
-      };
+    'TASKS' => Icons.task_alt_rounded,
+    'EVENTS' => Icons.calendar_today_rounded,
+    'LEARNINGS' => Icons.lightbulb_outline_rounded,
+    'DECISIONS' => Icons.alt_route_rounded,
+    _ => Icons.star_rounded,
+  };
 
   @override
   Widget build(BuildContext context) {

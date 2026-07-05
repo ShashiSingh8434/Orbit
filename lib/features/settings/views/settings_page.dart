@@ -243,9 +243,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
               ),
               ListTile(
-                leading: Icon(
-                  Icons.auto_awesome_rounded,
-                ),
+                leading: Icon(Icons.auto_awesome_rounded),
                 title: const Text('About Orbit'),
                 subtitle: const Text('Developer, features & privacy'),
                 trailing: const Icon(Icons.chevron_right_rounded),
