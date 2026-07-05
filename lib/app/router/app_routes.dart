@@ -48,6 +48,9 @@ abstract final class AppRoutes {
   // App guide.
   static const guide = '/home/guide';
 
+  // About page.
+  static const about = '/home/about';
+
   // AI Analytics dashboard.
   static const String aiAnalytics = '/home/ai-analytics';
 

@@ -1,7 +1,85 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_routes.dart';
+import '../widgets/guide_section_card.dart';
+import '../widgets/usage_accordion.dart';
+import '../widgets/prompt_guide_card.dart';
 
-class GuidePage extends StatelessWidget {
+class GuidePage extends StatefulWidget {
   const GuidePage({super.key});
+
+  @override
+  State<GuidePage> createState() => _GuidePageState();
+}
+
+class _GuidePageState extends State<GuidePage> {
+  final PageController _promptPageController = PageController();
+  int _currentPromptPage = 0;
+
+  static const _promptCards = [
+    (
+      tag: 'TASKS',
+      keywords: 'add task, I need to, finished, mark complete, reschedule to [date]',
+      example:
+          '"I need to complete the physics report by Friday. Also, mark the buy book task as completed."',
+    ),
+    (
+      tag: 'EVENTS',
+      keywords: 'schedule, event, went to, attending [event] on [date] at [time]',
+      example: '"Schedule Chemistry Lab for Thursday at 2 PM in Room 302."',
+    ),
+    (
+      tag: 'LEARNINGS',
+      keywords: 'learned that, realized, discovered, lesson learned',
+      example:
+          '"I learned that coding in small chunks reduces syntax errors. Category: Tech."',
+    ),
+    (
+      tag: 'DECISIONS',
+      keywords: 'decided to, committing to, chose to, reason is',
+      example:
+          '"I decided to study at the library because it helps me avoid distractions."',
+    ),
+  ];
+
+  @override
+  void dispose() {
+    _promptPageController.dispose();
+    super.dispose();
+  }
+
+  void _showTimetableSample() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sample Timetable Screenshot'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Upload a clear screenshot of your timetable. It should explicitly state class names, slot timings, days, and room locations.',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'assets/timetable_sample.png',
+                fit: BoxFit.contain,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -9,527 +87,220 @@ class GuidePage extends StatelessWidget {
     final cs = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Guide')),
+      appBar: AppBar(
+        title: const Text('User Guide'),
+        leading: BackButton(onPressed: () => context.pop()),
+      ),
       body: ListView(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
-          // ── Hero ──────────────────────────────────────────────────────────
-          _Hero(cs: cs, theme: theme),
-
-          const SizedBox(height: 40),
-
-          // ── Section 1: Live reflection mock ───────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: _EyebrowLabel(label: 'Writing a reflection', cs: cs),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              'Write naturally. Orbit reads your words and organises them automatically.',
-              style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
-            ),
-          ),
-          const SizedBox(height: 20),
-          const _ReflectionMock(),
-
-          const SizedBox(height: 48),
-
-          // ── Section 2: Trigger phrases ────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: _EyebrowLabel(label: 'Trigger phrases', cs: cs),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              'These phrases help Orbit extract the right type of entry.',
-              style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const _TriggerGrid(),
-
-          const SizedBox(height: 48),
-
-          // ── Section 3: Dashboard ──────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: _EyebrowLabel(label: 'Your dashboard', cs: cs),
-          ),
-          const SizedBox(height: 16),
-          const _DashboardFeatures(),
-
-          const SizedBox(height: 56),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Hero ──────────────────────────────────────────────────────────────────────
-
-class _Hero extends StatelessWidget {
-  const _Hero({required this.cs, required this.theme});
-
-  final ColorScheme cs;
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(28, 48, 28, 44),
-      decoration: BoxDecoration(
-        color: cs.primary,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(30),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(Icons.explore_rounded, size: 32, color: Colors.white),
-          ),
-          const SizedBox(height: 20),
+          // ── How to Use ────────────────────────────────────────────────────
           Text(
-            'Just reflect.\nOrbit does the rest.',
-            style: theme.textTheme.headlineLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              height: 1.15,
-              letterSpacing: -0.5,
+            'HOW TO USE THE APP',
+            style: theme.textTheme.labelMedium?.copyWith(
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.bold,
+              color: cs.primary,
             ),
           ),
           const SizedBox(height: 12),
-          Text(
-            'Write about your day in plain language — tasks, decisions, events, and lessons are extracted automatically.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withAlpha(200),
-              height: 1.6,
+
+          const UsageAccordion(
+            title: 'Daily Reflection & All-in-One Parsing',
+            icon: Icons.edit_note_rounded,
+            details:
+                'Write naturally in plain language about your day. Orbit\'s AI scans the entire text to extract all tasks, decisions, events, and learnings in one go. You don\'t have to structure it—just talk about what you did, what you need to do, what you decided, and what you learned.',
+          ),
+          const UsageAccordion(
+            title: 'Tasks Module',
+            icon: Icons.task_alt_rounded,
+            details:
+                'Track your to-do lists. You can add tasks manually or let Orbit extract them from your reflections. You can reschedule a task by saying "reschedule UI design task to tomorrow" or complete it by writing "I finished the UI design task". If no due date is provided, Orbit defaults the due date to today to keep you focused.',
+          ),
+          const UsageAccordion(
+            title: 'Events Module',
+            icon: Icons.calendar_month_rounded,
+            details:
+                'Log upcoming classes, meetings, gym sessions, or outings. Mention details like "Gym at 6 PM" or "Math Class on Monday at 10 AM". Orbit automatically structures these into a chronological calendar list. If you specify only a time (e.g. "meeting at 4pm"), it defaults the event date to today.',
+          ),
+          const UsageAccordion(
+            title: 'Learnings Module',
+            icon: Icons.lightbulb_outline_rounded,
+            details:
+                'Log real-time realizations, study lessons, or life observations. Describe what you learned (e.g., "I learned that recursion is easier with tree diagrams"). Orbit parses the content and classifies it into clean categories like Life, Tech, Career, Academic, Health, Relationships, or Finance.',
+          ),
+          const UsageAccordion(
+            title: 'Decisions Module',
+            icon: Icons.alt_route_rounded,
+            details:
+                'Document crucial choices or commitments you make, along with the reasoning (e.g., "I decided to wake up at 5am to get coding done early"). Recording these helps you look back and review your decision-making patterns over time.',
+          ),
+
+          const SizedBox(height: 16),
+
+          // Academic with sample image
+          GuideSectionCard(
+            title: 'Academic Timetable Planner',
+            icon: Icons.school_outlined,
+            iconColor: cs.primary,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Upload your semester course timetable screenshot. Orbit\'s multimodal AI reads the schedule, extracts course codes, slot timings, room numbers, and faculty details, and maps them to a beautiful daily timetable automatically. You can also pin this timetable as a widget to your home screen!',
+                  style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: _showTimetableSample,
+                  icon: const Icon(Icons.image_search_rounded),
+                  label: const Text('See Sample Timetable Image'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
 
-// ── Eyebrow label ─────────────────────────────────────────────────────────────
+          const SizedBox(height: 24),
 
-class _EyebrowLabel extends StatelessWidget {
-  const _EyebrowLabel({required this.label, required this.cs});
-
-  final String label;
-  final ColorScheme cs;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 3,
-          height: 16,
-          decoration: BoxDecoration(
-            color: cs.primary,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          label.toUpperCase(),
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: cs.primary,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ── Live reflection mock ──────────────────────────────────────────────────────
-
-class _ReflectionMock extends StatelessWidget {
-  const _ReflectionMock();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color ?? cs.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Mock "journal entry" header
+          // ── Prompt Engineering Guide (horizontal swipeable cards) ─────────
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(
-                Icons.edit_note_rounded,
-                size: 16,
-                color: cs.onSurfaceVariant,
-              ),
-              const SizedBox(width: 6),
               Text(
-                'Your reflection',
+                'PROMPT ENGINEERING',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.bold,
+                  color: cs.primary,
+                ),
+              ),
+              Text(
+                '${_currentPromptPage + 1} / ${_promptCards.length}',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: cs.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+          Text(
+            'Swipe the cards to explore keywords and examples for each module.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
 
-          // Annotated sentences
-          _AnnotatedSentence(
-            text: 'I need to finish the project proposal by Thursday.',
-            chipLabel: 'Task',
-            chipColor: const Color(0xFF22C55E),
-            cs: cs,
-            theme: theme,
+          // Swipeable card pager
+          SizedBox(
+            height: 290,
+            child: PageView.builder(
+              controller: _promptPageController,
+              onPageChanged: (i) => setState(() => _currentPromptPage = i),
+              itemCount: _promptCards.length,
+              itemBuilder: (ctx, i) {
+                final card = _promptCards[i];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: PromptGuideCard(
+                    tag: card.tag,
+                    keywords: card.keywords,
+                    example: card.example,
+                  ),
+                );
+              },
+            ),
           ),
-          const SizedBox(height: 14),
-          _AnnotatedSentence(
-            text: 'I had a great sync with the design team about the new flow.',
-            chipLabel: 'Event',
-            chipColor: const Color(0xFF3B82F6),
-            cs: cs,
-            theme: theme,
+
+          // Dot indicators
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_promptCards.length, (i) {
+              final isActive = i == _currentPromptPage;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: isActive ? 20 : 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? cs.primary
+                      : cs.onSurfaceVariant.withAlpha(60),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              );
+            }),
           ),
-          const SizedBox(height: 14),
-          _AnnotatedSentence(
-            text: 'I decided to block 9–11 AM every morning for deep work.',
-            chipLabel: 'Decision',
-            chipColor: const Color(0xFFF59E0B),
-            cs: cs,
-            theme: theme,
-          ),
-          const SizedBox(height: 14),
-          _AnnotatedSentence(
-            text:
-                'I learned that async/await in Dart is cleaner than I thought.',
-            chipLabel: 'Learning',
-            chipColor: const Color(0xFFF97316),
-            cs: cs,
-            theme: theme,
+
+          const SizedBox(height: 32),
+
+          // ── About Orbit Banner ────────────────────────────────────────────
+          InkWell(
+            onTap: () => context.push(AppRoutes.about),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer.withAlpha(60),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: cs.primary.withAlpha(50)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withAlpha(20),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.auto_awesome_rounded,
+                      color: cs.primary,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'About Orbit',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Developer, features, privacy & open source',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: cs.primary,
+                  ),
+                ],
+              ),
+            ),
           ),
 
           const SizedBox(height: 20),
-          Divider(color: cs.outlineVariant, height: 1),
-          const SizedBox(height: 14),
-
-          // Result hint
-          Row(
-            children: [
-              Icon(Icons.auto_awesome_rounded, size: 14, color: cs.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Orbit creates 1 task, 1 decision, 1 event, and 1 learning from this.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
   }
-}
-
-class _AnnotatedSentence extends StatelessWidget {
-  const _AnnotatedSentence({
-    required this.text,
-    required this.chipLabel,
-    required this.chipColor,
-    required this.cs,
-    required this.theme,
-  });
-
-  final String text;
-  final String chipLabel;
-  final Color chipColor;
-  final ColorScheme cs;
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest.withAlpha(120),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              text,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: cs.onSurface,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        // Chip label
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: chipColor,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            chipLabel,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.2,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ── Trigger phrase grid ───────────────────────────────────────────────────────
-
-class _TriggerGrid extends StatelessWidget {
-  const _TriggerGrid();
-
-  static const _triggers = [
-    _TriggerData(
-      icon: Icons.task_alt_rounded,
-      color: Color(0xFF22C55E),
-      category: 'Task',
-      phrases: ['"I need to…"', '"Remind me to…"', '"Add a task to…"'],
-    ),
-    _TriggerData(
-      icon: Icons.event_rounded,
-      color: Color(0xFF3B82F6),
-      category: 'Event',
-      phrases: ['"I had a…"', '"Schedule an event…"', '"I attended…"'],
-    ),
-    _TriggerData(
-      icon: Icons.gavel_rounded,
-      color: Color(0xFFF59E0B),
-      category: 'Decision',
-      phrases: ['"I decided to…"', '"I chose to…"', '"I took a decision…"'],
-    ),
-
-    _TriggerData(
-      icon: Icons.lightbulb_rounded,
-      color: Color(0xFFF97316),
-      category: 'Learning',
-      phrases: ['"I learned…"', '"Today I realised…"', '"I discovered…"'],
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: _triggers.map((t) {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.cardTheme.color ?? cs.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: cs.outlineVariant),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Coloured icon badge
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: t.color.withAlpha(28),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(t.icon, color: t.color, size: 20),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        t.category,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: t.phrases.map((p) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: t.color.withAlpha(22),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              p,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: t.color,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-class _TriggerData {
-  final IconData icon;
-  final Color color;
-  final String category;
-  final List<String> phrases;
-
-  const _TriggerData({
-    required this.icon,
-    required this.color,
-    required this.category,
-    required this.phrases,
-  });
-}
-
-// ── Dashboard features ────────────────────────────────────────────────────────
-
-class _DashboardFeatures extends StatelessWidget {
-  const _DashboardFeatures();
-
-  static const _features = [
-    _FeatureData(
-      icon: Icons.auto_stories_rounded,
-      title: 'AI Summary',
-      body:
-          'After saving, Orbit writes a concise narrative of your day — a readable overview, not just a list.',
-    ),
-    _FeatureData(
-      icon: Icons.calendar_month_rounded,
-      title: 'Time Travel',
-      body:
-          'Swipe left or right on the home page to move between days. Add reflections for future dates to plan ahead.',
-    ),
-    _FeatureData(
-      icon: Icons.mic_rounded,
-      title: 'Voice to text',
-      body:
-          'Tap the microphone in the reflection editor to speak your thoughts. Orbit transcribes instantly.',
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: _features.map((f) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: cs.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(f.icon, color: cs.primary, size: 20),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 2),
-                      Text(
-                        f.title,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        f.body,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-class _FeatureData {
-  final IconData icon;
-  final String title;
-  final String body;
-
-  const _FeatureData({
-    required this.icon,
-    required this.title,
-    required this.body,
-  });
 }

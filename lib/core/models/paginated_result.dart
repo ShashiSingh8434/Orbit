@@ -1,4 +1,3 @@
-
 class PaginatedResult<T> {
   final List<T> items;
   final Object? lastDoc;

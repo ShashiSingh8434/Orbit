@@ -216,7 +216,7 @@ class AppDrawer extends ConsumerWidget {
 
                     _DrawerItem(
                       icon: Icons.help_outline_rounded,
-                      label: 'How to use Orbit',
+                      label: 'User Guide',
                       isDark: isDark,
                       selectedHighlight: selectedHighlight,
                       colorScheme: colorScheme,

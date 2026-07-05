@@ -242,17 +242,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                 ),
               ),
+              ListTile(
+                leading: Icon(
+                  Icons.auto_awesome_rounded,
+                ),
+                title: const Text('About Orbit'),
+                subtitle: const Text('Developer, features & privacy'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push(AppRoutes.about),
+              ),
 
-              // ListTile(
-              //   leading: const Icon(Icons.gavel_rounded),
-              //   title: const Text('Licences'),
-              //   trailing: const Icon(Icons.chevron_right_rounded),
-              //   onTap: () => showLicensePage(
-              //     context: context,
-              //     applicationName: AppConstants.appName,
-              //     applicationVersion: AppConstants.appVersion,
-              //   ),
-              // ),
               const Divider(),
 
               // ── Sign Out ──────────────────────────────────────────────────

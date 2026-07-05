@@ -117,4 +117,5 @@ flutter:
     - assets/black.png
     - assets/arrow_black.png
     - assets/arrow_light.png
+    - assets/timetable_sample.png
     - .env

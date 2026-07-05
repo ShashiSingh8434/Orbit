@@ -13,6 +13,7 @@ import '../../features/event/views/event_list_page.dart';
 import '../../features/learning/views/learning_list_page.dart';
 import '../../features/settings/views/settings_page.dart';
 import '../../features/guide/views/guide_page.dart';
+import '../../features/about/about_page.dart';
 import '../../features/day/views/detailed_summary_page.dart';
 import '../../core/ai/analytics/ai_analytics_page.dart';
 import '../../features/academic/models/academic_schedule.dart';
@@ -119,6 +120,9 @@ final routerProvider = Provider<GoRouter>((ref) {
 
           // Guide
           GoRoute(path: 'guide', builder: (_, _) => const GuidePage()),
+
+          // About
+          GoRoute(path: 'about', builder: (_, _) => const AboutPage()),
 
           // Academic
           GoRoute(
