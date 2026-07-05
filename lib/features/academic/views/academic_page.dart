@@ -113,6 +113,39 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
     context.push(AppRoutes.academicEditCourse);
   }
 
+  void _showSampleImage(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sample Timetable'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Upload a clear screenshot of your university schedule containing course codes, times, days, and slot names.',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'assets/timetable_sample.png',
+                fit: BoxFit.contain,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handlePinWidget() async {
     final isSupported = await HomeWidgetPinService.isWidgetPinningSupported();
     if (!mounted) return;
@@ -290,6 +323,22 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                                   'Upload your timetable image to extract all classes automatically using AI.',
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                TextButton.icon(
+                                  onPressed: () => _showSampleImage(context),
+                                  icon: const Icon(
+                                    Icons.image_search_rounded,
+                                    size: 18,
+                                  ),
+                                  label: const Text('See Sample Image'),
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    foregroundColor: colorScheme.primary,
                                   ),
                                 ),
                               ],

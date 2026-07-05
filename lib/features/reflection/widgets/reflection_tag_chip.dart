@@ -17,28 +17,38 @@ class ReflectionTagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return FilterChip(
+    return InputChip(
       label: Text(
         label,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: selected ? colorScheme.onPrimary : colorScheme.onSurface,
-          fontWeight: FontWeight.w500,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: selected
+              ? colorScheme.onPrimary
+              : colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
         ),
       ),
       selected: selected,
+      showCheckmark: false,
       selectedColor: colorScheme.primary,
-      backgroundColor: colorScheme.surfaceContainerHighest,
+      backgroundColor: colorScheme.surfaceContainer,
       onSelected: onTap != null ? (_) => onTap!() : null,
+      onDeleted: onDeleted,
       deleteIcon: onDeleted != null
           ? Icon(
-              Icons.close,
+              Icons.close_rounded,
               size: 14,
-              color: colorScheme.onSurface.withAlpha(120),
+              color: selected
+                  ? colorScheme.onPrimary
+                  : colorScheme.onSurfaceVariant,
             )
           : null,
-      onDeleted: onDeleted,
+      side: BorderSide(
+        color: selected ? Colors.transparent : colorScheme.outlineVariant,
+        width: 1,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );

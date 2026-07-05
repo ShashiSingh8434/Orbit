@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/router/app_routes.dart';
 import '../../auth/controllers/auth_controller.dart';
 
@@ -81,7 +82,7 @@ class AppDrawer extends ConsumerWidget {
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: colorScheme.primary.withValues(alpha: 0.20),
                   backgroundImage: user?.photoURL != null
-                      ? NetworkImage(user!.photoURL!)
+                      ? CachedNetworkImageProvider(user!.photoURL!)
                       : null,
                   child: user?.photoURL == null
                       ? Icon(
@@ -215,7 +216,7 @@ class AppDrawer extends ConsumerWidget {
 
                     _DrawerItem(
                       icon: Icons.help_outline_rounded,
-                      label: 'How to use Orbit',
+                      label: 'User Guide',
                       isDark: isDark,
                       selectedHighlight: selectedHighlight,
                       colorScheme: colorScheme,

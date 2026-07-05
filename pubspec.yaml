@@ -6,7 +6,7 @@ homepage: https://shashisingh8434.vercel.app/projects/orbit
 repository: https://github.com/ShashiSingh8434/Orbit
 issue_tracker: https://github.com/ShashiSingh8434/Orbit/issues
 
-version: 2.0.0+3
+version: 3.0.0+4
 
 environment:
   sdk: ^3.12.0
@@ -51,6 +51,9 @@ dependencies:
 
   # ── Persistence ──
   shared_preferences: ^2.3.3
+  drift: ^2.20.0
+  sqlite3_flutter_libs: ^0.5.24
+  path: ^1.9.0
 
   # ── Utilities ──
   uuid: ^4.3.3
@@ -77,6 +80,7 @@ dependencies:
 
   # ── Home Screen Widget ──
   home_widget: ^0.7.0
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +90,7 @@ dev_dependencies:
 
   # ── Code Generation ──
   build_runner: ^2.4.13
+  drift_dev: ^2.20.0
   freezed: ^3.0.0
   json_serializable: ^6.8.0
 
@@ -112,4 +117,5 @@ flutter:
     - assets/black.png
     - assets/arrow_black.png
     - assets/arrow_light.png
+    - assets/timetable_sample.png
     - .env

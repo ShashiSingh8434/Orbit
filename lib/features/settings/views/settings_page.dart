@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/router/app_routes.dart';
 import '../../../app/theme/theme_notifier.dart';
 import '../../auth/controllers/auth_controller.dart';
@@ -29,6 +30,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final user = ref.watch(authStateProvider).value;
     final aiSettings = ref.watch(aiSettingsProvider);
 
+    ref.listen<AiSettingsState>(aiSettingsProvider, (previous, next) {
+      if (previous?.mode != next.mode) {
+        setState(() {
+          _selectedMode = next.mode;
+        });
+      }
+    });
+
     _selectedMode ??= aiSettings.mode;
 
     return Stack(
@@ -46,7 +55,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ListTile(
                 leading: CircleAvatar(
                   backgroundImage: user?.photoURL != null
-                      ? NetworkImage(user!.photoURL!)
+                      ? CachedNetworkImageProvider(user!.photoURL!)
                       : null,
                   backgroundColor: colorScheme.primary,
                   child: user?.photoURL == null
@@ -233,17 +242,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                 ),
               ),
+              ListTile(
+                leading: Icon(Icons.auto_awesome_rounded),
+                title: const Text('About Orbit'),
+                subtitle: const Text('Developer, features & privacy'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push(AppRoutes.about),
+              ),
 
-              // ListTile(
-              //   leading: const Icon(Icons.gavel_rounded),
-              //   title: const Text('Licences'),
-              //   trailing: const Icon(Icons.chevron_right_rounded),
-              //   onTap: () => showLicensePage(
-              //     context: context,
-              //     applicationName: AppConstants.appName,
-              //     applicationVersion: AppConstants.appVersion,
-              //   ),
-              // ),
               const Divider(),
 
               // ── Sign Out ──────────────────────────────────────────────────
@@ -522,15 +528,13 @@ class _ProviderCard extends ConsumerWidget {
     if (!hasUserKey) return cs.onSurfaceVariant;
     switch (status) {
       case ProviderHealthStatus.healthy:
+      case ProviderHealthStatus.unknown:
         return Colors.green;
       case ProviderHealthStatus.rateLimited:
         return Colors.orange;
       case ProviderHealthStatus.offline:
-        return cs.error;
       case ProviderHealthStatus.invalidKey:
         return cs.error;
-      case ProviderHealthStatus.unknown:
-        return cs.onSurfaceVariant;
     }
   }
 
@@ -538,6 +542,7 @@ class _ProviderCard extends ConsumerWidget {
     if (!hasUserKey) return 'Not Connected';
     switch (status) {
       case ProviderHealthStatus.healthy:
+      case ProviderHealthStatus.unknown:
         return 'Connected';
       case ProviderHealthStatus.rateLimited:
         return 'Rate Limited';
@@ -545,8 +550,6 @@ class _ProviderCard extends ConsumerWidget {
         return 'Offline';
       case ProviderHealthStatus.invalidKey:
         return 'Invalid Key';
-      case ProviderHealthStatus.unknown:
-        return 'Not Connected';
     }
   }
 }

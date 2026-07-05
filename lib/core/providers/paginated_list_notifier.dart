@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/paginated_result.dart';
 
@@ -35,9 +34,8 @@ class PaginatedState<T> {
 }
 
 class PaginatedListNotifier<T> extends StateNotifier<PaginatedState<T>> {
-  final Future<PaginatedResult<T>> Function(DocumentSnapshot? startAfter)
-  fetchPage;
-  DocumentSnapshot? _lastDoc;
+  final Future<PaginatedResult<T>> Function(Object? startAfter) fetchPage;
+  Object? _lastDoc;
 
   PaginatedListNotifier({required this.fetchPage})
     : super(

@@ -18,6 +18,7 @@ import '../widgets/bottom_action_bar.dart';
 import '../widgets/first_run_overlay.dart';
 import '../../../core/ai/providers/ai_notification_provider.dart';
 import '../../../core/security/exceptions/crypto_exceptions.dart';
+import '../../../core/database/sync_service.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -50,6 +51,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       final user = ref.read(authStateProvider).value;
       if (user != null) {
         ref.read(aiQueueManagerProvider).scanAndProcessUnextracted(user.uid);
+        ref.read(syncServiceProvider).syncAll();
       }
     });
     _setupWidgetLaunchListener();

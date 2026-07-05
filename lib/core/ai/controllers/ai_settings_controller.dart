@@ -4,6 +4,7 @@ import '../../utils/app_logger.dart';
 import '../engine/ai_health_monitor.dart';
 import '../engine/ai_request_manager.dart';
 import '../storage/secure_key_storage.dart';
+import '../../providers/shared_preferences_provider.dart';
 
 // ── State Model ──────────────────────────────────────────────────────────────
 
@@ -105,9 +106,12 @@ final aiSettingsProvider =
     );
 
 class AiSettingsController extends Notifier<AiSettingsState> {
+  Map<String, ProviderInfo>? _loadedProviders;
+
   @override
   AiSettingsState build() {
     final manager = ref.read(aiRequestManagerProvider);
+    final prefs = ref.read(sharedPreferencesProvider);
 
     // Load initial state
     final mode = manager.aiMode == 'user_key'
@@ -115,14 +119,20 @@ class AiSettingsController extends Notifier<AiSettingsState> {
         : AiMode.orbitDefault;
 
     // Load provider statuses
-    final providers = Map<String, ProviderInfo>.from(_defaultProviders);
+    final providers =
+        _loadedProviders ?? Map<String, ProviderInfo>.from(_defaultProviders);
     for (final id in providers.keys) {
+      final hasKey = prefs.getBool('has_user_key_$id') ?? false;
       final health = manager.healthMonitor.getStatus(id);
-      providers[id] = providers[id]!.copyWith(status: health);
+      providers[id] = providers[id]!.copyWith(
+        hasUserKey: hasKey,
+        status: health,
+      );
     }
 
-    // Check which providers have user keys (async, will update state)
-    _loadUserKeyStatus();
+    if (_loadedProviders == null) {
+      _loadUserKeyStatus();
+    }
 
     return AiSettingsState(mode: mode, providers: providers);
   }
@@ -130,17 +140,20 @@ class AiSettingsController extends Notifier<AiSettingsState> {
   Future<void> _loadUserKeyStatus() async {
     final manager = ref.read(aiRequestManagerProvider);
     final providers = Map<String, ProviderInfo>.from(state.providers);
+    final prefs = ref.read(sharedPreferencesProvider);
 
     for (final id in providers.keys) {
       final key = await SecureKeyStorage.getKey(id);
       final hasKey = key != null && key.isNotEmpty;
 
+      await prefs.setBool('has_user_key_$id', hasKey);
       providers[id] = providers[id]!.copyWith(hasUserKey: hasKey);
 
       if (hasKey && manager.aiMode == 'user_key') {
         await manager.registerProviderWithKey(id, key);
       }
     }
+    _loadedProviders = providers;
     state = state.copyWith(providers: providers);
     await manager.ensureInitialized();
   }
@@ -165,6 +178,10 @@ class AiSettingsController extends Notifier<AiSettingsState> {
       // Store securely
       await SecureKeyStorage.saveKey(providerId, apiKey);
 
+      // Save connection status flag in SharedPreferences
+      final prefs = ref.read(sharedPreferencesProvider);
+      await prefs.setBool('has_user_key_$providerId', true);
+
       // Register with the manager
       await manager.registerProviderWithKey(providerId, apiKey);
 
@@ -175,6 +192,7 @@ class AiSettingsController extends Notifier<AiSettingsState> {
         status: ProviderHealthStatus.healthy,
       );
 
+      _loadedProviders = providers;
       state = state.copyWith(
         providers: providers,
         isLoading: false,
@@ -187,6 +205,7 @@ class AiSettingsController extends Notifier<AiSettingsState> {
         status: ProviderHealthStatus.invalidKey,
       );
 
+      _loadedProviders = providers;
       state = state.copyWith(
         providers: providers,
         isLoading: false,
@@ -200,6 +219,10 @@ class AiSettingsController extends Notifier<AiSettingsState> {
   Future<void> disconnectProvider(String providerId) async {
     await SecureKeyStorage.deleteKey(providerId);
 
+    // Save connection status flag in SharedPreferences
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool('has_user_key_$providerId', false);
+
     final manager = ref.read(aiRequestManagerProvider);
     await manager.unregisterProvider(providerId);
 
@@ -208,6 +231,7 @@ class AiSettingsController extends Notifier<AiSettingsState> {
       hasUserKey: false,
       status: ProviderHealthStatus.unknown,
     );
+    _loadedProviders = providers;
     state = state.copyWith(providers: providers, testResult: null);
   }
 
@@ -224,6 +248,7 @@ class AiSettingsController extends Notifier<AiSettingsState> {
             ? ProviderHealthStatus.healthy
             : ProviderHealthStatus.offline,
       );
+      _loadedProviders = providers;
       state = state.copyWith(
         providers: providers,
         isLoading: false,

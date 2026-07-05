@@ -4,8 +4,10 @@ import '../../utils/app_logger.dart';
 import 'key_manager.dart';
 import '../repository/encryption_repository.dart';
 import '../../../features/auth/controllers/auth_controller.dart';
+import '../../database/local_database.dart';
 
 // ── Encryption State ──────────────────────────────────────────────────────────
+// ... (rest of the top remains same, we target clearLocalKey around line 131)
 
 /// Describes the encryption readiness state for the current authenticated user.
 ///
@@ -131,8 +133,9 @@ class RecoveryService {
   Future<void> clearLocalKey(String uid) async {
     await _keyManager.clearMasterKey(uid);
     _enc.clearCacheForUser(uid);
+    await deleteDatabaseFile(uid);
     AppLogger.info(
-      'RecoveryService: Local key and DEK cache cleared for uid=$uid',
+      'RecoveryService: Local key, DEK cache, and local database cleared for uid=$uid',
     );
   }
 }

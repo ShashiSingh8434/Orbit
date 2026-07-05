@@ -50,6 +50,7 @@ $summaryInstruction
 
 2. TASKS: Extract actionable items the user needs to do, tasks they explicitly mention completing, or requests to update existing tasks.
    - If user says "add a task to..." or "I need to...": FIRST check EXISTING PENDING TASKS. If a task with a similar title already exists, output its `originalId` to avoid duplicates. Otherwise, create a new task with status="pending".
+   - If the user doesn't specify the due date for a new task, check if the user expects to do this task today and set the `dueDate` to today (`$reflectionDate`) by default unless a future/different date is explicitly mentioned.
    - If user says "mark [X] as complete", "I finished [X]", or similar: find the best match in EXISTING PENDING TASKS, set its status to "completed", and YOU MUST output its exact ID in the `originalId` field.
    - If user says "reschedule task [X] to [Date]" or "change due date of task [X] to [Date]": find the best match in EXISTING PENDING TASKS, set status="pending", output its exact ID in the `originalId` field, and populate the new `dueDate` and optional `dueTime`.
    - If you can't find a match for a completed/updated task, create a new task with status="completed" or "pending" accordingly.

@@ -21,11 +21,64 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
   @override
   Widget build(BuildContext context) {
     final service = ref.watch(aiAnalyticsServiceProvider);
-    final stats = service.getStats(
-      apiSource: _selectedApiSource,
-      todayOnly: _todayOnly,
-    );
+    final allLogs = service.getRecentLogs(count: 500);
+
+    // Filter logs by API source
+    final filteredLogs = allLogs.where((l) {
+      final matchesFilter = l.apiSource == _selectedApiSource;
+      if (_todayOnly) {
+        final now = DateTime.now();
+        final todayStart = DateTime(now.year, now.month, now.day);
+        return matchesFilter && l.timestamp.isAfter(todayStart);
+      }
+      return matchesFilter;
+    }).toList();
+
+    // Partition into Chat/LLM vs Voice/STT vs Multimodal Extraction
+    final voiceLogs = filteredLogs
+        .where((l) => l.provider.contains('(Voice)'))
+        .toList();
+    final multimodalLogs = filteredLogs
+        .where((l) => l.provider.contains('(Multimodal)'))
+        .toList();
+    final chatLogs = filteredLogs
+        .where(
+          (l) =>
+              !l.provider.contains('(Voice)') &&
+              !l.provider.contains('(Multimodal)'),
+        )
+        .toList();
+
+    final chatStats = _computeStats(chatLogs);
+
     final recentLogs = service.getRecentLogs(count: 5);
+
+    // Compute daily aggregates from filteredLogs (all filtered requests)
+    final dailyMap = <String, _LocalDailyAcc>{};
+    for (final log in filteredLogs) {
+      final key =
+          '${log.timestamp.year}-${log.timestamp.month.toString().padLeft(2, '0')}-${log.timestamp.day.toString().padLeft(2, '0')}';
+      final acc = dailyMap.putIfAbsent(key, () => _LocalDailyAcc());
+      acc.requests++;
+      acc.tokens += log.totalTokens ?? 0;
+      acc.totalLatency += log.responseTimeMs;
+    }
+
+    final dailyAggregates = dailyMap.entries.map((e) {
+      final parts = e.key.split('-');
+      return DailyAggregate(
+        date: DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        ),
+        requests: e.value.requests,
+        tokens: e.value.tokens,
+        avgLatencyMs: e.value.requests > 0
+            ? e.value.totalLatency / e.value.requests
+            : 0,
+      );
+    }).toList()..sort((a, b) => a.date.compareTo(b.date));
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -100,7 +153,7 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                 child: _StatCard(
                   icon: Icons.send_rounded,
                   label: 'Requests',
-                  value: '${stats.totalRequests}',
+                  value: '${chatStats['totalRequests']}',
                   color: colorScheme.primary,
                 ),
               ),
@@ -109,7 +162,7 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                 child: _StatCard(
                   icon: Icons.token_rounded,
                   label: 'Tokens',
-                  value: _formatNumber(stats.totalTokens),
+                  value: _formatNumber(chatStats['totalTokens'] as int),
                   color: colorScheme.tertiary,
                 ),
               ),
@@ -122,7 +175,7 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                 child: _StatCard(
                   icon: Icons.speed_rounded,
                   label: 'Avg Latency',
-                  value: '${stats.avgLatencyMs.round()}ms',
+                  value: '${(chatStats['avgLatency'] as double).round()}ms',
                   color: Colors.orange,
                 ),
               ),
@@ -131,7 +184,8 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                 child: _StatCard(
                   icon: Icons.check_circle_rounded,
                   label: 'Success Rate',
-                  value: '${(stats.successRate * 100).round()}%',
+                  value:
+                      '${((chatStats['successRate'] as double) * 100).round()}%',
                   color: Colors.green,
                 ),
               ),
@@ -149,7 +203,7 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
             ),
           ),
           const SizedBox(height: 12),
-          if (stats.requestsByModel.isEmpty)
+          if ((chatStats['requestsByModel'] as Map<String, int>).isEmpty)
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -162,10 +216,11 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
               ),
             )
           else
-            ...(stats.requestsByModel.entries.toList()
+            ...((chatStats['requestsByModel'] as Map<String, int>).entries
+                    .toList()
                   ..sort((a, b) => b.value.compareTo(a.value)))
                 .map((e) {
-                  final maxReq = stats.totalRequests;
+                  final maxReq = chatStats['totalRequests'] as int;
                   final fraction = maxReq > 0 ? e.value / maxReq : 0.0;
                   final modelColor = e.key.toLowerCase().contains('gemini')
                       ? colorScheme.primary
@@ -207,10 +262,30 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                   );
                 }),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 12),
+
+          // ── Speech-to-Text Section ──────────────────────────────────────
+          _SpeechToTextSection(
+            voiceLogs: voiceLogs,
+            theme: theme,
+            colorScheme: colorScheme,
+          ),
+
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 12),
+
+          // ── Multimodal Extraction Section ────────────────────────────────
+          _MultimodalSection(
+            multimodalLogs: multimodalLogs,
+            theme: theme,
+            colorScheme: colorScheme,
+          ),
 
           // ── Daily Trend ─────────────────────────────────────────────────
-          if (stats.dailyAggregates.isNotEmpty) ...[
+          if (dailyAggregates.isNotEmpty) ...[
             Text(
               'REQUESTS (LAST 7 DAYS)',
               style: theme.textTheme.labelSmall?.copyWith(
@@ -225,7 +300,7 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,
                   maxY:
-                      stats.dailyAggregates.fold<double>(
+                      dailyAggregates.fold<double>(
                         0,
                         (max, e) =>
                             e.requests > max ? e.requests.toDouble() : max,
@@ -239,10 +314,10 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
                           final idx = value.toInt();
-                          if (idx < 0 || idx >= stats.dailyAggregates.length) {
+                          if (idx < 0 || idx >= dailyAggregates.length) {
                             return const SizedBox.shrink();
                           }
-                          final day = stats.dailyAggregates[idx].date;
+                          final day = dailyAggregates[idx].date;
                           return Text(
                             '${day.day}/${day.month}',
                             style: theme.textTheme.labelSmall,
@@ -262,12 +337,12 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                   ),
                   borderData: FlBorderData(show: false),
                   gridData: const FlGridData(show: false),
-                  barGroups: List.generate(stats.dailyAggregates.length, (i) {
+                  barGroups: List.generate(dailyAggregates.length, (i) {
                     return BarChartGroupData(
                       x: i,
                       barRods: [
                         BarChartRodData(
-                          toY: stats.dailyAggregates[i].requests.toDouble(),
+                          toY: dailyAggregates[i].requests.toDouble(),
                           color: colorScheme.primary,
                           width: 16,
                           borderRadius: const BorderRadius.vertical(
@@ -282,7 +357,9 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
             ),
           ],
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 12),
 
           // ── Error Insights ──────────────────────────────────────────────
           Text(
@@ -299,7 +376,7 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                 child: _StatCard(
                   icon: Icons.timer_off_rounded,
                   label: 'Rate Limits',
-                  value: '${stats.rateLimitOccurrences}',
+                  value: '${chatStats['rateLimitOccurrences']}',
                   color: Colors.orange,
                 ),
               ),
@@ -308,14 +385,16 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                 child: _StatCard(
                   icon: Icons.error_outline_rounded,
                   label: 'Failures',
-                  value: '${stats.failureCount}',
+                  value: '${chatStats['failureCount']}',
                   color: colorScheme.error,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 12),
 
           // ── Recent Activity ─────────────────────────────────────────────
           Text(
@@ -378,6 +457,50 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
     if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
     return '$n';
+  }
+
+  Map<String, dynamic> _computeStats(List<AiUsageLog> logs) {
+    if (logs.isEmpty) {
+      return {
+        'totalRequests': 0,
+        'totalTokens': 0,
+        'avgLatency': 0.0,
+        'successRate': 0.0,
+        'requestsByModel': <String, int>{},
+        'rateLimitOccurrences': 0,
+        'failureCount': 0,
+      };
+    }
+    int totalTokens = 0;
+    int latencySum = 0;
+    int successCount = 0;
+    int rateLimitCount = 0;
+    int failureCount = 0;
+    final modelCounts = <String, int>{};
+
+    for (final log in logs) {
+      totalTokens += log.totalTokens ?? 0;
+      latencySum += log.responseTimeMs;
+      if (log.success) {
+        successCount++;
+      } else {
+        failureCount++;
+        if (log.errorType == 'rateLimited' || log.errorType == 'rate_limited') {
+          rateLimitCount++;
+        }
+      }
+      modelCounts[log.modelName] = (modelCounts[log.modelName] ?? 0) + 1;
+    }
+
+    return {
+      'totalRequests': logs.length,
+      'totalTokens': totalTokens,
+      'avgLatency': latencySum / logs.length,
+      'successRate': successCount / logs.length,
+      'requestsByModel': modelCounts,
+      'rateLimitOccurrences': rateLimitCount,
+      'failureCount': failureCount,
+    };
   }
 }
 
@@ -455,6 +578,279 @@ class _LogTile extends StatelessWidget {
           color: colorScheme.onSurfaceVariant,
         ),
       ),
+    );
+  }
+}
+
+class _SpeechToTextSection extends StatelessWidget {
+  final List<AiUsageLog> voiceLogs;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+
+  const _SpeechToTextSection({
+    required this.voiceLogs,
+    required this.theme,
+    required this.colorScheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (voiceLogs.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final total = voiceLogs.length;
+    final successCount = voiceLogs.where((l) => l.success).length;
+    final successRate = total > 0 ? successCount / total : 0.0;
+    final totalLatency = voiceLogs.fold<int>(
+      0,
+      (sum, l) => sum + l.responseTimeMs,
+    );
+    final avgLatency = total > 0 ? totalLatency / total : 0.0;
+
+    // Model breakdown
+    final modelCounts = <String, int>{};
+    for (final log in voiceLogs) {
+      modelCounts[log.modelName] = (modelCounts[log.modelName] ?? 0) + 1;
+    }
+    final sortedModels = modelCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'SPEECH TO TEXT',
+          style: theme.textTheme.labelSmall?.copyWith(
+            letterSpacing: 1.2,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                icon: Icons.keyboard_voice_rounded,
+                label: 'Voice Requests',
+                value: '$total',
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _StatCard(
+                icon: Icons.check_circle_rounded,
+                label: 'Success Rate',
+                value: '${(successRate * 100).round()}%',
+                color: Colors.green,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                icon: Icons.speed_rounded,
+                label: 'Avg STT Latency',
+                value: '${avgLatency.round()}ms',
+                color: Colors.orange,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'STT MODEL USAGE',
+          style: theme.textTheme.labelSmall?.copyWith(
+            letterSpacing: 1.2,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...sortedModels.map((e) {
+          final fraction = total > 0 ? e.value / total : 0.0;
+          const modelColor = Colors.purple; // Distinct color for voice models
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      e.key,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      '${e.value} requests',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: fraction,
+                    minHeight: 8,
+                    backgroundColor: modelColor.withValues(alpha: 0.1),
+                    valueColor: const AlwaysStoppedAnimation(modelColor),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+}
+
+class _LocalDailyAcc {
+  int requests = 0;
+  int tokens = 0;
+  int totalLatency = 0;
+}
+
+class _MultimodalSection extends StatelessWidget {
+  final List<AiUsageLog> multimodalLogs;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+
+  const _MultimodalSection({
+    required this.multimodalLogs,
+    required this.theme,
+    required this.colorScheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (multimodalLogs.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final total = multimodalLogs.length;
+    final successCount = multimodalLogs.where((l) => l.success).length;
+    final successRate = total > 0 ? successCount / total : 0.0;
+    final totalLatency = multimodalLogs.fold<int>(
+      0,
+      (sum, l) => sum + l.responseTimeMs,
+    );
+    final avgLatency = total > 0 ? totalLatency / total : 0.0;
+
+    // Model breakdown
+    final modelCounts = <String, int>{};
+    for (final log in multimodalLogs) {
+      modelCounts[log.modelName] = (modelCounts[log.modelName] ?? 0) + 1;
+    }
+    final sortedModels = modelCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'MULTIMODAL EXTRACTION',
+          style: theme.textTheme.labelSmall?.copyWith(
+            letterSpacing: 1.2,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                icon: Icons.document_scanner_rounded,
+                label: 'Extraction Requests',
+                value: '$total',
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _StatCard(
+                icon: Icons.check_circle_rounded,
+                label: 'Success Rate',
+                value: '${(successRate * 100).round()}%',
+                color: Colors.green,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                icon: Icons.speed_rounded,
+                label: 'Avg Latency',
+                value: '${avgLatency.round()}ms',
+                color: Colors.orange,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'EXTRACTION MODEL USAGE',
+          style: theme.textTheme.labelSmall?.copyWith(
+            letterSpacing: 1.2,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...sortedModels.map((e) {
+          final fraction = total > 0 ? e.value / total : 0.0;
+          const modelColor =
+              Colors.teal; // Distinct color for multimodal models
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      e.key,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      '${e.value} requests',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: fraction,
+                    minHeight: 8,
+                    backgroundColor: modelColor.withValues(alpha: 0.1),
+                    valueColor: const AlwaysStoppedAnimation(modelColor),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+        const SizedBox(height: 24),
+      ],
     );
   }
 }

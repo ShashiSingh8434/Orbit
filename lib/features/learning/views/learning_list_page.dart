@@ -63,12 +63,20 @@ class LearningListPage extends ConsumerWidget {
             );
           }
 
-          final Map<String, List<LearningModel>> grouped = {};
+          final Map<DateTime, List<LearningModel>> grouped = {};
           for (final l in state.items) {
-            final dateKey = OrbitDateUtils.friendlyLabel(
-              OrbitDateUtils.dateKey(l.createdAt),
+            final date = DateTime(
+              l.createdAt.year,
+              l.createdAt.month,
+              l.createdAt.day,
             );
-            grouped.putIfAbsent(dateKey, () => []).add(l);
+            grouped.putIfAbsent(date, () => []).add(l);
+          }
+
+          final sortedDates = grouped.keys.toList()
+            ..sort((a, b) => b.compareTo(a));
+          for (final date in sortedDates) {
+            grouped[date]!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           }
 
           return NotificationListener<ScrollNotification>(
@@ -82,18 +90,21 @@ class LearningListPage extends ConsumerWidget {
               onRefresh: () =>
                   ref.read(paginatedLearningsProvider.notifier).refresh(),
               child: ListView.builder(
-                itemCount: grouped.length + (state.isLoadMore ? 1 : 0),
+                itemCount: sortedDates.length + (state.isLoadMore ? 1 : 0),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemBuilder: (context, index) {
-                  if (index == grouped.length) {
+                  if (index == sortedDates.length) {
                     return const Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
 
-                  final dateKey = grouped.keys.elementAt(index);
-                  final dayLearnings = grouped[dateKey]!;
+                  final date = sortedDates[index];
+                  final dayLearnings = grouped[date]!;
+                  final dateKey = OrbitDateUtils.friendlyLabel(
+                    OrbitDateUtils.dateKey(date),
+                  );
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
