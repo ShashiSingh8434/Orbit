@@ -35,9 +35,19 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
     }).toList();
 
     // Partition into Chat/LLM vs Voice/STT vs Multimodal Extraction
-    final voiceLogs = filteredLogs.where((l) => l.provider.contains('(Voice)')).toList();
-    final multimodalLogs = filteredLogs.where((l) => l.provider.contains('(Multimodal)')).toList();
-    final chatLogs = filteredLogs.where((l) => !l.provider.contains('(Voice)') && !l.provider.contains('(Multimodal)')).toList();
+    final voiceLogs = filteredLogs
+        .where((l) => l.provider.contains('(Voice)'))
+        .toList();
+    final multimodalLogs = filteredLogs
+        .where((l) => l.provider.contains('(Multimodal)'))
+        .toList();
+    final chatLogs = filteredLogs
+        .where(
+          (l) =>
+              !l.provider.contains('(Voice)') &&
+              !l.provider.contains('(Multimodal)'),
+        )
+        .toList();
 
     final chatStats = _computeStats(chatLogs);
 
@@ -174,7 +184,8 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
                 child: _StatCard(
                   icon: Icons.check_circle_rounded,
                   label: 'Success Rate',
-                  value: '${((chatStats['successRate'] as double) * 100).round()}%',
+                  value:
+                      '${((chatStats['successRate'] as double) * 100).round()}%',
                   color: Colors.green,
                 ),
               ),
@@ -205,7 +216,8 @@ class _AiAnalyticsPageState extends ConsumerState<AiAnalyticsPage> {
               ),
             )
           else
-            ...((chatStats['requestsByModel'] as Map<String, int>).entries.toList()
+            ...((chatStats['requestsByModel'] as Map<String, int>).entries
+                    .toList()
                   ..sort((a, b) => b.value.compareTo(a.value)))
                 .map((e) {
                   final maxReq = chatStats['totalRequests'] as int;
@@ -590,7 +602,10 @@ class _SpeechToTextSection extends StatelessWidget {
     final total = voiceLogs.length;
     final successCount = voiceLogs.where((l) => l.success).length;
     final successRate = total > 0 ? successCount / total : 0.0;
-    final totalLatency = voiceLogs.fold<int>(0, (sum, l) => sum + l.responseTimeMs);
+    final totalLatency = voiceLogs.fold<int>(
+      0,
+      (sum, l) => sum + l.responseTimeMs,
+    );
     final avgLatency = total > 0 ? totalLatency / total : 0.0;
 
     // Model breakdown
@@ -726,7 +741,10 @@ class _MultimodalSection extends StatelessWidget {
     final total = multimodalLogs.length;
     final successCount = multimodalLogs.where((l) => l.success).length;
     final successRate = total > 0 ? successCount / total : 0.0;
-    final totalLatency = multimodalLogs.fold<int>(0, (sum, l) => sum + l.responseTimeMs);
+    final totalLatency = multimodalLogs.fold<int>(
+      0,
+      (sum, l) => sum + l.responseTimeMs,
+    );
     final avgLatency = total > 0 ? totalLatency / total : 0.0;
 
     // Model breakdown
@@ -793,7 +811,8 @@ class _MultimodalSection extends StatelessWidget {
         const SizedBox(height: 12),
         ...sortedModels.map((e) {
           final fraction = total > 0 ? e.value / total : 0.0;
-          const modelColor = Colors.teal; // Distinct color for multimodal models
+          const modelColor =
+              Colors.teal; // Distinct color for multimodal models
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Column(

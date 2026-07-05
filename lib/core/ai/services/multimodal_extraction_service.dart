@@ -122,7 +122,9 @@ class MultimodalExtractionService {
       final analytics = _ref.read(aiAnalyticsServiceProvider);
       final log = AiUsageLog(
         provider: 'Groq (Multimodal)',
-        modelName: modelName.contains('scout') ? 'Llama 4 Scout (Multimodal)' : 'Qwen 3.6 (Multimodal)',
+        modelName: modelName.contains('scout')
+            ? 'Llama 4 Scout (Multimodal)'
+            : 'Qwen 3.6 (Multimodal)',
         modelId: modelName,
         aiMode: 'Orbit',
         apiSource: 'Orbit API',
@@ -140,7 +142,11 @@ class MultimodalExtractionService {
       );
       analytics.logRequest(log);
     } catch (e, stack) {
-      AppLogger.error('MultimodalExtractionService: Failed to log extraction request', e, stack);
+      AppLogger.error(
+        'MultimodalExtractionService: Failed to log extraction request',
+        e,
+        stack,
+      );
     }
   }
 

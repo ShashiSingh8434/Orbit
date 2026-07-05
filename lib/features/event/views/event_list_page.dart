@@ -65,11 +65,16 @@ class EventListPage extends ConsumerWidget {
 
           final Map<DateTime, List<EventModel>> grouped = {};
           for (final e in state.items) {
-            final date = DateTime(e.eventDate.year, e.eventDate.month, e.eventDate.day);
+            final date = DateTime(
+              e.eventDate.year,
+              e.eventDate.month,
+              e.eventDate.day,
+            );
             grouped.putIfAbsent(date, () => []).add(e);
           }
 
-          final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+          final sortedDates = grouped.keys.toList()
+            ..sort((a, b) => b.compareTo(a));
           for (final date in sortedDates) {
             grouped[date]!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           }

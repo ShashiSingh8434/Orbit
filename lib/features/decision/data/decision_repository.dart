@@ -41,8 +41,10 @@ class DriftDecisionRepository implements DecisionRepository {
 
   @override
   Stream<List<DecisionModel>> watchDecisions(String uid) {
-    return (db.select(db.decisionsTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)]))
+    return (db.select(db.decisionsTable)..orderBy([
+          (tbl) =>
+              OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc),
+        ]))
         .watch()
         .map((rows) => rows.map((r) => r.toModel()).toList());
   }
@@ -51,9 +53,14 @@ class DriftDecisionRepository implements DecisionRepository {
 
   @override
   Future<List<DecisionModel>> getDecisions(String uid) async {
-    final rows = await (db.select(db.decisionsTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)]))
-        .get();
+    final rows =
+        await (db.select(db.decisionsTable)..orderBy([
+              (tbl) => OrderingTerm(
+                expression: tbl.createdAt,
+                mode: OrderingMode.desc,
+              ),
+            ]))
+            .get();
     return rows.map((r) => r.toModel()).toList();
   }
 
@@ -64,10 +71,16 @@ class DriftDecisionRepository implements DecisionRepository {
     int limit = 20,
   }) async {
     final offset = (startAfter is int) ? startAfter : 0;
-    final rows = await (db.select(db.decisionsTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)])
-          ..limit(limit, offset: offset))
-        .get();
+    final rows =
+        await (db.select(db.decisionsTable)
+              ..orderBy([
+                (tbl) => OrderingTerm(
+                  expression: tbl.createdAt,
+                  mode: OrderingMode.desc,
+                ),
+              ])
+              ..limit(limit, offset: offset))
+            .get();
     final items = rows.map((r) => r.toModel()).toList();
     final newOffset = offset + items.length;
     final hasMore = items.length == limit;
@@ -86,7 +99,9 @@ class DriftDecisionRepository implements DecisionRepository {
     final decisionToSave = decision.updatedAt == null
         ? decision.copyWith(updatedAt: DateTime.now())
         : decision;
-    await db.into(db.decisionsTable).insertOnConflictUpdate(decisionToSave.toCompanion());
+    await db
+        .into(db.decisionsTable)
+        .insertOnConflictUpdate(decisionToSave.toCompanion());
     await sync.enqueue(
       collection: 'decisions',
       operation: 'INSERT',
@@ -98,7 +113,9 @@ class DriftDecisionRepository implements DecisionRepository {
   @override
   Future<void> updateDecision(String uid, DecisionModel decision) async {
     final updated = decision.copyWith(updatedAt: DateTime.now());
-    await db.into(db.decisionsTable).insertOnConflictUpdate(updated.toCompanion());
+    await db
+        .into(db.decisionsTable)
+        .insertOnConflictUpdate(updated.toCompanion());
     await sync.enqueue(
       collection: 'decisions',
       operation: 'UPDATE',
@@ -111,7 +128,9 @@ class DriftDecisionRepository implements DecisionRepository {
 
   @override
   Future<void> deleteDecision(String uid, String decisionId) async {
-    await (db.delete(db.decisionsTable)..where((tbl) => tbl.id.equals(decisionId))).go();
+    await (db.delete(
+      db.decisionsTable,
+    )..where((tbl) => tbl.id.equals(decisionId))).go();
     await sync.enqueue(
       collection: 'decisions',
       operation: 'DELETE',

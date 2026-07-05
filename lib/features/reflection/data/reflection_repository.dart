@@ -55,8 +55,15 @@ class DriftReflectionRepository implements ReflectionRepository {
     sync.syncReflectionsForDate(uid, dateKey);
 
     return (db.select(db.reflectionsTable)
-          ..where((tbl) => tbl.dateKey.equals(dateKey) & tbl.deleted.equals(false))
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)]))
+          ..where(
+            (tbl) => tbl.dateKey.equals(dateKey) & tbl.deleted.equals(false),
+          )
+          ..orderBy([
+            (tbl) => OrderingTerm(
+              expression: tbl.createdAt,
+              mode: OrderingMode.desc,
+            ),
+          ]))
         .watch()
         .map((rows) => rows.map((r) => r.toModel()).toList());
   }
@@ -70,10 +77,19 @@ class DriftReflectionRepository implements ReflectionRepository {
   ) async {
     await sync.syncReflectionsForDate(uid, dateKey);
 
-    final rows = await (db.select(db.reflectionsTable)
-          ..where((tbl) => tbl.dateKey.equals(dateKey) & tbl.deleted.equals(false))
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)]))
-        .get();
+    final rows =
+        await (db.select(db.reflectionsTable)
+              ..where(
+                (tbl) =>
+                    tbl.dateKey.equals(dateKey) & tbl.deleted.equals(false),
+              )
+              ..orderBy([
+                (tbl) => OrderingTerm(
+                  expression: tbl.createdAt,
+                  mode: OrderingMode.desc,
+                ),
+              ]))
+            .get();
     return rows.map((r) => r.toModel()).toList();
   }
 
@@ -86,7 +102,9 @@ class DriftReflectionRepository implements ReflectionRepository {
     ReflectionModel reflection,
   ) async {
     final refToSave = reflection.copyWith(updatedAt: DateTime.now());
-    await db.into(db.reflectionsTable).insertOnConflictUpdate(refToSave.toCompanion());
+    await db
+        .into(db.reflectionsTable)
+        .insertOnConflictUpdate(refToSave.toCompanion());
 
     final payload = refToSave.toJson();
     payload['dateKey'] = dateKey;
@@ -106,14 +124,18 @@ class DriftReflectionRepository implements ReflectionRepository {
     String dateKey,
     String reflectionId,
   ) async {
-    final local = await (db.select(db.reflectionsTable)..where((tbl) => tbl.id.equals(reflectionId))).getSingleOrNull();
+    final local = await (db.select(
+      db.reflectionsTable,
+    )..where((tbl) => tbl.id.equals(reflectionId))).getSingleOrNull();
     if (local == null) return;
 
     final updated = local.toModel().copyWith(
       deleted: true,
       updatedAt: DateTime.now(),
     );
-    await db.into(db.reflectionsTable).insertOnConflictUpdate(updated.toCompanion());
+    await db
+        .into(db.reflectionsTable)
+        .insertOnConflictUpdate(updated.toCompanion());
 
     final payload = updated.toJson();
     payload['dateKey'] = dateKey;
@@ -131,14 +153,18 @@ class DriftReflectionRepository implements ReflectionRepository {
     String dateKey,
     String reflectionId,
   ) async {
-    final local = await (db.select(db.reflectionsTable)..where((tbl) => tbl.id.equals(reflectionId))).getSingleOrNull();
+    final local = await (db.select(
+      db.reflectionsTable,
+    )..where((tbl) => tbl.id.equals(reflectionId))).getSingleOrNull();
     if (local == null) return;
 
     final updated = local.toModel().copyWith(
       aiProcessed: true,
       updatedAt: DateTime.now(),
     );
-    await db.into(db.reflectionsTable).insertOnConflictUpdate(updated.toCompanion());
+    await db
+        .into(db.reflectionsTable)
+        .insertOnConflictUpdate(updated.toCompanion());
 
     final payload = updated.toJson();
     payload['dateKey'] = dateKey;

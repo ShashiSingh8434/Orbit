@@ -94,7 +94,9 @@ class ReflectionsTable extends Table {
   TextColumn get textContent => text().named('text')();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
-  TextColumn get tags => text().map(const StringListConverter()).withDefault(const Constant('[]'))();
+  TextColumn get tags => text()
+      .map(const StringListConverter())
+      .withDefault(const Constant('[]'))();
   TextColumn get source => text().withDefault(const Constant('manual'))();
   BoolColumn get aiProcessed => boolean().withDefault(const Constant(false))();
   BoolColumn get deleted => boolean().withDefault(const Constant(false))();
@@ -162,22 +164,26 @@ class SyncQueueTable extends Table {
   DateTimeColumn get createdAt => dateTime()();
   TextColumn get payload => text()(); // JSON payload
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
-  TextColumn get status => text().withDefault(const Constant('pending'))(); // pending, processing, failed
+  TextColumn get status => text().withDefault(
+    const Constant('pending'),
+  )(); // pending, processing, failed
 
   @override
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [
-  DaysTable,
-  TasksTable,
-  ReflectionsTable,
-  LearningsTable,
-  EventsTable,
-  DecisionsTable,
-  AcademicTable,
-  SyncQueueTable,
-])
+@DriftDatabase(
+  tables: [
+    DaysTable,
+    TasksTable,
+    ReflectionsTable,
+    LearningsTable,
+    EventsTable,
+    DecisionsTable,
+    AcademicTable,
+    SyncQueueTable,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(String uid) : super(_openConnection(uid));
 
@@ -216,167 +222,167 @@ Future<void> deleteDatabaseFile(String uid) async {
 
 extension DayModelMapper on DayModel {
   DaysTableCompanion toCompanion() => DaysTableCompanion(
-        date: Value(OrbitDateUtils.dateKey(date)),
-        summary: Value(summary),
-        summaryMode: Value(summaryMode),
-        reflectionCount: Value(reflectionCount),
-        detailedSummary: Value(detailedSummary),
-        detailedSummaryBullet: Value(detailedSummaryBullet),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-        aiVersion: Value(aiVersion),
-      );
+    date: Value(OrbitDateUtils.dateKey(date)),
+    summary: Value(summary),
+    summaryMode: Value(summaryMode),
+    reflectionCount: Value(reflectionCount),
+    detailedSummary: Value(detailedSummary),
+    detailedSummaryBullet: Value(detailedSummaryBullet),
+    createdAt: Value(createdAt),
+    updatedAt: Value(updatedAt),
+    aiVersion: Value(aiVersion),
+  );
 }
 
 extension DaysTableDataMapper on DaysTableData {
   DayModel toModel() => DayModel(
-        date: OrbitDateUtils.parseKey(date),
-        summary: summary,
-        summaryMode: summaryMode,
-        reflectionCount: reflectionCount,
-        detailedSummary: detailedSummary,
-        detailedSummaryBullet: detailedSummaryBullet,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        aiVersion: aiVersion,
-      );
+    date: OrbitDateUtils.parseKey(date),
+    summary: summary,
+    summaryMode: summaryMode,
+    reflectionCount: reflectionCount,
+    detailedSummary: detailedSummary,
+    detailedSummaryBullet: detailedSummaryBullet,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    aiVersion: aiVersion,
+  );
 }
 
 extension TaskModelMapper on TaskModel {
   TasksTableCompanion toCompanion() => TasksTableCompanion(
-        id: Value(id),
-        title: Value(title),
-        description: Value(description),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-        dueDate: Value(dueDate),
-        dueTime: Value(dueTime),
-        priority: Value(priority),
-        status: Value(status),
-        completedAt: Value(completedAt),
-        metadata: Value(metadata?.toJson()),
-      );
+    id: Value(id),
+    title: Value(title),
+    description: Value(description),
+    createdAt: Value(createdAt),
+    updatedAt: Value(updatedAt),
+    dueDate: Value(dueDate),
+    dueTime: Value(dueTime),
+    priority: Value(priority),
+    status: Value(status),
+    completedAt: Value(completedAt),
+    metadata: Value(metadata?.toJson()),
+  );
 }
 
 extension TasksTableDataMapper on TasksTableData {
   TaskModel toModel() => TaskModel(
-        id: id,
-        title: title,
-        description: description,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        dueDate: dueDate,
-        dueTime: dueTime,
-        priority: priority,
-        status: status,
-        completedAt: completedAt,
-        metadata: metadata != null ? EntityMetadata.fromJson(metadata!) : null,
-      );
+    id: id,
+    title: title,
+    description: description,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    dueDate: dueDate,
+    dueTime: dueTime,
+    priority: priority,
+    status: status,
+    completedAt: completedAt,
+    metadata: metadata != null ? EntityMetadata.fromJson(metadata!) : null,
+  );
 }
 
 extension ReflectionModelMapper on ReflectionModel {
   ReflectionsTableCompanion toCompanion() => ReflectionsTableCompanion(
-        id: Value(id),
-        textContent: Value(text),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-        tags: Value(tags),
-        source: Value(source),
-        aiProcessed: Value(aiProcessed),
-        deleted: Value(deleted),
-        dateKey: Value(OrbitDateUtils.dateKey(createdAt)),
-      );
+    id: Value(id),
+    textContent: Value(text),
+    createdAt: Value(createdAt),
+    updatedAt: Value(updatedAt),
+    tags: Value(tags),
+    source: Value(source),
+    aiProcessed: Value(aiProcessed),
+    deleted: Value(deleted),
+    dateKey: Value(OrbitDateUtils.dateKey(createdAt)),
+  );
 }
 
 extension ReflectionsTableDataMapper on ReflectionsTableData {
   ReflectionModel toModel() => ReflectionModel(
-        id: id,
-        text: textContent,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        tags: tags,
-        source: source,
-        aiProcessed: aiProcessed,
-        deleted: deleted,
-      );
+    id: id,
+    text: textContent,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    tags: tags,
+    source: source,
+    aiProcessed: aiProcessed,
+    deleted: deleted,
+  );
 }
 
 extension LearningModelMapper on LearningModel {
   LearningsTableCompanion toCompanion() => LearningsTableCompanion(
-        id: Value(id),
-        title: Value(title),
-        description: Value(description),
-        category: Value(category),
-        occurrenceCount: Value(occurrenceCount),
-        lastSeen: Value(lastSeen),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-        metadata: Value(metadata?.toJson()),
-      );
+    id: Value(id),
+    title: Value(title),
+    description: Value(description),
+    category: Value(category),
+    occurrenceCount: Value(occurrenceCount),
+    lastSeen: Value(lastSeen),
+    createdAt: Value(createdAt),
+    updatedAt: Value(updatedAt),
+    metadata: Value(metadata?.toJson()),
+  );
 }
 
 extension LearningsTableDataMapper on LearningsTableData {
   LearningModel toModel() => LearningModel(
-        id: id,
-        title: title,
-        description: description,
-        category: category,
-        occurrenceCount: occurrenceCount,
-        lastSeen: lastSeen,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        metadata: metadata != null ? EntityMetadata.fromJson(metadata!) : null,
-      );
+    id: id,
+    title: title,
+    description: description,
+    category: category,
+    occurrenceCount: occurrenceCount,
+    lastSeen: lastSeen,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    metadata: metadata != null ? EntityMetadata.fromJson(metadata!) : null,
+  );
 }
 
 extension EventModelMapper on EventModel {
   EventsTableCompanion toCompanion() => EventsTableCompanion(
-        id: Value(id),
-        title: Value(title),
-        description: Value(description),
-        eventDate: Value(eventDate),
-        time: Value(time),
-        location: Value(location),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-        metadata: Value(metadata?.toJson()),
-      );
+    id: Value(id),
+    title: Value(title),
+    description: Value(description),
+    eventDate: Value(eventDate),
+    time: Value(time),
+    location: Value(location),
+    createdAt: Value(createdAt),
+    updatedAt: Value(updatedAt),
+    metadata: Value(metadata?.toJson()),
+  );
 }
 
 extension EventsTableDataMapper on EventsTableData {
   EventModel toModel() => EventModel(
-        id: id,
-        title: title,
-        description: description,
-        eventDate: eventDate,
-        time: time,
-        location: location,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        metadata: metadata != null ? EntityMetadata.fromJson(metadata!) : null,
-      );
+    id: id,
+    title: title,
+    description: description,
+    eventDate: eventDate,
+    time: time,
+    location: location,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    metadata: metadata != null ? EntityMetadata.fromJson(metadata!) : null,
+  );
 }
 
 extension DecisionModelMapper on DecisionModel {
   DecisionsTableCompanion toCompanion() => DecisionsTableCompanion(
-        id: Value(id),
-        decision: Value(decision),
-        reason: Value(reason),
-        status: Value(status),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-        metadata: Value(metadata?.toJson()),
-      );
+    id: Value(id),
+    decision: Value(decision),
+    reason: Value(reason),
+    status: Value(status),
+    createdAt: Value(createdAt),
+    updatedAt: Value(updatedAt),
+    metadata: Value(metadata?.toJson()),
+  );
 }
 
 extension DecisionsTableDataMapper on DecisionsTableData {
   DecisionModel toModel() => DecisionModel(
-        id: id,
-        decision: decision,
-        reason: reason,
-        status: status,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        metadata: metadata != null ? EntityMetadata.fromJson(metadata!) : null,
-      );
+    id: id,
+    decision: decision,
+    reason: reason,
+    status: status,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    metadata: metadata != null ? EntityMetadata.fromJson(metadata!) : null,
+  );
 }

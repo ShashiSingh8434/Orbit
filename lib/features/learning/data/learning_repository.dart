@@ -41,8 +41,10 @@ class DriftLearningRepository implements LearningRepository {
 
   @override
   Stream<List<LearningModel>> watchLearnings(String uid) {
-    return (db.select(db.learningsTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)]))
+    return (db.select(db.learningsTable)..orderBy([
+          (tbl) =>
+              OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc),
+        ]))
         .watch()
         .map((rows) => rows.map((r) => r.toModel()).toList());
   }
@@ -51,9 +53,14 @@ class DriftLearningRepository implements LearningRepository {
 
   @override
   Future<List<LearningModel>> getLearnings(String uid) async {
-    final rows = await (db.select(db.learningsTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)]))
-        .get();
+    final rows =
+        await (db.select(db.learningsTable)..orderBy([
+              (tbl) => OrderingTerm(
+                expression: tbl.createdAt,
+                mode: OrderingMode.desc,
+              ),
+            ]))
+            .get();
     return rows.map((r) => r.toModel()).toList();
   }
 
@@ -64,10 +71,16 @@ class DriftLearningRepository implements LearningRepository {
     int limit = 20,
   }) async {
     final offset = (startAfter is int) ? startAfter : 0;
-    final rows = await (db.select(db.learningsTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)])
-          ..limit(limit, offset: offset))
-        .get();
+    final rows =
+        await (db.select(db.learningsTable)
+              ..orderBy([
+                (tbl) => OrderingTerm(
+                  expression: tbl.createdAt,
+                  mode: OrderingMode.desc,
+                ),
+              ])
+              ..limit(limit, offset: offset))
+            .get();
     final items = rows.map((r) => r.toModel()).toList();
     final newOffset = offset + items.length;
     final hasMore = items.length == limit;
@@ -86,7 +99,9 @@ class DriftLearningRepository implements LearningRepository {
     final learningToSave = learning.updatedAt == null
         ? learning.copyWith(updatedAt: DateTime.now())
         : learning;
-    await db.into(db.learningsTable).insertOnConflictUpdate(learningToSave.toCompanion());
+    await db
+        .into(db.learningsTable)
+        .insertOnConflictUpdate(learningToSave.toCompanion());
     await sync.enqueue(
       collection: 'learnings',
       operation: 'INSERT',
@@ -98,7 +113,9 @@ class DriftLearningRepository implements LearningRepository {
   @override
   Future<void> updateLearning(String uid, LearningModel learning) async {
     final updated = learning.copyWith(updatedAt: DateTime.now());
-    await db.into(db.learningsTable).insertOnConflictUpdate(updated.toCompanion());
+    await db
+        .into(db.learningsTable)
+        .insertOnConflictUpdate(updated.toCompanion());
     await sync.enqueue(
       collection: 'learnings',
       operation: 'UPDATE',
@@ -111,7 +128,9 @@ class DriftLearningRepository implements LearningRepository {
 
   @override
   Future<void> deleteLearning(String uid, String learningId) async {
-    await (db.delete(db.learningsTable)..where((tbl) => tbl.id.equals(learningId))).go();
+    await (db.delete(
+      db.learningsTable,
+    )..where((tbl) => tbl.id.equals(learningId))).go();
     await sync.enqueue(
       collection: 'learnings',
       operation: 'DELETE',

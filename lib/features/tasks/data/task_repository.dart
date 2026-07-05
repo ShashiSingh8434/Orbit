@@ -46,8 +46,10 @@ class DriftTaskRepository implements TaskRepository {
 
   @override
   Stream<List<TaskModel>> watchTasks(String uid) {
-    return (db.select(db.tasksTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)]))
+    return (db.select(db.tasksTable)..orderBy([
+          (tbl) =>
+              OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc),
+        ]))
         .watch()
         .map((rows) => rows.map((r) => r.toModel()).toList());
   }
@@ -56,9 +58,14 @@ class DriftTaskRepository implements TaskRepository {
 
   @override
   Future<List<TaskModel>> getTasks(String uid) async {
-    final rows = await (db.select(db.tasksTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.desc)]))
-        .get();
+    final rows =
+        await (db.select(db.tasksTable)..orderBy([
+              (tbl) => OrderingTerm(
+                expression: tbl.createdAt,
+                mode: OrderingMode.desc,
+              ),
+            ]))
+            .get();
     return rows.map((r) => r.toModel()).toList();
   }
 
@@ -69,7 +76,9 @@ class DriftTaskRepository implements TaskRepository {
     final taskToSave = task.updatedAt == null
         ? task.copyWith(updatedAt: DateTime.now())
         : task;
-    await db.into(db.tasksTable).insertOnConflictUpdate(taskToSave.toCompanion());
+    await db
+        .into(db.tasksTable)
+        .insertOnConflictUpdate(taskToSave.toCompanion());
     await sync.enqueue(
       collection: 'tasks',
       operation: 'INSERT',
@@ -94,7 +103,9 @@ class DriftTaskRepository implements TaskRepository {
 
   @override
   Future<void> deleteTask(String uid, String taskId) async {
-    await (db.delete(db.tasksTable)..where((tbl) => tbl.id.equals(taskId))).go();
+    await (db.delete(
+      db.tasksTable,
+    )..where((tbl) => tbl.id.equals(taskId))).go();
     await sync.enqueue(
       collection: 'tasks',
       operation: 'DELETE',
@@ -112,9 +123,11 @@ class DriftTaskRepository implements TaskRepository {
     String status, {
     DateTime? completedAt,
   }) async {
-    final local = await (db.select(db.tasksTable)..where((tbl) => tbl.id.equals(taskId))).getSingleOrNull();
+    final local = await (db.select(
+      db.tasksTable,
+    )..where((tbl) => tbl.id.equals(taskId))).getSingleOrNull();
     if (local == null) return;
-    
+
     final updated = local.toModel().copyWith(
       status: status,
       completedAt: completedAt,

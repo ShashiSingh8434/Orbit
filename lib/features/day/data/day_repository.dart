@@ -46,7 +46,9 @@ class DriftDayRepository implements DayRepository {
   @override
   Future<DayModel?> getDay(String uid, DateTime date) async {
     final key = OrbitDateUtils.dateKey(date);
-    final row = await (db.select(db.daysTable)..where((tbl) => tbl.date.equals(key))).getSingleOrNull();
+    final row = await (db.select(
+      db.daysTable,
+    )..where((tbl) => tbl.date.equals(key))).getSingleOrNull();
     return row?.toModel();
   }
 

@@ -4,7 +4,9 @@ import 'voice_controller.dart';
 import '../ai/analytics/ai_analytics_service.dart';
 
 final voiceServiceProvider = Provider<VoiceService>((ref) {
-  final service = VoiceService(analytics: ref.watch(aiAnalyticsServiceProvider));
+  final service = VoiceService(
+    analytics: ref.watch(aiAnalyticsServiceProvider),
+  );
   ref.onDispose(service.dispose);
   return service;
 });

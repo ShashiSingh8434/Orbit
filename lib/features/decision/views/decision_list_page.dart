@@ -65,11 +65,16 @@ class DecisionListPage extends ConsumerWidget {
 
           final Map<DateTime, List<DecisionModel>> grouped = {};
           for (final d in state.items) {
-            final date = DateTime(d.createdAt.year, d.createdAt.month, d.createdAt.day);
+            final date = DateTime(
+              d.createdAt.year,
+              d.createdAt.month,
+              d.createdAt.day,
+            );
             grouped.putIfAbsent(date, () => []).add(d);
           }
 
-          final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+          final sortedDates = grouped.keys.toList()
+            ..sort((a, b) => b.compareTo(a));
           for (final date in sortedDates) {
             grouped[date]!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           }

@@ -34,8 +34,7 @@ class PaginatedState<T> {
 }
 
 class PaginatedListNotifier<T> extends StateNotifier<PaginatedState<T>> {
-  final Future<PaginatedResult<T>> Function(Object? startAfter)
-  fetchPage;
+  final Future<PaginatedResult<T>> Function(Object? startAfter) fetchPage;
   Object? _lastDoc;
 
   PaginatedListNotifier({required this.fetchPage})

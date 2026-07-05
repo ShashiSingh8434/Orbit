@@ -65,11 +65,16 @@ class LearningListPage extends ConsumerWidget {
 
           final Map<DateTime, List<LearningModel>> grouped = {};
           for (final l in state.items) {
-            final date = DateTime(l.createdAt.year, l.createdAt.month, l.createdAt.day);
+            final date = DateTime(
+              l.createdAt.year,
+              l.createdAt.month,
+              l.createdAt.day,
+            );
             grouped.putIfAbsent(date, () => []).add(l);
           }
 
-          final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+          final sortedDates = grouped.keys.toList()
+            ..sort((a, b) => b.compareTo(a));
           for (final date in sortedDates) {
             grouped[date]!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           }

@@ -24,7 +24,9 @@ class ReflectionTagChip extends StatelessWidget {
       label: Text(
         label,
         style: theme.textTheme.bodySmall?.copyWith(
-          color: selected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+          color: selected
+              ? colorScheme.onPrimary
+              : colorScheme.onSurfaceVariant,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -38,7 +40,9 @@ class ReflectionTagChip extends StatelessWidget {
           ? Icon(
               Icons.close_rounded,
               size: 14,
-              color: selected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+              color: selected
+                  ? colorScheme.onPrimary
+                  : colorScheme.onSurfaceVariant,
             )
           : null,
       side: BorderSide(

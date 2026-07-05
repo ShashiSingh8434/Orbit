@@ -41,8 +41,10 @@ class DriftEventRepository implements EventRepository {
 
   @override
   Stream<List<EventModel>> watchEvents(String uid) {
-    return (db.select(db.eventsTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.eventDate, mode: OrderingMode.desc)]))
+    return (db.select(db.eventsTable)..orderBy([
+          (tbl) =>
+              OrderingTerm(expression: tbl.eventDate, mode: OrderingMode.desc),
+        ]))
         .watch()
         .map((rows) => rows.map((r) => r.toModel()).toList());
   }
@@ -51,9 +53,14 @@ class DriftEventRepository implements EventRepository {
 
   @override
   Future<List<EventModel>> getEvents(String uid) async {
-    final rows = await (db.select(db.eventsTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.eventDate, mode: OrderingMode.desc)]))
-        .get();
+    final rows =
+        await (db.select(db.eventsTable)..orderBy([
+              (tbl) => OrderingTerm(
+                expression: tbl.eventDate,
+                mode: OrderingMode.desc,
+              ),
+            ]))
+            .get();
     return rows.map((r) => r.toModel()).toList();
   }
 
@@ -64,10 +71,16 @@ class DriftEventRepository implements EventRepository {
     int limit = 20,
   }) async {
     final offset = (startAfter is int) ? startAfter : 0;
-    final rows = await (db.select(db.eventsTable)
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.eventDate, mode: OrderingMode.desc)])
-          ..limit(limit, offset: offset))
-        .get();
+    final rows =
+        await (db.select(db.eventsTable)
+              ..orderBy([
+                (tbl) => OrderingTerm(
+                  expression: tbl.eventDate,
+                  mode: OrderingMode.desc,
+                ),
+              ])
+              ..limit(limit, offset: offset))
+            .get();
     final items = rows.map((r) => r.toModel()).toList();
     final newOffset = offset + items.length;
     final hasMore = items.length == limit;
@@ -86,7 +99,9 @@ class DriftEventRepository implements EventRepository {
     final eventToSave = event.updatedAt == null
         ? event.copyWith(updatedAt: DateTime.now())
         : event;
-    await db.into(db.eventsTable).insertOnConflictUpdate(eventToSave.toCompanion());
+    await db
+        .into(db.eventsTable)
+        .insertOnConflictUpdate(eventToSave.toCompanion());
     await sync.enqueue(
       collection: 'events',
       operation: 'INSERT',
@@ -111,7 +126,9 @@ class DriftEventRepository implements EventRepository {
 
   @override
   Future<void> deleteEvent(String uid, String eventId) async {
-    await (db.delete(db.eventsTable)..where((tbl) => tbl.id.equals(eventId))).go();
+    await (db.delete(
+      db.eventsTable,
+    )..where((tbl) => tbl.id.equals(eventId))).go();
     await sync.enqueue(
       collection: 'events',
       operation: 'DELETE',

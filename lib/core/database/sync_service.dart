@@ -23,12 +23,7 @@ final syncServiceProvider = Provider<SyncService>((ref) {
   final db = ref.watch(databaseProvider);
   final enc = ref.watch(encryptionRepositoryProvider);
   final migration = ref.watch(migrationServiceProvider);
-  return SyncService(
-    ref: ref,
-    db: db,
-    enc: enc,
-    migration: migration,
-  );
+  return SyncService(ref: ref, db: db, enc: enc, migration: migration);
 });
 
 // A provider that exposes the local database database instance.
@@ -107,10 +102,14 @@ class SyncService {
     }
     final uid = user.uid;
 
-    final pending = await (db.select(db.syncQueueTable)
-          ..where((tbl) => tbl.status.equals('pending') | tbl.status.equals('failed'))
-          ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt)]))
-        .get();
+    final pending =
+        await (db.select(db.syncQueueTable)
+              ..where(
+                (tbl) =>
+                    tbl.status.equals('pending') | tbl.status.equals('failed'),
+              )
+              ..orderBy([(tbl) => OrderingTerm(expression: tbl.createdAt)]))
+            .get();
 
     if (pending.isEmpty) {
       AppLogger.debug('SyncService: No pending items in sync queue');
@@ -121,7 +120,8 @@ class SyncService {
 
     for (final item in pending) {
       // Mark as processing
-      await (db.update(db.syncQueueTable)..where((tbl) => tbl.id.equals(item.id)))
+      await (db.update(db.syncQueueTable)
+            ..where((tbl) => tbl.id.equals(item.id)))
           .write(const SyncQueueTableCompanion(status: Value('processing')));
 
       try {
@@ -172,17 +172,28 @@ class SyncService {
         }
 
         // Successfully synced, remove from queue
-        await (db.delete(db.syncQueueTable)..where((tbl) => tbl.id.equals(item.id))).go();
-        AppLogger.info('SyncService: Successfully processed $operation on $collection ($id)');
+        await (db.delete(
+          db.syncQueueTable,
+        )..where((tbl) => tbl.id.equals(item.id))).go();
+        AppLogger.info(
+          'SyncService: Successfully processed $operation on $collection ($id)',
+        );
       } catch (e, st) {
-        AppLogger.error('SyncService: Error processing queue item ${item.id}', e, st);
+        AppLogger.error(
+          'SyncService: Error processing queue item ${item.id}',
+          e,
+          st,
+        );
         // Increment retry count
         final newRetryCount = item.retryCount + 1;
-        await (db.update(db.syncQueueTable)..where((tbl) => tbl.id.equals(item.id)))
-            .write(SyncQueueTableCompanion(
-          retryCount: Value(newRetryCount),
-          status: const Value('failed'),
-        ));
+        await (db.update(
+          db.syncQueueTable,
+        )..where((tbl) => tbl.id.equals(item.id))).write(
+          SyncQueueTableCompanion(
+            retryCount: Value(newRetryCount),
+            status: const Value('failed'),
+          ),
+        );
       }
     }
   }
@@ -216,7 +227,11 @@ class SyncService {
   // --- Collection Sync Helpers ---
 
   Future<void> _syncDays(String uid) async {
-    final remoteSnap = await _firestore.collection('users').doc(uid).collection('days').get();
+    final remoteSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('days')
+        .get();
     final localQueueIds = await _getPendingIdsForCollection('days');
 
     final remoteDays = <String, Map<String, dynamic>>{};
@@ -234,10 +249,15 @@ class SyncService {
         continue;
       }
 
-      final localDoc = await (db.select(db.daysTable)..where((tbl) => tbl.date.equals(dateKey))).getSingleOrNull();
+      final localDoc = await (db.select(
+        db.daysTable,
+      )..where((tbl) => tbl.date.equals(dateKey))).getSingleOrNull();
 
-      final remoteUpdatedAt = _toDateTime(remoteData['updatedAt']) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final localUpdatedAt = localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final remoteUpdatedAt =
+          _toDateTime(remoteData['updatedAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final localUpdatedAt =
+          localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 
       if (localDoc == null || remoteUpdatedAt.isAfter(localUpdatedAt)) {
         final companion = DaysTableCompanion(
@@ -246,7 +266,9 @@ class SyncService {
           summaryMode: Value(remoteData['summaryMode'] as String? ?? 'auto'),
           reflectionCount: Value(remoteData['reflectionCount'] as int? ?? 0),
           detailedSummary: Value(remoteData['detailedSummary'] as String?),
-          detailedSummaryBullet: Value(remoteData['detailedSummaryBullet'] as String?),
+          detailedSummaryBullet: Value(
+            remoteData['detailedSummaryBullet'] as String?,
+          ),
           createdAt: Value(_toDateTime(remoteData['createdAt'])),
           updatedAt: Value(remoteUpdatedAt),
           aiVersion: Value(remoteData['aiVersion'] as String?),
@@ -258,14 +280,21 @@ class SyncService {
     // 2. Remove local items not on remote
     final localDocs = await db.select(db.daysTable).get();
     for (final local in localDocs) {
-      if (!remoteDays.containsKey(local.date) && !localQueueIds.contains(local.date)) {
-        await (db.delete(db.daysTable)..where((tbl) => tbl.date.equals(local.date))).go();
+      if (!remoteDays.containsKey(local.date) &&
+          !localQueueIds.contains(local.date)) {
+        await (db.delete(
+          db.daysTable,
+        )..where((tbl) => tbl.date.equals(local.date))).go();
       }
     }
   }
 
   Future<void> _syncTasks(String uid) async {
-    final remoteSnap = await _firestore.collection('users').doc(uid).collection('tasks').get();
+    final remoteSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('tasks')
+        .get();
     final localQueueIds = await _getPendingIdsForCollection('tasks');
 
     final remoteTasks = <String, Map<String, dynamic>>{};
@@ -281,26 +310,35 @@ class SyncService {
 
       if (localQueueIds.contains(taskId)) continue;
 
-      final localDoc = await (db.select(db.tasksTable)..where((tbl) => tbl.id.equals(taskId))).getSingleOrNull();
+      final localDoc = await (db.select(
+        db.tasksTable,
+      )..where((tbl) => tbl.id.equals(taskId))).getSingleOrNull();
 
-      final remoteUpdatedAt = _toDateTime(remoteData['updatedAt']) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final localUpdatedAt = localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final remoteUpdatedAt =
+          _toDateTime(remoteData['updatedAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final localUpdatedAt =
+          localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 
       if (localDoc == null || remoteUpdatedAt.isAfter(localUpdatedAt)) {
         final companion = TasksTableCompanion(
           id: Value(taskId),
           title: Value(remoteData['title'] as String? ?? ''),
           description: Value(remoteData['description'] as String? ?? ''),
-          createdAt: Value(_toDateTime(remoteData['createdAt']) ?? DateTime.now()),
+          createdAt: Value(
+            _toDateTime(remoteData['createdAt']) ?? DateTime.now(),
+          ),
           updatedAt: Value(remoteUpdatedAt),
           dueDate: Value(_toDateTime(remoteData['dueDate'])),
           dueTime: Value(remoteData['dueTime'] as String?),
           priority: Value(remoteData['priority'] as String? ?? 'medium'),
           status: Value(remoteData['status'] as String? ?? 'pending'),
           completedAt: Value(_toDateTime(remoteData['completedAt'])),
-          metadata: Value(remoteData['metadata'] != null
-              ? Map<String, dynamic>.from(remoteData['metadata'] as Map)
-              : null),
+          metadata: Value(
+            remoteData['metadata'] != null
+                ? Map<String, dynamic>.from(remoteData['metadata'] as Map)
+                : null,
+          ),
         );
         await db.into(db.tasksTable).insertOnConflictUpdate(companion);
       }
@@ -309,8 +347,11 @@ class SyncService {
     // 2. Remove local items not on remote
     final localDocs = await db.select(db.tasksTable).get();
     for (final local in localDocs) {
-      if (!remoteTasks.containsKey(local.id) && !localQueueIds.contains(local.id)) {
-        await (db.delete(db.tasksTable)..where((tbl) => tbl.id.equals(local.id))).go();
+      if (!remoteTasks.containsKey(local.id) &&
+          !localQueueIds.contains(local.id)) {
+        await (db.delete(
+          db.tasksTable,
+        )..where((tbl) => tbl.id.equals(local.id))).go();
       }
     }
   }
@@ -328,21 +369,32 @@ class SyncService {
       final localQueueIds = await _getPendingIdsForCollection('reflections');
 
       for (final doc in entriesSnap.docs) {
-        final decrypted = await enc.decryptDocument(uid, 'reflections', doc.data());
+        final decrypted = await enc.decryptDocument(
+          uid,
+          'reflections',
+          doc.data(),
+        );
         final refId = doc.id;
 
         if (localQueueIds.contains(refId)) continue;
 
-        final localDoc = await (db.select(db.reflectionsTable)..where((tbl) => tbl.id.equals(refId))).getSingleOrNull();
+        final localDoc = await (db.select(
+          db.reflectionsTable,
+        )..where((tbl) => tbl.id.equals(refId))).getSingleOrNull();
 
-        final remoteUpdatedAt = _toDateTime(decrypted['updatedAt']) ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final localUpdatedAt = localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final remoteUpdatedAt =
+            _toDateTime(decrypted['updatedAt']) ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        final localUpdatedAt =
+            localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 
         if (localDoc == null || remoteUpdatedAt.isAfter(localUpdatedAt)) {
           final companion = ReflectionsTableCompanion(
             id: Value(refId),
             textContent: Value(decrypted['text'] as String? ?? ''),
-            createdAt: Value(_toDateTime(decrypted['createdAt']) ?? DateTime.now()),
+            createdAt: Value(
+              _toDateTime(decrypted['createdAt']) ?? DateTime.now(),
+            ),
             updatedAt: Value(remoteUpdatedAt),
             tags: Value(List<String>.from(decrypted['tags'] as List? ?? [])),
             source: Value(decrypted['source'] as String? ?? 'manual'),
@@ -354,12 +406,20 @@ class SyncService {
         }
       }
     } catch (e, st) {
-      AppLogger.error('SyncService: Error syncing reflections for date $dateKey', e, st);
+      AppLogger.error(
+        'SyncService: Error syncing reflections for date $dateKey',
+        e,
+        st,
+      );
     }
   }
 
   Future<void> _syncReflections(String uid) async {
-    final daysSnap = await _firestore.collection('users').doc(uid).collection('days').get();
+    final daysSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('days')
+        .get();
     final dates = daysSnap.docs.map((doc) => doc.id).toSet();
 
     // Always include today's key
@@ -379,22 +439,33 @@ class SyncService {
             .get();
 
         for (final doc in entriesSnap.docs) {
-          final decrypted = await enc.decryptDocument(uid, 'reflections', doc.data());
+          final decrypted = await enc.decryptDocument(
+            uid,
+            'reflections',
+            doc.data(),
+          );
           final refId = doc.id;
           remoteSeenIds.add(refId);
 
           if (localQueueIds.contains(refId)) continue;
 
-          final localDoc = await (db.select(db.reflectionsTable)..where((tbl) => tbl.id.equals(refId))).getSingleOrNull();
+          final localDoc = await (db.select(
+            db.reflectionsTable,
+          )..where((tbl) => tbl.id.equals(refId))).getSingleOrNull();
 
-          final remoteUpdatedAt = _toDateTime(decrypted['updatedAt']) ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final localUpdatedAt = localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final remoteUpdatedAt =
+              _toDateTime(decrypted['updatedAt']) ??
+              DateTime.fromMillisecondsSinceEpoch(0);
+          final localUpdatedAt =
+              localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 
           if (localDoc == null || remoteUpdatedAt.isAfter(localUpdatedAt)) {
             final companion = ReflectionsTableCompanion(
               id: Value(refId),
               textContent: Value(decrypted['text'] as String? ?? ''),
-              createdAt: Value(_toDateTime(decrypted['createdAt']) ?? DateTime.now()),
+              createdAt: Value(
+                _toDateTime(decrypted['createdAt']) ?? DateTime.now(),
+              ),
               updatedAt: Value(remoteUpdatedAt),
               tags: Value(List<String>.from(decrypted['tags'] as List? ?? [])),
               source: Value(decrypted['source'] as String? ?? 'manual'),
@@ -402,25 +473,38 @@ class SyncService {
               deleted: Value(decrypted['deleted'] as bool? ?? false),
               dateKey: Value(dateKey),
             );
-            await db.into(db.reflectionsTable).insertOnConflictUpdate(companion);
+            await db
+                .into(db.reflectionsTable)
+                .insertOnConflictUpdate(companion);
           }
         }
       } catch (e, st) {
-        AppLogger.error('SyncService: Error syncing reflections for date $dateKey', e, st);
+        AppLogger.error(
+          'SyncService: Error syncing reflections for date $dateKey',
+          e,
+          st,
+        );
       }
     }
 
     // 2. Remove local items not on remote
     final localDocs = await db.select(db.reflectionsTable).get();
     for (final local in localDocs) {
-      if (!remoteSeenIds.contains(local.id) && !localQueueIds.contains(local.id)) {
-        await (db.delete(db.reflectionsTable)..where((tbl) => tbl.id.equals(local.id))).go();
+      if (!remoteSeenIds.contains(local.id) &&
+          !localQueueIds.contains(local.id)) {
+        await (db.delete(
+          db.reflectionsTable,
+        )..where((tbl) => tbl.id.equals(local.id))).go();
       }
     }
   }
 
   Future<void> _syncLearnings(String uid) async {
-    final remoteSnap = await _firestore.collection('users').doc(uid).collection('learnings').get();
+    final remoteSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('learnings')
+        .get();
     final localQueueIds = await _getPendingIdsForCollection('learnings');
 
     final remoteLearnings = <String, Map<String, dynamic>>{};
@@ -436,10 +520,15 @@ class SyncService {
 
       if (localQueueIds.contains(learningId)) continue;
 
-      final localDoc = await (db.select(db.learningsTable)..where((tbl) => tbl.id.equals(learningId))).getSingleOrNull();
+      final localDoc = await (db.select(
+        db.learningsTable,
+      )..where((tbl) => tbl.id.equals(learningId))).getSingleOrNull();
 
-      final remoteUpdatedAt = _toDateTime(remoteData['updatedAt']) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final localUpdatedAt = localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final remoteUpdatedAt =
+          _toDateTime(remoteData['updatedAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final localUpdatedAt =
+          localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 
       if (localDoc == null || remoteUpdatedAt.isAfter(localUpdatedAt)) {
         final companion = LearningsTableCompanion(
@@ -449,11 +538,15 @@ class SyncService {
           category: Value(remoteData['category'] as String? ?? 'general'),
           occurrenceCount: Value(remoteData['occurrenceCount'] as int? ?? 1),
           lastSeen: Value(_toDateTime(remoteData['lastSeen'])),
-          createdAt: Value(_toDateTime(remoteData['createdAt']) ?? DateTime.now()),
+          createdAt: Value(
+            _toDateTime(remoteData['createdAt']) ?? DateTime.now(),
+          ),
           updatedAt: Value(remoteUpdatedAt),
-          metadata: Value(remoteData['metadata'] != null
-              ? Map<String, dynamic>.from(remoteData['metadata'] as Map)
-              : null),
+          metadata: Value(
+            remoteData['metadata'] != null
+                ? Map<String, dynamic>.from(remoteData['metadata'] as Map)
+                : null,
+          ),
         );
         await db.into(db.learningsTable).insertOnConflictUpdate(companion);
       }
@@ -462,14 +555,21 @@ class SyncService {
     // 2. Remove local items not on remote
     final localDocs = await db.select(db.learningsTable).get();
     for (final local in localDocs) {
-      if (!remoteLearnings.containsKey(local.id) && !localQueueIds.contains(local.id)) {
-        await (db.delete(db.learningsTable)..where((tbl) => tbl.id.equals(local.id))).go();
+      if (!remoteLearnings.containsKey(local.id) &&
+          !localQueueIds.contains(local.id)) {
+        await (db.delete(
+          db.learningsTable,
+        )..where((tbl) => tbl.id.equals(local.id))).go();
       }
     }
   }
 
   Future<void> _syncEvents(String uid) async {
-    final remoteSnap = await _firestore.collection('users').doc(uid).collection('events').get();
+    final remoteSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('events')
+        .get();
     final localQueueIds = await _getPendingIdsForCollection('events');
 
     final remoteEvents = <String, Map<String, dynamic>>{};
@@ -485,24 +585,35 @@ class SyncService {
 
       if (localQueueIds.contains(eventId)) continue;
 
-      final localDoc = await (db.select(db.eventsTable)..where((tbl) => tbl.id.equals(eventId))).getSingleOrNull();
+      final localDoc = await (db.select(
+        db.eventsTable,
+      )..where((tbl) => tbl.id.equals(eventId))).getSingleOrNull();
 
-      final remoteUpdatedAt = _toDateTime(remoteData['updatedAt']) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final localUpdatedAt = localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final remoteUpdatedAt =
+          _toDateTime(remoteData['updatedAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final localUpdatedAt =
+          localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 
       if (localDoc == null || remoteUpdatedAt.isAfter(localUpdatedAt)) {
         final companion = EventsTableCompanion(
           id: Value(eventId),
           title: Value(remoteData['title'] as String? ?? ''),
           description: Value(remoteData['description'] as String? ?? ''),
-          eventDate: Value(_toDateTime(remoteData['eventDate']) ?? DateTime.now()),
+          eventDate: Value(
+            _toDateTime(remoteData['eventDate']) ?? DateTime.now(),
+          ),
           time: Value(remoteData['time'] as String?),
           location: Value(remoteData['location'] as String?),
-          createdAt: Value(_toDateTime(remoteData['createdAt']) ?? DateTime.now()),
+          createdAt: Value(
+            _toDateTime(remoteData['createdAt']) ?? DateTime.now(),
+          ),
           updatedAt: Value(remoteUpdatedAt),
-          metadata: Value(remoteData['metadata'] != null
-              ? Map<String, dynamic>.from(remoteData['metadata'] as Map)
-              : null),
+          metadata: Value(
+            remoteData['metadata'] != null
+                ? Map<String, dynamic>.from(remoteData['metadata'] as Map)
+                : null,
+          ),
         );
         await db.into(db.eventsTable).insertOnConflictUpdate(companion);
       }
@@ -511,14 +622,21 @@ class SyncService {
     // 2. Remove local items not on remote
     final localDocs = await db.select(db.eventsTable).get();
     for (final local in localDocs) {
-      if (!remoteEvents.containsKey(local.id) && !localQueueIds.contains(local.id)) {
-        await (db.delete(db.eventsTable)..where((tbl) => tbl.id.equals(local.id))).go();
+      if (!remoteEvents.containsKey(local.id) &&
+          !localQueueIds.contains(local.id)) {
+        await (db.delete(
+          db.eventsTable,
+        )..where((tbl) => tbl.id.equals(local.id))).go();
       }
     }
   }
 
   Future<void> _syncDecisions(String uid) async {
-    final remoteSnap = await _firestore.collection('users').doc(uid).collection('decisions').get();
+    final remoteSnap = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('decisions')
+        .get();
     final localQueueIds = await _getPendingIdsForCollection('decisions');
 
     final remoteDecisions = <String, Map<String, dynamic>>{};
@@ -534,10 +652,15 @@ class SyncService {
 
       if (localQueueIds.contains(decId)) continue;
 
-      final localDoc = await (db.select(db.decisionsTable)..where((tbl) => tbl.id.equals(decId))).getSingleOrNull();
+      final localDoc = await (db.select(
+        db.decisionsTable,
+      )..where((tbl) => tbl.id.equals(decId))).getSingleOrNull();
 
-      final remoteUpdatedAt = _toDateTime(remoteData['updatedAt']) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final localUpdatedAt = localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final remoteUpdatedAt =
+          _toDateTime(remoteData['updatedAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final localUpdatedAt =
+          localDoc?.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 
       if (localDoc == null || remoteUpdatedAt.isAfter(localUpdatedAt)) {
         final companion = DecisionsTableCompanion(
@@ -545,11 +668,15 @@ class SyncService {
           decision: Value(remoteData['decision'] as String? ?? ''),
           reason: Value(remoteData['reason'] as String? ?? ''),
           status: Value(remoteData['status'] as String? ?? 'Active'),
-          createdAt: Value(_toDateTime(remoteData['createdAt']) ?? DateTime.now()),
+          createdAt: Value(
+            _toDateTime(remoteData['createdAt']) ?? DateTime.now(),
+          ),
           updatedAt: Value(remoteUpdatedAt),
-          metadata: Value(remoteData['metadata'] != null
-              ? Map<String, dynamic>.from(remoteData['metadata'] as Map)
-              : null),
+          metadata: Value(
+            remoteData['metadata'] != null
+                ? Map<String, dynamic>.from(remoteData['metadata'] as Map)
+                : null,
+          ),
         );
         await db.into(db.decisionsTable).insertOnConflictUpdate(companion);
       }
@@ -558,21 +685,31 @@ class SyncService {
     // 2. Remove local items not on remote
     final localDocs = await db.select(db.decisionsTable).get();
     for (final local in localDocs) {
-      if (!remoteDecisions.containsKey(local.id) && !localQueueIds.contains(local.id)) {
-        await (db.delete(db.decisionsTable)..where((tbl) => tbl.id.equals(local.id))).go();
+      if (!remoteDecisions.containsKey(local.id) &&
+          !localQueueIds.contains(local.id)) {
+        await (db.delete(
+          db.decisionsTable,
+        )..where((tbl) => tbl.id.equals(local.id))).go();
       }
     }
   }
 
   Future<void> _syncAcademic(String uid) async {
-    final doc = await _firestore.collection('users').doc(uid).collection('academic').doc('data').get();
+    final doc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('academic')
+        .doc('data')
+        .get();
     final localQueueIds = await _getPendingIdsForCollection('academic');
 
     if (localQueueIds.contains('academic')) return; // local change pending
 
     if (!doc.exists || doc.data() == null) {
       // Academic schedule deleted remotely
-      await (db.delete(db.academicTable)..where((tbl) => tbl.uid.equals(uid))).go();
+      await (db.delete(
+        db.academicTable,
+      )..where((tbl) => tbl.uid.equals(uid))).go();
       return;
     }
 
@@ -588,9 +725,9 @@ class SyncService {
 
   // --- Helper to get pending IDs for a collection ---
   Future<Set<String>> _getPendingIdsForCollection(String collection) async {
-    final pending = await (db.select(db.syncQueueTable)
-          ..where((tbl) => tbl.collection.equals(collection)))
-        .get();
+    final pending = await (db.select(
+      db.syncQueueTable,
+    )..where((tbl) => tbl.collection.equals(collection))).get();
     return pending.map((item) => item.id).toSet();
   }
 

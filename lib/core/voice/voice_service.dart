@@ -92,7 +92,8 @@ class VoiceService {
     // Load API Keys
     final orbitGeminiKey = dotenv.env['GEMINI_API_KEY']?.trim() ?? '';
     final userGeminiKey = await SecureKeyStorage.getKey('gemini');
-    final hasUserGemini = userGeminiKey != null && userGeminiKey.trim().isNotEmpty;
+    final hasUserGemini =
+        userGeminiKey != null && userGeminiKey.trim().isNotEmpty;
 
     final orbitGroqKey = dotenv.env['GROQ_API_KEY']?.trim() ?? '';
     final userGroqKey = await SecureKeyStorage.getKey('groq');
@@ -105,9 +106,15 @@ class VoiceService {
         AppLogger.info(
           'VoiceService: Attempting $modelId transcription on Groq using USER API key...',
         );
-        final text = await _transcribeWithGroq(file, modelId, userGroqKey.trim());
+        final text = await _transcribeWithGroq(
+          file,
+          modelId,
+          userGroqKey.trim(),
+        );
         if (text.isNotEmpty) {
-          AppLogger.info('VoiceService: $modelId using USER API key succeeded.');
+          AppLogger.info(
+            'VoiceService: $modelId using USER API key succeeded.',
+          );
           _logTranscription(
             provider: 'Groq (Voice)',
             modelName: modelName,
@@ -143,9 +150,15 @@ class VoiceService {
         AppLogger.info(
           'VoiceService: Attempting $modelId transcription on Gemini using USER API key...',
         );
-        final text = await _transcribeWithGemini(file, modelId, userGeminiKey.trim());
+        final text = await _transcribeWithGemini(
+          file,
+          modelId,
+          userGeminiKey.trim(),
+        );
         if (text.isNotEmpty) {
-          AppLogger.info('VoiceService: $modelId using USER API key succeeded.');
+          AppLogger.info(
+            'VoiceService: $modelId using USER API key succeeded.',
+          );
           _logTranscription(
             provider: 'Gemini (Voice)',
             modelName: modelName,
@@ -195,10 +208,7 @@ class VoiceService {
           return text;
         }
       } catch (e) {
-        AppLogger.warning(
-          'VoiceService: $modelId using ORBIT key failed',
-          e,
-        );
+        AppLogger.warning('VoiceService: $modelId using ORBIT key failed', e);
         _logTranscription(
           provider: 'Groq (Voice)',
           modelName: modelName,
@@ -233,10 +243,7 @@ class VoiceService {
           return text;
         }
       } catch (e) {
-        AppLogger.warning(
-          'VoiceService: $modelId using ORBIT key failed',
-          e,
-        );
+        AppLogger.warning('VoiceService: $modelId using ORBIT key failed', e);
         _logTranscription(
           provider: 'Gemini (Voice)',
           modelName: modelName,
@@ -252,23 +259,41 @@ class VoiceService {
 
     try {
       // ── First Priority: USER API Keys (in order) ──────────────────────────
-      final textUser1 = await tryUserGroq('Whisper Large V3 Turbo', 'whisper-large-v3-turbo');
+      final textUser1 = await tryUserGroq(
+        'Whisper Large V3 Turbo',
+        'whisper-large-v3-turbo',
+      );
       if (textUser1 != null) return textUser1;
 
-      final textUser2 = await tryUserGemini('Gemini 2.5 Flash (Voice)', 'gemini-2.5-flash');
+      final textUser2 = await tryUserGemini(
+        'Gemini 2.5 Flash (Voice)',
+        'gemini-2.5-flash',
+      );
       if (textUser2 != null) return textUser2;
 
-      final textUser3 = await tryUserGroq('Whisper Large V3', 'whisper-large-v3');
+      final textUser3 = await tryUserGroq(
+        'Whisper Large V3',
+        'whisper-large-v3',
+      );
       if (textUser3 != null) return textUser3;
 
       // ── Second Priority: ORBIT Default Keys (in order) ─────────────────────
-      final textOrbit1 = await tryOrbitGroq('Whisper Large V3 Turbo', 'whisper-large-v3-turbo');
+      final textOrbit1 = await tryOrbitGroq(
+        'Whisper Large V3 Turbo',
+        'whisper-large-v3-turbo',
+      );
       if (textOrbit1 != null) return textOrbit1;
 
-      final textOrbit2 = await tryOrbitGemini('Gemini 2.5 Flash (Voice)', 'gemini-2.5-flash');
+      final textOrbit2 = await tryOrbitGemini(
+        'Gemini 2.5 Flash (Voice)',
+        'gemini-2.5-flash',
+      );
       if (textOrbit2 != null) return textOrbit2;
 
-      final textOrbit3 = await tryOrbitGroq('Whisper Large V3', 'whisper-large-v3');
+      final textOrbit3 = await tryOrbitGroq(
+        'Whisper Large V3',
+        'whisper-large-v3',
+      );
       if (textOrbit3 != null) return textOrbit3;
 
       throw Exception(

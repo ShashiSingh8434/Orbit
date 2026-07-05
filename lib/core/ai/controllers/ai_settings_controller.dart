@@ -119,7 +119,8 @@ class AiSettingsController extends Notifier<AiSettingsState> {
         : AiMode.orbitDefault;
 
     // Load provider statuses
-    final providers = _loadedProviders ?? Map<String, ProviderInfo>.from(_defaultProviders);
+    final providers =
+        _loadedProviders ?? Map<String, ProviderInfo>.from(_defaultProviders);
     for (final id in providers.keys) {
       final hasKey = prefs.getBool('has_user_key_$id') ?? false;
       final health = manager.healthMonitor.getStatus(id);

@@ -74,7 +74,9 @@ class DriftAcademicRepository implements AcademicRepository {
 
   @override
   Future<AcademicSchedule?> getSchedule(String uid) async {
-    final row = await (db.select(db.academicTable)..where((tbl) => tbl.uid.equals(uid))).getSingleOrNull();
+    final row = await (db.select(
+      db.academicTable,
+    )..where((tbl) => tbl.uid.equals(uid))).getSingleOrNull();
     if (row == null) return null;
     return AcademicSchedule.fromJson(row.schedule);
   }
@@ -101,7 +103,9 @@ class DriftAcademicRepository implements AcademicRepository {
 
   @override
   Future<void> clearSchedule(String uid) async {
-    await (db.delete(db.academicTable)..where((tbl) => tbl.uid.equals(uid))).go();
+    await (db.delete(
+      db.academicTable,
+    )..where((tbl) => tbl.uid.equals(uid))).go();
     await sync.enqueue(
       collection: 'academic',
       operation: 'DELETE',
