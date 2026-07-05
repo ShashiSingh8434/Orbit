@@ -63,12 +63,15 @@ class DecisionListPage extends ConsumerWidget {
             );
           }
 
-          final Map<String, List<DecisionModel>> grouped = {};
+          final Map<DateTime, List<DecisionModel>> grouped = {};
           for (final d in state.items) {
-            final dateKey = OrbitDateUtils.friendlyLabel(
-              OrbitDateUtils.dateKey(d.createdAt),
-            );
-            grouped.putIfAbsent(dateKey, () => []).add(d);
+            final date = DateTime(d.createdAt.year, d.createdAt.month, d.createdAt.day);
+            grouped.putIfAbsent(date, () => []).add(d);
+          }
+
+          final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+          for (final date in sortedDates) {
+            grouped[date]!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           }
 
           return NotificationListener<ScrollNotification>(
@@ -82,18 +85,21 @@ class DecisionListPage extends ConsumerWidget {
               onRefresh: () =>
                   ref.read(paginatedDecisionsProvider.notifier).refresh(),
               child: ListView.builder(
-                itemCount: grouped.length + (state.isLoadMore ? 1 : 0),
+                itemCount: sortedDates.length + (state.isLoadMore ? 1 : 0),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemBuilder: (context, index) {
-                  if (index == grouped.length) {
+                  if (index == sortedDates.length) {
                     return const Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
 
-                  final dateKey = grouped.keys.elementAt(index);
-                  final dayDecisions = grouped[dateKey]!;
+                  final date = sortedDates[index];
+                  final dayDecisions = grouped[date]!;
+                  final dateKey = OrbitDateUtils.friendlyLabel(
+                    OrbitDateUtils.dateKey(date),
+                  );
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

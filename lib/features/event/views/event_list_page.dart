@@ -63,12 +63,15 @@ class EventListPage extends ConsumerWidget {
             );
           }
 
-          final Map<String, List<EventModel>> grouped = {};
+          final Map<DateTime, List<EventModel>> grouped = {};
           for (final e in state.items) {
-            final dateKey = OrbitDateUtils.friendlyLabel(
-              OrbitDateUtils.dateKey(e.eventDate),
-            );
-            grouped.putIfAbsent(dateKey, () => []).add(e);
+            final date = DateTime(e.eventDate.year, e.eventDate.month, e.eventDate.day);
+            grouped.putIfAbsent(date, () => []).add(e);
+          }
+
+          final sortedDates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+          for (final date in sortedDates) {
+            grouped[date]!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           }
 
           return NotificationListener<ScrollNotification>(
@@ -82,18 +85,21 @@ class EventListPage extends ConsumerWidget {
               onRefresh: () =>
                   ref.read(paginatedEventsProvider.notifier).refresh(),
               child: ListView.builder(
-                itemCount: grouped.length + (state.isLoadMore ? 1 : 0),
+                itemCount: sortedDates.length + (state.isLoadMore ? 1 : 0),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemBuilder: (context, index) {
-                  if (index == grouped.length) {
+                  if (index == sortedDates.length) {
                     return const Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
 
-                  final dateKey = grouped.keys.elementAt(index);
-                  final dayEvents = grouped[dateKey]!;
+                  final date = sortedDates[index];
+                  final dayEvents = grouped[date]!;
+                  final dateKey = OrbitDateUtils.friendlyLabel(
+                    OrbitDateUtils.dateKey(date),
+                  );
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
