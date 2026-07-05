@@ -8,6 +8,7 @@ import '../../../core/models/paginated_result.dart';
 import '../../../core/providers/paginated_list_notifier.dart';
 import 'decision_edit_page.dart';
 import '../../../core/widgets/orbit_card.dart';
+import '../../../core/security/exceptions/crypto_exceptions.dart';
 
 final paginatedDecisionsProvider =
     StateNotifierProvider<
@@ -50,7 +51,7 @@ class DecisionListPage extends ConsumerWidget {
           }
 
           if (state.error != null && state.items.isEmpty) {
-            return Center(child: Text('Error: ${state.error}'));
+            return Center(child: Text(state.error!.userFriendlyMessage));
           }
 
           if (state.items.isEmpty) {

@@ -19,12 +19,31 @@ import '../../features/academic/models/academic_schedule.dart';
 import '../../features/academic/views/academic_page.dart';
 import '../../features/academic/views/courses_page.dart';
 import '../../features/academic/views/edit_course_page.dart';
+import '../../core/security/services/recovery_service.dart';
+import '../../core/security/views/passphrase_setup_page.dart';
+import '../../core/security/views/passphrase_recovery_page.dart';
+import '../../core/utils/app_logger.dart';
 import 'app_routes.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = _RouterNotifier(ref);
+
+  // Re-run redirect whenever auth state changes
+  ref.listen(authStateProvider, (prev, next) {
+    AppLogger.info('Router: authStateProvider changed. Notifying listeners.');
+    notifier.refresh();
+  });
+
+  // Re-run redirect whenever current encryption state changes
+  ref.listen(currentEncryptionStateProvider, (prev, next) {
+    AppLogger.info(
+      'Router: currentEncryptionStateProvider changed. Notifying listeners.',
+    );
+    notifier.refresh();
+  });
+
   return GoRouter(
     debugLogDiagnostics: true,
     refreshListenable: notifier,
@@ -41,6 +60,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       // ── Unauthenticated ───────────────────────────────────────────────
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),
       GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginPage()),
+
+      // ── Encryption gate (authenticated but not yet encrypted-ready) ───
+      GoRoute(
+        path: AppRoutes.setupPassphrase,
+        builder: (_, _) => const PassphraseSetupPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.recoverPassphrase,
+        builder: (_, _) => const PassphraseRecoveryPage(),
+      ),
 
       // ── Authenticated ─────────────────────────────────────────────────
       GoRoute(
@@ -131,38 +160,95 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-// ── Auth Redirect Guard ───────────────────────────────────────────────────────
+// ── Auth + Encryption Redirect Guard ─────────────────────────────────────────
+
 class _RouterNotifier extends ChangeNotifier {
-  _RouterNotifier(this._ref) {
-    _ref.listen<AsyncValue>(authStateProvider, (_, _) {
-      notifyListeners();
-    });
-  }
+  _RouterNotifier(this._ref);
 
   final Ref _ref;
 
+  void refresh() => notifyListeners();
+
+  /// Determines the redirect destination based on auth + encryption state.
+  ///
+  /// Priority order:
+  /// 1. Unauthenticated → /login
+  /// 2. Authenticated but encryption state loading → / (Splash screen)
+  /// 3. Authenticated and encryption state needsSetup → /setup-passphrase
+  /// 4. Authenticated and encryption state needsRecovery → /recover-passphrase
+  /// 5. Authenticated and encryption state ready → /home
   String? redirect(BuildContext context, GoRouterState state) {
-    final authValue = _ref.read(authStateProvider);
     final loc = state.matchedLocation;
+    final authValue = _ref.read(authStateProvider);
 
-    if (loc == AppRoutes.splash) {
-      return null;
-    }
+    AppLogger.info(
+      'Router: Redirect called for loc: $loc. Auth status: isAuthenticated=${authValue.value != null}, isLoading=${authValue.isLoading}',
+    );
 
+    // 1. Auth still loading -> show splash
     if (authValue.isLoading) {
+      AppLogger.info('Router: Auth is loading. Directing/staying on Splash.');
+      if (loc == AppRoutes.splash) return null;
       return AppRoutes.splash;
     }
 
-    final isAuthenticated = authValue.value != null;
+    final user = authValue.value;
+    final isAuthenticated = user != null;
 
+    // 2. Not authenticated -> go to login
     if (!isAuthenticated) {
-      return loc == AppRoutes.login ? null : AppRoutes.login;
+      AppLogger.info('Router: Unauthenticated. Directing to Login.');
+      if (loc == AppRoutes.login || loc == AppRoutes.splash) return null;
+      return AppRoutes.login;
     }
 
-    if (loc == AppRoutes.login) {
-      return AppRoutes.home;
+    // 3. Authenticated -> Check Encryption State
+    final encState = _ref.read(currentEncryptionStateProvider);
+    AppLogger.info(
+      'Router: Authenticated user. Encryption status: value=${encState.value}, isLoading=${encState.isLoading}',
+    );
+
+    // 3a. Encryption state still loading -> keep showing splash screen
+    if (encState.isLoading) {
+      AppLogger.info(
+        'Router: Encryption state is loading. Directing/staying on Splash.',
+      );
+      if (loc == AppRoutes.splash) return null;
+      return AppRoutes.splash;
     }
 
-    return null;
+    final stateValue = encState.value;
+    if (stateValue == null) {
+      AppLogger.info(
+        'Router: Encryption state value is null. Directing/staying on Splash.',
+      );
+      if (loc == AppRoutes.splash) return null;
+      return AppRoutes.splash;
+    }
+
+    // 3b. Encryption state resolved
+    AppLogger.info('Router: Encryption state resolved to: $stateValue');
+    switch (stateValue) {
+      case EncryptionState.needsSetup:
+        if (loc == AppRoutes.setupPassphrase) return null;
+        AppLogger.info('Router: Redirecting to setup passphrase.');
+        return AppRoutes.setupPassphrase;
+
+      case EncryptionState.needsRecovery:
+        if (loc == AppRoutes.recoverPassphrase) return null;
+        AppLogger.info('Router: Redirecting to recover passphrase.');
+        return AppRoutes.recoverPassphrase;
+
+      case EncryptionState.ready:
+        // If on splash, login, or gate screens, go to home
+        if (loc == AppRoutes.splash ||
+            loc == AppRoutes.login ||
+            loc == AppRoutes.setupPassphrase ||
+            loc == AppRoutes.recoverPassphrase) {
+          AppLogger.info('Router: Encryption is ready. Redirecting to Home.');
+          return AppRoutes.home;
+        }
+        return null;
+    }
   }
 }

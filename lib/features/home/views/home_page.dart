@@ -17,6 +17,7 @@ import '../../../core/ai/engine/ai_queue_manager.dart';
 import '../widgets/bottom_action_bar.dart';
 import '../widgets/first_run_overlay.dart';
 import '../../../core/ai/providers/ai_notification_provider.dart';
+import '../../../core/security/exceptions/crypto_exceptions.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -413,7 +414,7 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
         );
       },
       loading: () => DaySkeletonLoader(date: widget.date),
-      error: (err, _) => Center(child: Text('Error loading day data: $err')),
+      error: (err, _) => Center(child: Text(err.userFriendlyMessage)),
     );
   }
 }

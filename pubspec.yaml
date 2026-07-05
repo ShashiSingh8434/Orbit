@@ -1,6 +1,7 @@
 name: orbit
 description: "Your AI-powered personal orbit — reflections, knowledge, and tasks."
 publish_to: 'none'
+
 homepage: https://shashisingh8434.vercel.app/projects/orbit
 repository: https://github.com/ShashiSingh8434/Orbit
 issue_tracker: https://github.com/ShashiSingh8434/Orbit/issues
@@ -62,6 +63,9 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   http: ^1.2.2
   crypto: ^3.0.6
+
+  # ── Encryption (AES-256-GCM, Argon2id, HKDF) ──
+  cryptography: ^2.7.0
   url_launcher: ^6.3.1
   package_info_plus: ^8.0.0
 

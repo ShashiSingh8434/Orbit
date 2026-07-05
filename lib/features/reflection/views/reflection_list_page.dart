@@ -7,6 +7,7 @@ import '../../auth/controllers/auth_controller.dart';
 import '../controllers/reflection_controller.dart';
 import '../models/reflection_model.dart';
 import '../widgets/reflection_card.dart';
+import '../../../core/security/exceptions/crypto_exceptions.dart';
 
 /// Lists all reflections for a given [dateKey] (defaults to today).
 /// Tapping the FAB opens [ReflectionEditPage] to create a new entry.
@@ -163,7 +164,7 @@ class ReflectionListPage extends ConsumerWidget {
                   ],
                 ),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => Center(child: Text(e.userFriendlyMessage)),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
