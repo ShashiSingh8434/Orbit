@@ -58,7 +58,7 @@ class AboutPage extends StatelessWidget {
                     width: 75,
                     height: 75,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       width: 75,
                       height: 75,
                       decoration: BoxDecoration(
