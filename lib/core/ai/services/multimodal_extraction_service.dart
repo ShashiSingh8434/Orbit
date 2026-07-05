@@ -6,6 +6,8 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
 import '../engine/ai_request_manager.dart';
 import '../storage/secure_key_storage.dart';
+import '../analytics/ai_analytics_service.dart';
+import '../analytics/ai_usage_log.dart';
 import '../../utils/app_logger.dart';
 import '../../../features/academic/data/static_slots.dart';
 
@@ -61,6 +63,7 @@ class MultimodalExtractionService {
       Object? lastError;
 
       for (final modelName in _models) {
+        final stopwatch = Stopwatch()..start();
         try {
           _updateStatus(true, 'Extracting with $modelName...');
           AppLogger.info(
@@ -78,6 +81,11 @@ class MultimodalExtractionService {
           AppLogger.info(
             'MultimodalExtractionService: Extraction succeeded using model $modelName.',
           );
+          _logExtraction(
+            modelName: modelName,
+            success: true,
+            responseTimeMs: stopwatch.elapsedMilliseconds,
+          );
           return result;
         } catch (e, stackTrace) {
           lastError = e;
@@ -85,6 +93,12 @@ class MultimodalExtractionService {
             'MultimodalExtractionService: Model $modelName failed. Trying next fallback.',
             e,
             stackTrace,
+          );
+          _logExtraction(
+            modelName: modelName,
+            success: false,
+            responseTimeMs: stopwatch.elapsedMilliseconds,
+            errorType: e.toString(),
           );
         }
       }
@@ -95,6 +109,38 @@ class MultimodalExtractionService {
           );
     } finally {
       _updateStatus(false, null);
+    }
+  }
+
+  void _logExtraction({
+    required String modelName,
+    required bool success,
+    required int responseTimeMs,
+    String? errorType,
+  }) {
+    try {
+      final analytics = _ref.read(aiAnalyticsServiceProvider);
+      final log = AiUsageLog(
+        provider: 'Groq (Multimodal)',
+        modelName: modelName.contains('scout') ? 'Llama 4 Scout (Multimodal)' : 'Qwen 3.6 (Multimodal)',
+        modelId: modelName,
+        aiMode: 'Orbit',
+        apiSource: 'Orbit API',
+        timestamp: DateTime.now(),
+        success: success,
+        errorType: errorType,
+        retryCount: 0,
+        responseTimeMs: responseTimeMs,
+        inputTokens: null,
+        outputTokens: null,
+        totalTokens: null,
+        cached: false,
+        queueWaitTimeMs: 0,
+        processingTimeMs: responseTimeMs,
+      );
+      analytics.logRequest(log);
+    } catch (e, stack) {
+      AppLogger.error('MultimodalExtractionService: Failed to log extraction request', e, stack);
     }
   }
 
