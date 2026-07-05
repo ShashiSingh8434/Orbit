@@ -153,12 +153,12 @@ class _PassphraseSetupPageState extends ConsumerState<PassphraseSetupPage>
                         ),
                       ),
                     ),
-                    TextButton.icon(
-                      onPressed: _signOut,
-                      icon: const Icon(Icons.logout, size: 16),
-                      label: const Text('Logout'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: cs.onSurfaceVariant,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton.filledTonal(
+                        onPressed: _signOut,
+                        icon: const Icon(Icons.logout),
+                        tooltip: 'Logout',
                       ),
                     ),
                   ],

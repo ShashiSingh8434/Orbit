@@ -113,9 +113,7 @@ class _PassphraseRecoveryPageState
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
               'Delete Permanently',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
