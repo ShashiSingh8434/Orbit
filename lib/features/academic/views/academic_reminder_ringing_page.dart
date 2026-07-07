@@ -22,6 +22,7 @@ class _AcademicReminderRingingPageState extends ConsumerState<AcademicReminderRi
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Timer _timeTimer;
+  Timer? _statusTimer;
   String _currentTimeString = '';
 
   @override
@@ -34,12 +35,21 @@ class _AcademicReminderRingingPageState extends ConsumerState<AcademicReminderRi
 
     _updateTime();
     _timeTimer = Timer.periodic(const Duration(seconds: 1), (_) => _updateTime());
+
+    // Periodically check if alarm is still ringing (handles native 2-min timeout and drawer Stop button)
+    _statusTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+      final isRinging = await Alarm.isRinging(widget.alarmSettings.id);
+      if (!isRinging) {
+        _dismissPage();
+      }
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     _timeTimer.cancel();
+    _statusTimer?.cancel();
     super.dispose();
   }
 
@@ -55,22 +65,24 @@ class _AcademicReminderRingingPageState extends ConsumerState<AcademicReminderRi
     }
   }
 
-  Future<void> _stopAlarm() async {
-    final id = widget.alarmSettings.id;
-    // Clear global ringing state in router provider
+  void _dismissPage() {
+    _statusTimer?.cancel();
     ref.read(ringingAlarmProvider.notifier).state = null;
-    
-    await Alarm.stop(id);
-    await AlarmHelper.cancelAlarmTimeout(id);
-
     if (mounted) {
       final navigator = Navigator.of(context);
       if (navigator.canPop()) {
         navigator.pop();
       } else {
-        await SystemNavigator.pop();
+        SystemNavigator.pop();
       }
     }
+  }
+
+  Future<void> _stopAlarm() async {
+    final id = widget.alarmSettings.id;
+    await Alarm.stop(id);
+    await AlarmHelper.cancelAlarmTimeout(id);
+    _dismissPage();
   }
 
   @override
