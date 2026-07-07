@@ -55,7 +55,7 @@ final dayTasksStreamProvider = StreamProvider.family<List<TaskModel>, DateTime>(
       final todayKey = OrbitDateUtils.todayKey();
       final isPageToday = key == todayKey;
 
-      return tasks.where((t) {
+      final filtered = tasks.where((t) {
         if (t.dueDate != null) {
           return OrbitDateUtils.dateKey(t.dueDate!) == key;
         }
@@ -67,6 +67,9 @@ final dayTasksStreamProvider = StreamProvider.family<List<TaskModel>, DateTime>(
           return OrbitDateUtils.dateKey(completedDate) == key;
         }
       }).toList();
+
+      filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return filtered;
     });
   },
 );
@@ -78,9 +81,11 @@ final dayLearningsStreamProvider =
       return ref.watch(learningRepositoryProvider).watchLearnings(user.uid).map(
         (learnings) {
           final key = OrbitDateUtils.dateKey(date);
-          return learnings
+          final filtered = learnings
               .where((l) => OrbitDateUtils.dateKey(l.createdAt) == key)
               .toList();
+          filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return filtered;
         },
       );
     });
@@ -92,9 +97,11 @@ final dayDecisionsStreamProvider =
       return ref.watch(decisionRepositoryProvider).watchDecisions(user.uid).map(
         (decisions) {
           final key = OrbitDateUtils.dateKey(date);
-          return decisions
+          final filtered = decisions
               .where((d) => OrbitDateUtils.dateKey(d.createdAt) == key)
               .toList();
+          filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return filtered;
         },
       );
     });
@@ -107,9 +114,11 @@ final dayEventsStreamProvider =
         events,
       ) {
         final key = OrbitDateUtils.dateKey(date);
-        return events
+        final filtered = events
             .where((e) => OrbitDateUtils.dateKey(e.eventDate) == key)
             .toList();
+        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return filtered;
       });
     });
 

@@ -226,6 +226,15 @@ class _HomePageState extends ConsumerState<HomePage> {
           );
         },
       ),
+
+      // ── FAB — attached here ──────────────────────────────────────────────
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push(AppRoutes.academic),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).colorScheme.onSecondary,
+        tooltip: 'Academic Timetable',
+        child: const Icon(Icons.school_rounded),
+      ),
     );
   }
 }
@@ -382,7 +391,8 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
             ],
             if (data.tasks.isNotEmpty) ...[
               TaskSection(
-                tasks: data.tasks,
+                tasks: data.tasks.toList()
+                  ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
                 isLoading: false,
                 date: widget.date,
               ),
@@ -390,7 +400,8 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
             ],
             if (data.learnings.isNotEmpty) ...[
               LearningSection(
-                learnings: data.learnings,
+                learnings: data.learnings.toList()
+                  ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
                 isLoading: false,
                 date: widget.date,
               ),
@@ -398,7 +409,8 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
             ],
             if (data.decisions.isNotEmpty) ...[
               DecisionSection(
-                decisions: data.decisions,
+                decisions: data.decisions.toList()
+                  ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
                 isLoading: false,
                 date: widget.date,
               ),
@@ -406,7 +418,8 @@ class _DelayedDataViewState extends State<_DelayedDataView> {
             ],
             if (data.events.isNotEmpty) ...[
               EventSection(
-                events: data.events,
+                events: data.events.toList()
+                  ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
                 isLoading: false,
                 date: widget.date,
               ),

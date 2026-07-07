@@ -74,6 +74,74 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                 if (filteredTasks.isEmpty) {
                   return _EmptyState(filter: _currentFilter);
                 }
+
+                if (_currentFilter == TaskFilter.completed) {
+                  final Map<DateTime, List<TaskModel>> grouped = {};
+                  for (final t in filteredTasks) {
+                    final completionDate =
+                        t.dueDate ?? t.completedAt ?? t.createdAt;
+                    final date = DateTime(
+                      completionDate.year,
+                      completionDate.month,
+                      completionDate.day,
+                    );
+                    grouped.putIfAbsent(date, () => []).add(t);
+                  }
+
+                  final sortedDates = grouped.keys.toList()
+                    ..sort((a, b) => b.compareTo(a));
+                  for (final date in sortedDates) {
+                    grouped[date]!.sort((a, b) {
+                      final aTime = a.updatedAt ?? a.createdAt;
+                      final bTime = b.updatedAt ?? b.createdAt;
+                      return bTime.compareTo(aTime);
+                    });
+                  }
+
+                  final theme = Theme.of(context);
+                  final colorScheme = theme.colorScheme;
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: sortedDates.length,
+                    itemBuilder: (context, index) {
+                      final date = sortedDates[index];
+                      final dayTasks = grouped[date]!;
+                      final dateKey = OrbitDateUtils.friendlyLabel(
+                        OrbitDateUtils.dateKey(date),
+                      );
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
+                            child: Text(
+                              dateKey,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          ...dayTasks.map(
+                            (task) => TaskTile(
+                              task: task,
+                              onToggle: (done) => ref
+                                  .read(taskControllerProvider.notifier)
+                                  .toggleDone(task, done),
+                              onDelete: () => ref
+                                  .read(taskControllerProvider.notifier)
+                                  .deleteTask(task),
+                              onEdit: () => _showTaskModal(context, task: task),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: filteredTasks.length,

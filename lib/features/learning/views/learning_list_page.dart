@@ -76,7 +76,7 @@ class LearningListPage extends ConsumerWidget {
           final sortedDates = grouped.keys.toList()
             ..sort((a, b) => b.compareTo(a));
           for (final date in sortedDates) {
-            grouped[date]!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            grouped[date]!.sort((a, b) => a.createdAt.compareTo(b.createdAt));
           }
 
           return NotificationListener<ScrollNotification>(

@@ -91,14 +91,6 @@ class TimetableWidget : GlanceAppWidget() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
 
-        val deepLinkIntent_course = Intent(
-            Intent.ACTION_VIEW,
-            android.net.Uri.parse("orbit://app/home/academic")
-        ).apply {
-            setClass(context, MainActivity::class.java)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
@@ -231,7 +223,7 @@ class TimetableWidget : GlanceAppWidget() {
                                     textPrimary = textPrimaryColor,
                                     textSecondary = textSecondaryColor,
                                     accent = accentColor,
-                                    launchIntent = deepLinkIntent_course
+                                    launchIntent = deepLinkIntent_academic
                                 )
                             }
                         }

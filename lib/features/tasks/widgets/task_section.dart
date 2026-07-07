@@ -75,7 +75,11 @@ class TaskSection extends ConsumerWidget {
         date.day == DateTime.now().day;
     final emptyText = isToday ? 'No tasks for today' : 'No tasks for this day';
 
-    if (tasks == null || tasks!.isEmpty) {
+    final sortedTasks = tasks != null
+        ? (tasks!.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt)))
+        : <TaskModel>[];
+
+    if (sortedTasks.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(16),
@@ -128,7 +132,7 @@ class TaskSection extends ConsumerWidget {
             ),
           ),
         ),
-        ...tasks!.map<Widget>(
+        ...sortedTasks.map<Widget>(
           (t) => OrbitCard(
             onTap: () => context.push(AppRoutes.tasks),
             margin: const EdgeInsets.only(bottom: 8),

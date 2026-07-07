@@ -301,12 +301,6 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.auto_awesome_rounded,
-                            color: colorScheme.primary,
-                            size: 28,
-                          ),
-                          const SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,11 +338,15 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                               ],
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 12),
                           IconButton.filled(
                             onPressed: _handleUploadPressed,
                             icon: const Icon(Icons.upload_file_rounded),
                             tooltip: 'Upload Timetable',
+                            style: IconButton.styleFrom(
+                              backgroundColor: colorScheme.secondary,
+                              foregroundColor: colorScheme.onSecondary,
+                            ),
                           ),
                         ],
                       ),
