@@ -468,7 +468,6 @@ class _AcademicReminderSettingsPageState
             if (ref.watch(academicAlarmProvider).isNotEmpty) ...[
               OutlinedButton.icon(
                 onPressed: () async {
-                  final messenger = ScaffoldMessenger.of(context);
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(

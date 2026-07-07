@@ -123,9 +123,9 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
       state = newKeys;
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Reminder removed.')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Reminder removed.')),
+        // );
       }
     } else {
       // Request notifications permission on Android (Exact alarm permission is automatically
@@ -183,9 +183,9 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
 
         final formattedTime = _formatDateTime(alarmTime);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Reminder set for $formattedTime')),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text('Reminder set for $formattedTime')),
+          // );
         }
       } else {
         if (context.mounted) {

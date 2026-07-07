@@ -73,7 +73,7 @@ class AlarmTimeoutReceiver : BroadcastReceiver() {
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("Class Reminder")
-            .setContentText("Class $classDetails starting soon.")
+            .setContentText("$classDetails starting soon.")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)

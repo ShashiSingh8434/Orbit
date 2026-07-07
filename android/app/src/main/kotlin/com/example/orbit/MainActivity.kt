@@ -20,6 +20,12 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        try {
+            com.gdelataillade.alarm.services.AlarmRingingLiveData.instance.removeObservers(this)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
@@ -27,7 +33,6 @@ class MainActivity : FlutterActivity() {
             @Suppress("DEPRECATION")
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             )
