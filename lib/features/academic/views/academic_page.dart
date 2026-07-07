@@ -292,7 +292,7 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                   child: FilledButton.icon(
                     onPressed: () => context.push(AppRoutes.academicReminderSettings),
                     icon: const Icon(Icons.alarm_rounded),
-                    label: const Text('Reminders Setting'),
+                    label: const Text('Reminder Settings'),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(48),
                       backgroundColor: colorScheme.secondaryContainer,

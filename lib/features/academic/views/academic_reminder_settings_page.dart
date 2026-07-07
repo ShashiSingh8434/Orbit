@@ -6,6 +6,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../providers/academic_alarm_provider.dart';
+import '../providers/academic_provider.dart';
 
 class AcademicReminderSettingsPage extends ConsumerStatefulWidget {
   const AcademicReminderSettingsPage({super.key});
@@ -74,6 +75,13 @@ class _AcademicReminderSettingsPageState
           ringtonePath: _ringtonePath,
           ringtoneName: _ringtoneName,
         );
+
+    // Reschedule all active alarms with the new warning offset and ringtone
+    final academicState = ref.read(academicStateProvider);
+    final schedule = academicState.schedule;
+    if (schedule != null) {
+      await ref.read(academicAlarmProvider.notifier).reschedulePassedAlarms(schedule.schedule);
+    }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -482,9 +490,9 @@ class _AcademicReminderSettingsPageState
 
                   if (confirm == true) {
                     await ref.read(academicAlarmProvider.notifier).clearAllReminders();
-                    messenger.showSnackBar(
-                      const SnackBar(content: Text('All active reminders have been cleared.')),
-                    );
+                    // messenger.showSnackBar(
+                    //   const SnackBar(content: Text('All active reminders have been cleared.')),
+                    // );
                   }
                 },
                 icon: Icon(Icons.alarm_off_rounded, color: colorScheme.error),

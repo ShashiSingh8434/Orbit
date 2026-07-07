@@ -279,7 +279,10 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
       final alarm = await Alarm.getAlarm(id);
       final calculatedAlarmTime = _calculateNextAlarmDateTime(day, session.startTime, minutesBefore);
 
-      if (alarm == null || alarm.dateTime.isBefore(now) || alarm.dateTime != calculatedAlarmTime) {
+      if (alarm == null ||
+          alarm.dateTime.isBefore(now) ||
+          alarm.dateTime != calculatedAlarmTime ||
+          alarm.assetAudioPath != ringtonePath) {
         final alarmSettings = AlarmSettings(
           id: id,
           dateTime: calculatedAlarmTime,
