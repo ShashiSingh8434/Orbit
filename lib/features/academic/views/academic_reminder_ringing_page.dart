@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:alarm/alarm.dart';
 import '../services/alarm_helper.dart';
+import '../../../app/router/app_router.dart';
 
-class AcademicReminderRingingPage extends StatefulWidget {
+class AcademicReminderRingingPage extends ConsumerStatefulWidget {
   final AlarmSettings alarmSettings;
 
   const AcademicReminderRingingPage({
@@ -13,10 +15,10 @@ class AcademicReminderRingingPage extends StatefulWidget {
   });
 
   @override
-  State<AcademicReminderRingingPage> createState() => _AcademicReminderRingingPageState();
+  ConsumerState<AcademicReminderRingingPage> createState() => _AcademicReminderRingingPageState();
 }
 
-class _AcademicReminderRingingPageState extends State<AcademicReminderRingingPage>
+class _AcademicReminderRingingPageState extends ConsumerState<AcademicReminderRingingPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Timer _timeTimer;
@@ -55,6 +57,9 @@ class _AcademicReminderRingingPageState extends State<AcademicReminderRingingPag
 
   Future<void> _stopAlarm() async {
     final id = widget.alarmSettings.id;
+    // Clear global ringing state in router provider
+    ref.read(ringingAlarmProvider.notifier).state = null;
+    
     await Alarm.stop(id);
     await AlarmHelper.cancelAlarmTimeout(id);
 
@@ -109,7 +114,6 @@ class _AcademicReminderRingingPageState extends State<AcademicReminderRingingPag
               // Middle Section: Pulsating Icon & Details Card
               Column(
                 children: [
-                  // Animated alarm bell
                   AnimatedBuilder(
                     animation: _animationController,
                     builder: (context, child) {
@@ -133,7 +137,6 @@ class _AcademicReminderRingingPageState extends State<AcademicReminderRingingPag
                   ),
                   const SizedBox(height: 48),
 
-                  // Class details container
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),

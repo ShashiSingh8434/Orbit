@@ -27,9 +27,26 @@ class _OrbitAppState extends ConsumerState<OrbitApp> {
   void initState() {
     super.initState();
     _ringSubscription = Alarm.ringStream.stream.listen((alarmSettings) {
-      final router = ref.read(routerProvider);
-      router.push(AppRoutes.academicReminderRinging, extra: alarmSettings);
+      ref.read(ringingAlarmProvider.notifier).state = alarmSettings;
     });
+
+    _checkActiveRingingAlarms();
+  }
+
+  Future<void> _checkActiveRingingAlarms() async {
+    // Wait a brief moment to allow the router and widget tree to mount completely
+    await Future.delayed(const Duration(milliseconds: 1000));
+    if (!mounted) return;
+    try {
+      final alarms = await Alarm.getAlarms();
+      for (final alarm in alarms) {
+        final isRinging = await Alarm.isRinging(alarm.id);
+        if (isRinging) {
+          ref.read(ringingAlarmProvider.notifier).state = alarm;
+          break;
+        }
+      }
+    } catch (_) {}
   }
 
   @override

@@ -31,6 +31,9 @@ import 'app_routes.dart';
 
 // ── Provider ─────────────────────────────────────────────────────────────────
 
+/// Tracks the active ringing alarm settings.
+final ringingAlarmProvider = StateProvider<AlarmSettings?>((ref) => null);
+
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = _RouterNotifier(ref);
 
@@ -44,6 +47,14 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(currentEncryptionStateProvider, (prev, next) {
     AppLogger.info(
       'Router: currentEncryptionStateProvider changed. Notifying listeners.',
+    );
+    notifier.refresh();
+  });
+
+  // Re-run redirect whenever ringing alarm state changes
+  ref.listen(ringingAlarmProvider, (prev, next) {
+    AppLogger.info(
+      'Router: ringingAlarmProvider changed. Notifying listeners.',
     );
     notifier.refresh();
   });
@@ -66,9 +77,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginPage()),
       GoRoute(
         path: AppRoutes.academicReminderRinging,
-        builder: (_, state) => AcademicReminderRingingPage(
-          alarmSettings: state.extra as AlarmSettings,
-        ),
+        builder: (_, state) {
+          final alarm = state.extra as AlarmSettings?;
+          if (alarm != null) {
+            return AcademicReminderRingingPage(alarmSettings: alarm);
+          }
+          final ringing = ref.read(ringingAlarmProvider);
+          if (ringing != null) {
+            return AcademicReminderRingingPage(alarmSettings: ringing);
+          }
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        },
       ),
 
       // ── Encryption gate (authenticated but not yet encrypted-ready) ───
@@ -196,6 +217,21 @@ class _RouterNotifier extends ChangeNotifier {
   /// 5. Authenticated and encryption state ready → /home
   String? redirect(BuildContext context, GoRouterState state) {
     final loc = state.matchedLocation;
+
+    // Check if any alarm is ringing and redirect immediately
+    final ringingAlarm = _ref.read(ringingAlarmProvider);
+    if (ringingAlarm != null) {
+      if (loc != AppRoutes.academicReminderRinging) {
+        return AppRoutes.academicReminderRinging;
+      }
+      return null;
+    }
+
+    // Exempt academic reminder ringing screen from all security guards
+    if (loc == AppRoutes.academicReminderRinging) {
+      return null;
+    }
+
     final authValue = _ref.read(authStateProvider);
 
     AppLogger.info(
