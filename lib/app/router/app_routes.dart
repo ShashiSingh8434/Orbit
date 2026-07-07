@@ -45,6 +45,9 @@ abstract final class AppRoutes {
   // Add/Edit Registered Course.
   static const academicEditCourse = '/home/academic/edit-course';
 
+  // Academic Reminder Settings.
+  static const academicReminderSettings = '/home/academic/reminder-settings';
+
   // App guide.
   static const guide = '/home/guide';
 
@@ -56,4 +59,7 @@ abstract final class AppRoutes {
 
   // Saturn space bonus page.
   static const String bonus = '/home/bonus';
+
+  // Academic Reminder Ringing screen.
+  static const String academicReminderRinging = '/academic-reminder-ringing';
 }

@@ -19,6 +19,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:alarm/alarm.dart';
 import 'firebase_options.dart';
 import 'app/app.dart';
 import 'core/providers/shared_preferences_provider.dart';
@@ -29,6 +30,8 @@ void main() async {
   await dotenv.load(fileName: '.env');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await Alarm.init();
 
   final prefs = await SharedPreferences.getInstance();
 

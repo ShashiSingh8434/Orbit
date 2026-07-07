@@ -1,20 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_routes.dart';
 import '../models/academic_schedule.dart';
+import '../providers/academic_alarm_provider.dart';
 
 /// Card widget to display a single [ClassSession] with action buttons.
-class ClassCard extends StatelessWidget {
+class ClassCard extends ConsumerWidget {
   /// The class session to render.
   final ClassSession session;
+
+  /// The weekday of the session.
+  final String day;
 
   /// Triggered when the card is tapped.
   final VoidCallback onTap;
 
-  const ClassCard({super.key, required this.session, required this.onTap});
+  const ClassCard({
+    super.key,
+    required this.session,
+    required this.day,
+    required this.onTap,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    final activeAlarmKeys = ref.watch(academicAlarmProvider);
+    final sessionKey = '${day}_${session.startTime}_${session.code}';
+    final isAlarmSet = activeAlarmKeys.contains(sessionKey);
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -62,6 +78,29 @@ class ClassCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isAlarmSet ? Icons.alarm_on_rounded : Icons.alarm_add_rounded,
+                      color: isAlarmSet
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant.withAlpha(180),
+                      size: 22,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    style: IconButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    tooltip: isAlarmSet ? 'Remove Reminder' : 'Add Reminder',
+                    onPressed: () async {
+                      final isConfigured = ref.read(academicReminderSettingsProvider).isConfigured;
+                      if (!isConfigured) {
+                        context.push(AppRoutes.academicReminderSettings);
+                      } else {
+                        await ref.read(academicAlarmProvider.notifier).toggleReminder(day, session, context);
+                      }
+                    },
                   ),
                 ],
               ),

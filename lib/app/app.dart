@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:alarm/alarm.dart';
 import '../core/constants/app_constants.dart';
 import '../core/voice/global_voice_status_notch.dart';
 import '../core/ai/views/global_ai_status_notch.dart';
@@ -11,12 +13,33 @@ import 'theme/app_theme.dart';
 import 'theme/theme_notifier.dart';
 
 /// Root widget of the Orbit application.
-
-class OrbitApp extends ConsumerWidget {
+class OrbitApp extends ConsumerStatefulWidget {
   const OrbitApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OrbitApp> createState() => _OrbitAppState();
+}
+
+class _OrbitAppState extends ConsumerState<OrbitApp> {
+  StreamSubscription<AlarmSettings>? _ringSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _ringSubscription = Alarm.ringStream.stream.listen((alarmSettings) {
+      final router = ref.read(routerProvider);
+      router.push(AppRoutes.academicReminderRinging, extra: alarmSettings);
+    });
+  }
+
+  @override
+  void dispose() {
+    _ringSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeNotifierProvider);
 

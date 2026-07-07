@@ -20,6 +20,9 @@ import '../../features/academic/models/academic_schedule.dart';
 import '../../features/academic/views/academic_page.dart';
 import '../../features/academic/views/courses_page.dart';
 import '../../features/academic/views/edit_course_page.dart';
+import '../../features/academic/views/academic_reminder_settings_page.dart';
+import '../../features/academic/views/academic_reminder_ringing_page.dart';
+import 'package:alarm/alarm.dart';
 import '../../core/security/services/recovery_service.dart';
 import '../../core/security/views/passphrase_setup_page.dart';
 import '../../core/security/views/passphrase_recovery_page.dart';
@@ -61,6 +64,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       // ── Unauthenticated ───────────────────────────────────────────────
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),
       GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginPage()),
+      GoRoute(
+        path: AppRoutes.academicReminderRinging,
+        builder: (_, state) => AcademicReminderRingingPage(
+          alarmSettings: state.extra as AlarmSettings,
+        ),
+      ),
 
       // ── Encryption gate (authenticated but not yet encrypted-ready) ───
       GoRoute(
@@ -136,6 +145,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   final extra = state.extra as Map<String, dynamic>?;
                   return EditCoursePage(course: extra?['course'] as Course?);
                 },
+              ),
+              GoRoute(
+                path: 'reminder-settings',
+                builder: (_, _) => const AcademicReminderSettingsPage(),
               ),
             ],
           ),

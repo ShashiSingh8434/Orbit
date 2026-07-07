@@ -284,6 +284,25 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                     ),
                   ),
                 ),
+
+              // Reminder Settings Button for loaded timetable
+              if (hasTimetable)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: FilledButton.icon(
+                    onPressed: () => context.push(AppRoutes.academicReminderSettings),
+                    icon: const Icon(Icons.alarm_rounded),
+                    label: const Text('Reminders Setting'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      backgroundColor: colorScheme.secondaryContainer,
+                      foregroundColor: colorScheme.onSecondaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
               // Prompt to upload timetable via AI at the top if not uploaded yet
               if (!hasTimetable)
                 Padding(
@@ -569,6 +588,7 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
                       final session = sessions[index];
                       return ClassCard(
                         session: session,
+                        day: day,
                         onTap: () {
                           final course = schedule?.courses.firstWhere(
                             (c) =>
