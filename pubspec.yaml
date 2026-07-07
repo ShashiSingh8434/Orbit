@@ -118,4 +118,7 @@ flutter:
     - assets/arrow_black.png
     - assets/arrow_light.png
     - assets/timetable_sample.png
+    - assets/freedom.mp3
+    - assets/slow.mp3
+    - assets/feel.mp3
     - .env
