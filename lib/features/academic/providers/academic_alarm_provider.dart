@@ -27,17 +27,25 @@ class AcademicReminderSettings {
 }
 
 /// Notifier that manages saving and updating reminder settings reactively.
-class AcademicReminderSettingsNotifier extends StateNotifier<AcademicReminderSettings> {
+class AcademicReminderSettingsNotifier
+    extends StateNotifier<AcademicReminderSettings> {
   final SharedPreferences _prefs;
 
   AcademicReminderSettingsNotifier(this._prefs)
-      : super(AcademicReminderSettings(
+    : super(
+        AcademicReminderSettings(
           minutesBefore: _prefs.getInt('academic_reminder_minutes') ?? 15,
-          ringtoneType: _prefs.getString('academic_reminder_ringtone_type') ?? 'asset',
-          ringtonePath: _prefs.getString('academic_reminder_ringtone_path') ?? 'assets/freedom.mp3',
-          ringtoneName: _prefs.getString('academic_reminder_ringtone_name') ?? 'Freedom',
-          isConfigured: _prefs.getBool('academic_reminder_settings_configured') ?? false,
-        ));
+          ringtoneType:
+              _prefs.getString('academic_reminder_ringtone_type') ?? 'asset',
+          ringtonePath:
+              _prefs.getString('academic_reminder_ringtone_path') ??
+              'assets/freedom.mp3',
+          ringtoneName:
+              _prefs.getString('academic_reminder_ringtone_name') ?? 'Freedom',
+          isConfigured:
+              _prefs.getBool('academic_reminder_settings_configured') ?? false,
+        ),
+      );
 
   Future<void> updateSettings({
     required int minutesBefore,
@@ -63,25 +71,29 @@ class AcademicReminderSettingsNotifier extends StateNotifier<AcademicReminderSet
 
 /// Provider for academic reminder settings state.
 final academicReminderSettingsProvider =
-    StateNotifierProvider<AcademicReminderSettingsNotifier, AcademicReminderSettings>((ref) {
-  final prefs = ref.watch(sharedPreferencesProvider);
-  return AcademicReminderSettingsNotifier(prefs);
-});
+    StateNotifierProvider<
+      AcademicReminderSettingsNotifier,
+      AcademicReminderSettings
+    >((ref) {
+      final prefs = ref.watch(sharedPreferencesProvider);
+      return AcademicReminderSettingsNotifier(prefs);
+    });
 
 /// Provider tracking active reminder alarm session keys.
-final academicAlarmProvider = StateNotifierProvider<AcademicAlarmNotifier, Set<String>>((ref) {
-  final prefs = ref.watch(sharedPreferencesProvider);
-  final notifier = AcademicAlarmNotifier(prefs);
+final academicAlarmProvider =
+    StateNotifierProvider<AcademicAlarmNotifier, Set<String>>((ref) {
+      final prefs = ref.watch(sharedPreferencesProvider);
+      final notifier = AcademicAlarmNotifier(prefs);
 
-  ref.listen(academicStateProvider, (previous, next) {
-    final schedule = next.schedule;
-    if (schedule != null) {
-      notifier.reschedulePassedAlarms(schedule.schedule);
-    }
-  }, fireImmediately: true);
+      ref.listen(academicStateProvider, (previous, next) {
+        final schedule = next.schedule;
+        if (schedule != null) {
+          notifier.reschedulePassedAlarms(schedule.schedule);
+        }
+      }, fireImmediately: true);
 
-  return notifier;
-});
+      return notifier;
+    });
 
 class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
   final SharedPreferences _prefs;
@@ -108,7 +120,11 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
     return key.hashCode & 0x7FFFFFFF;
   }
 
-  Future<void> toggleReminder(String day, ClassSession session, BuildContext context) async {
+  Future<void> toggleReminder(
+    String day,
+    ClassSession session,
+    BuildContext context,
+  ) async {
     final key = _getSessionKey(day, session);
     final id = _getAlarmId(key);
     final isSet = state.contains(key);
@@ -119,7 +135,10 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
       await AlarmHelper.cancelAlarmTimeout(id);
 
       final newKeys = Set<String>.from(state)..remove(key);
-      await _prefs.setStringList('academic_active_alarm_keys', newKeys.toList());
+      await _prefs.setStringList(
+        'academic_active_alarm_keys',
+        newKeys.toList(),
+      );
       state = newKeys;
 
       if (context.mounted) {
@@ -137,7 +156,11 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
           if (!request.isGranted) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Notification permission is required to set class reminders.')),
+                const SnackBar(
+                  content: Text(
+                    'Notification permission is required to set class reminders.',
+                  ),
+                ),
               );
             }
             return;
@@ -147,9 +170,15 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
 
       // Read settings
       final minutesBefore = _prefs.getInt('academic_reminder_minutes') ?? 15;
-      final ringtonePath = _prefs.getString('academic_reminder_ringtone_path') ?? 'assets/freedom.mp3';
+      final ringtonePath =
+          _prefs.getString('academic_reminder_ringtone_path') ??
+          'assets/freedom.mp3';
 
-      final alarmTime = _calculateNextAlarmDateTime(day, session.startTime, minutesBefore);
+      final alarmTime = _calculateNextAlarmDateTime(
+        day,
+        session.startTime,
+        minutesBefore,
+      );
 
       final alarmSettings = AlarmSettings(
         id: id,
@@ -162,7 +191,8 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
         androidFullScreenIntent: true,
         notificationSettings: NotificationSettings(
           title: 'Class Reminder',
-          body: '${session.code}: ${session.name} starts at ${session.startTime}',
+          body:
+              '${session.code}: ${session.name} starts at ${session.startTime}',
           stopButton: 'Stop',
         ),
       );
@@ -170,7 +200,8 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
       final setSuccess = await Alarm.set(alarmSettings: alarmSettings);
       if (setSuccess) {
         // Schedule native timeout at alarmTime + 2 minutes
-        final timeoutTimestamp = alarmTime.millisecondsSinceEpoch + 2 * 60 * 1000;
+        final timeoutTimestamp =
+            alarmTime.millisecondsSinceEpoch + 2 * 60 * 1000;
         await AlarmHelper.setAlarmTimeout(
           id,
           timeoutTimestamp,
@@ -178,7 +209,10 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
         );
 
         final newKeys = Set<String>.from(state)..add(key);
-        await _prefs.setStringList('academic_active_alarm_keys', newKeys.toList());
+        await _prefs.setStringList(
+          'academic_active_alarm_keys',
+          newKeys.toList(),
+        );
         state = newKeys;
 
         final formattedTime = _formatDateTime(alarmTime);
@@ -197,10 +231,20 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
     }
   }
 
-  DateTime _calculateNextAlarmDateTime(String dayName, String startTimeStr, int minutesBefore) {
+  DateTime _calculateNextAlarmDateTime(
+    String dayName,
+    String startTimeStr,
+    int minutesBefore,
+  ) {
     final now = DateTime.now();
     const weekdays = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
     ];
     final targetWeekday = weekdays.indexOf(dayName) + 1;
 
@@ -228,7 +272,18 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
 
   String _formatDateTime(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
     final min = dt.minute.toString().padLeft(2, '0');
@@ -251,7 +306,9 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
   Future<void> reschedulePassedAlarms(WeekSchedule schedule) async {
     final now = DateTime.now();
     final minutesBefore = _prefs.getInt('academic_reminder_minutes') ?? 15;
-    final ringtonePath = _prefs.getString('academic_reminder_ringtone_path') ?? 'assets/freedom.mp3';
+    final ringtonePath =
+        _prefs.getString('academic_reminder_ringtone_path') ??
+        'assets/freedom.mp3';
 
     final currentKeys = Set<String>.from(state);
 
@@ -277,7 +334,11 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
 
       final id = _getAlarmId(key);
       final alarm = await Alarm.getAlarm(id);
-      final calculatedAlarmTime = _calculateNextAlarmDateTime(day, session.startTime, minutesBefore);
+      final calculatedAlarmTime = _calculateNextAlarmDateTime(
+        day,
+        session.startTime,
+        minutesBefore,
+      );
 
       if (alarm == null ||
           alarm.dateTime.isBefore(now) ||
@@ -294,13 +355,15 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
           androidFullScreenIntent: true,
           notificationSettings: NotificationSettings(
             title: 'Class Reminder',
-            body: 'Class ${session.code}: ${session.name} starts soon at ${session.startTime}!',
+            body:
+                'Class ${session.code}: ${session.name} starts soon at ${session.startTime}!',
             stopButton: 'Stop',
           ),
         );
         await Alarm.set(alarmSettings: alarmSettings);
-        
-        final timeoutTimestamp = calculatedAlarmTime.millisecondsSinceEpoch + 2 * 60 * 1000;
+
+        final timeoutTimestamp =
+            calculatedAlarmTime.millisecondsSinceEpoch + 2 * 60 * 1000;
         await AlarmHelper.setAlarmTimeout(
           id,
           timeoutTimestamp,
@@ -312,14 +375,22 @@ class AcademicAlarmNotifier extends StateNotifier<Set<String>> {
 
   List<ClassSession> _getSessionsForDay(WeekSchedule schedule, String day) {
     switch (day) {
-      case 'Monday': return schedule.monday;
-      case 'Tuesday': return schedule.tuesday;
-      case 'Wednesday': return schedule.wednesday;
-      case 'Thursday': return schedule.thursday;
-      case 'Friday': return schedule.friday;
-      case 'Saturday': return schedule.saturday;
-      case 'Sunday': return schedule.sunday;
-      default: return [];
+      case 'Monday':
+        return schedule.monday;
+      case 'Tuesday':
+        return schedule.tuesday;
+      case 'Wednesday':
+        return schedule.wednesday;
+      case 'Thursday':
+        return schedule.thursday;
+      case 'Friday':
+        return schedule.friday;
+      case 'Saturday':
+        return schedule.saturday;
+      case 'Sunday':
+        return schedule.sunday;
+      default:
+        return [];
     }
   }
 }

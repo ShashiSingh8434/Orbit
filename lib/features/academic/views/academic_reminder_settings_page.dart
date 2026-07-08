@@ -19,19 +19,27 @@ class AcademicReminderSettingsPage extends ConsumerStatefulWidget {
 class _AcademicReminderSettingsPageState
     extends ConsumerState<AcademicReminderSettingsPage> {
   late AudioPlayer _audioPlayer;
-  
+
   int _minutesBefore = 15;
   String _ringtoneType = 'asset'; // 'asset' or 'local'
   String _ringtonePath = 'assets/freedom.mp3';
   String _ringtoneName = 'Freedom';
-  
+
   bool _isPlaying = false;
   String? _playingPath;
 
   final List<Map<String, String>> _defaultRingtones = [
-    {'name': 'Freedom', 'path': 'assets/freedom.mp3', 'assetKey': 'freedom.mp3'},
+    {
+      'name': 'Freedom',
+      'path': 'assets/freedom.mp3',
+      'assetKey': 'freedom.mp3',
+    },
     {'name': 'If it smiles', 'path': 'assets/slow.mp3', 'assetKey': 'slow.mp3'},
-    {'name': 'Feel Something Good', 'path': 'assets/feel.mp3', 'assetKey': 'feel.mp3'},
+    {
+      'name': 'Feel Something Good',
+      'path': 'assets/feel.mp3',
+      'assetKey': 'feel.mp3',
+    },
   ];
 
   final List<int> _offsetOptions = [0, 10, 15, 20];
@@ -69,7 +77,9 @@ class _AcademicReminderSettingsPageState
   }
 
   Future<void> _saveSettings() async {
-    await ref.read(academicReminderSettingsProvider.notifier).updateSettings(
+    await ref
+        .read(academicReminderSettingsProvider.notifier)
+        .updateSettings(
           minutesBefore: _minutesBefore,
           ringtoneType: _ringtoneType,
           ringtonePath: _ringtonePath,
@@ -80,7 +90,9 @@ class _AcademicReminderSettingsPageState
     final academicState = ref.read(academicStateProvider);
     final schedule = academicState.schedule;
     if (schedule != null) {
-      await ref.read(academicAlarmProvider.notifier).reschedulePassedAlarms(schedule.schedule);
+      await ref
+          .read(academicAlarmProvider.notifier)
+          .reschedulePassedAlarms(schedule.schedule);
     }
 
     if (mounted) {
@@ -116,9 +128,9 @@ class _AcademicReminderSettingsPageState
           _playingPath = null;
         });
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to play preview: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to play preview: $e')));
         }
       }
     }
@@ -164,7 +176,9 @@ class _AcademicReminderSettingsPageState
   Future<void> _showOffsetDialog() async {
     int tempOffset = _minutesBefore;
     final textController = TextEditingController(
-      text: _offsetOptions.contains(_minutesBefore) ? '' : _minutesBefore.toString()
+      text: _offsetOptions.contains(_minutesBefore)
+          ? ''
+          : _minutesBefore.toString(),
     );
     bool isCustom = !_offsetOptions.contains(_minutesBefore);
 
@@ -197,28 +211,43 @@ class _AcademicReminderSettingsPageState
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ..._offsetOptions.map((opt) {
-                        final label = opt == 0 ? 'Exactly at class time' : '$opt minutes before';
+                        final label = opt == 0
+                            ? 'Exactly at class time'
+                            : '$opt minutes before';
                         return RadioListTile<int>(
                           title: Text(label, style: theme.textTheme.bodyMedium),
                           value: opt,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                          ),
                         );
                       }),
                       RadioListTile<int>(
-                        title: Text('Custom minutes', style: theme.textTheme.bodyMedium),
+                        title: Text(
+                          'Custom minutes',
+                          style: theme.textTheme.bodyMedium,
+                        ),
                         value: -1,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                        ),
                       ),
                       if (isCustom)
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0,
+                            vertical: 8.0,
+                          ),
                           child: TextField(
                             controller: textController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               hintText: 'Enter minutes',
                               suffixText: 'mins',
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -246,7 +275,11 @@ class _AcademicReminderSettingsPageState
                       final parsed = int.tryParse(textController.text);
                       if (parsed == null || parsed < 0) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please enter a valid number of minutes.')),
+                          const SnackBar(
+                            content: Text(
+                              'Please enter a valid number of minutes.',
+                            ),
+                          ),
                         );
                         return;
                       }
@@ -276,9 +309,7 @@ class _AcademicReminderSettingsPageState
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reminder Settings'),
-      ),
+      appBar: AppBar(title: const Text('Reminder Settings')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -296,14 +327,19 @@ class _AcademicReminderSettingsPageState
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: colorScheme.outlineVariant.withAlpha(120)),
+                side: BorderSide(
+                  color: colorScheme.outlineVariant.withAlpha(120),
+                ),
               ),
               color: colorScheme.surfaceContainerLow,
               child: InkWell(
                 onTap: _showOffsetDialog,
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -317,7 +353,10 @@ class _AcademicReminderSettingsPageState
                           ),
                         ),
                       ),
-                      Icon(Icons.edit_calendar_rounded, color: colorScheme.primary),
+                      Icon(
+                        Icons.edit_calendar_rounded,
+                        color: colorScheme.primary,
+                      ),
                     ],
                   ),
                 ),
@@ -333,7 +372,7 @@ class _AcademicReminderSettingsPageState
               ),
             ),
             const SizedBox(height: 12),
-            
+
             // Default list and Local Device wrapped in a single RadioGroup
             RadioGroup<String>(
               groupValue: _ringtoneType == 'local' ? 'local' : _ringtonePath,
@@ -341,7 +380,9 @@ class _AcademicReminderSettingsPageState
                 if (value == 'local') {
                   _pickLocalRingtone();
                 } else if (value != null) {
-                  final matched = _defaultRingtones.firstWhere((r) => r['path'] == value);
+                  final matched = _defaultRingtones.firstWhere(
+                    (r) => r['path'] == value,
+                  );
                   setState(() {
                     _ringtoneType = 'asset';
                     _ringtonePath = value;
@@ -353,9 +394,12 @@ class _AcademicReminderSettingsPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ..._defaultRingtones.map((ringtone) {
-                    final isSelected = _ringtoneType == 'asset' && _ringtonePath == ringtone['path'];
-                    final isRingtonePlaying = _isPlaying && _playingPath == ringtone['path'];
-                    
+                    final isSelected =
+                        _ringtoneType == 'asset' &&
+                        _ringtonePath == ringtone['path'];
+                    final isRingtonePlaying =
+                        _isPlaying && _playingPath == ringtone['path'];
+
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
@@ -378,29 +422,35 @@ class _AcademicReminderSettingsPageState
                             _ringtoneName = ringtone['name']!;
                           });
                         },
-                        leading: Radio<String>(
-                          value: ringtone['path']!,
-                        ),
+                        leading: Radio<String>(value: ringtone['path']!),
                         title: Text(
                           ringtone['name']!,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
                         trailing: IconButton(
                           icon: Icon(
-                            isRingtonePlaying ? Icons.stop_circle_rounded : Icons.play_circle_fill_rounded,
+                            isRingtonePlaying
+                                ? Icons.stop_circle_rounded
+                                : Icons.play_circle_fill_rounded,
                             color: colorScheme.primary,
                             size: 28,
                           ),
-                          onPressed: () => _togglePreview(ringtone['path']!, 'asset', ringtone['assetKey']!),
+                          onPressed: () => _togglePreview(
+                            ringtone['path']!,
+                            'asset',
+                            ringtone['assetKey']!,
+                          ),
                         ),
                       ),
                     );
                   }),
 
                   const SizedBox(height: 16),
-                  
+
                   // Local Device Section
                   Text(
                     'Custom Ringtone',
@@ -425,13 +475,15 @@ class _AcademicReminderSettingsPageState
                     ),
                     child: ListTile(
                       onTap: _pickLocalRingtone,
-                      leading: const Radio<String>(
-                        value: 'local',
-                      ),
+                      leading: const Radio<String>(value: 'local'),
                       title: Text(
-                        _ringtoneType == 'local' ? _ringtoneName : 'Choose from local device...',
+                        _ringtoneType == 'local'
+                            ? _ringtoneName
+                            : 'Choose from local device...',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: _ringtoneType == 'local' ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: _ringtoneType == 'local'
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -448,10 +500,14 @@ class _AcademicReminderSettingsPageState
                                 color: colorScheme.primary,
                                 size: 28,
                               ),
-                              onPressed: () => _togglePreview(_ringtonePath, 'local', ''),
+                              onPressed: () =>
+                                  _togglePreview(_ringtonePath, 'local', ''),
                             ),
                           IconButton(
-                            icon: Icon(Icons.folder_open_rounded, color: colorScheme.primary),
+                            icon: Icon(
+                              Icons.folder_open_rounded,
+                              color: colorScheme.primary,
+                            ),
                             onPressed: _pickLocalRingtone,
                             tooltip: 'Select local audio file',
                           ),
@@ -472,7 +528,9 @@ class _AcademicReminderSettingsPageState
                     context: context,
                     builder: (context) => AlertDialog(
                       title: const Text('Clear All Reminders?'),
-                      content: const Text('This will turn off and delete all currently set reminders.'),
+                      content: const Text(
+                        'This will turn off and delete all currently set reminders.',
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -480,7 +538,9 @@ class _AcademicReminderSettingsPageState
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          style: TextButton.styleFrom(foregroundColor: colorScheme.error),
+                          style: TextButton.styleFrom(
+                            foregroundColor: colorScheme.error,
+                          ),
                           child: const Text('Clear All'),
                         ),
                       ],
@@ -488,7 +548,9 @@ class _AcademicReminderSettingsPageState
                   );
 
                   if (confirm == true) {
-                    await ref.read(academicAlarmProvider.notifier).clearAllReminders();
+                    await ref
+                        .read(academicAlarmProvider.notifier)
+                        .clearAllReminders();
                     // messenger.showSnackBar(
                     //   const SnackBar(content: Text('All active reminders have been cleared.')),
                     // );
@@ -497,7 +559,10 @@ class _AcademicReminderSettingsPageState
                 icon: Icon(Icons.alarm_off_rounded, color: colorScheme.error),
                 label: Text(
                   'Clear All Active Reminders',
-                  style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: colorScheme.error,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(52),
@@ -523,10 +588,7 @@ class _AcademicReminderSettingsPageState
               ),
               child: const Text(
                 'Save Settings',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ],

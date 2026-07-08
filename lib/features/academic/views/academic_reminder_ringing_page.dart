@@ -9,16 +9,15 @@ import '../../../app/router/app_router.dart';
 class AcademicReminderRingingPage extends ConsumerStatefulWidget {
   final AlarmSettings alarmSettings;
 
-  const AcademicReminderRingingPage({
-    super.key,
-    required this.alarmSettings,
-  });
+  const AcademicReminderRingingPage({super.key, required this.alarmSettings});
 
   @override
-  ConsumerState<AcademicReminderRingingPage> createState() => _AcademicReminderRingingPageState();
+  ConsumerState<AcademicReminderRingingPage> createState() =>
+      _AcademicReminderRingingPageState();
 }
 
-class _AcademicReminderRingingPageState extends ConsumerState<AcademicReminderRingingPage>
+class _AcademicReminderRingingPageState
+    extends ConsumerState<AcademicReminderRingingPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Timer _timeTimer;
@@ -34,7 +33,10 @@ class _AcademicReminderRingingPageState extends ConsumerState<AcademicReminderRi
     )..repeat(reverse: true);
 
     _updateTime();
-    _timeTimer = Timer.periodic(const Duration(seconds: 1), (_) => _updateTime());
+    _timeTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _updateTime(),
+    );
 
     // Periodically check if alarm is still ringing (handles native 2-min timeout and drawer Stop button)
     _statusTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
@@ -94,7 +96,9 @@ class _AcademicReminderRingingPageState extends ConsumerState<AcademicReminderRi
     final bodyText = widget.alarmSettings.notificationSettings.body;
 
     return Scaffold(
-      backgroundColor: isDark ? colorScheme.surface : colorScheme.primaryContainer.withAlpha(40),
+      backgroundColor: isDark
+          ? colorScheme.surface
+          : colorScheme.primaryContainer.withAlpha(40),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
@@ -153,7 +157,9 @@ class _AcademicReminderRingingPageState extends ConsumerState<AcademicReminderRi
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: isDark ? colorScheme.surfaceContainer : Colors.white,
+                      color: isDark
+                          ? colorScheme.surfaceContainer
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(

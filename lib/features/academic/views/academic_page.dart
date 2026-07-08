@@ -270,37 +270,41 @@ class _AcademicPageState extends ConsumerState<AcademicPage> {
               if (hasTimetable)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: FilledButton.icon(
-                    onPressed: _handlePinWidget,
-                    icon: const Icon(Icons.widgets_outlined),
-                    label: const Text('Pin Timetable Widget'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                      backgroundColor: colorScheme.secondaryContainer,
-                      foregroundColor: colorScheme.onSecondaryContainer,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: _handlePinWidget,
+                          icon: const Icon(Icons.widgets_outlined),
+                          label: const Text('Pin Widget'),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            backgroundColor: colorScheme.secondaryContainer,
+                            foregroundColor: colorScheme.onSecondaryContainer,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-
-              // Reminder Settings Button for loaded timetable
-              if (hasTimetable)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: FilledButton.icon(
-                    onPressed: () => context.push(AppRoutes.academicReminderSettings),
-                    icon: const Icon(Icons.alarm_rounded),
-                    label: const Text('Reminder Settings'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                      backgroundColor: colorScheme.secondaryContainer,
-                      foregroundColor: colorScheme.onSecondaryContainer,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () =>
+                              context.push(AppRoutes.academicReminderSettings),
+                          icon: const Icon(Icons.alarm_rounded),
+                          label: const Text('Reminder'),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            backgroundColor: colorScheme.secondaryContainer,
+                            foregroundColor: colorScheme.onSecondaryContainer,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               // Prompt to upload timetable via AI at the top if not uploaded yet

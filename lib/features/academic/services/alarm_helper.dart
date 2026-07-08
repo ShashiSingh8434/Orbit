@@ -8,7 +8,11 @@ class AlarmHelper {
 
   /// Schedules a native BroadcastReceiver trigger at [timeoutTimestamp] (epoch ms) to stop
   /// the alarm service and show a class reminder notification if it's still ringing.
-  static Future<void> setAlarmTimeout(int alarmId, int timeoutTimestamp, String classDetails) async {
+  static Future<void> setAlarmTimeout(
+    int alarmId,
+    int timeoutTimestamp,
+    String classDetails,
+  ) async {
     try {
       await _channel.invokeMethod('setAlarmTimeout', {
         'alarmId': alarmId,
@@ -23,9 +27,7 @@ class AlarmHelper {
   /// Cancels a native timeout alarm broadcast.
   static Future<void> cancelAlarmTimeout(int alarmId) async {
     try {
-      await _channel.invokeMethod('cancelAlarmTimeout', {
-        'alarmId': alarmId,
-      });
+      await _channel.invokeMethod('cancelAlarmTimeout', {'alarmId': alarmId});
     } on PlatformException catch (e) {
       debugPrint('Failed to cancel alarm timeout: ${e.message}');
     }

@@ -81,7 +81,9 @@ class ClassCard extends ConsumerWidget {
                   ),
                   IconButton(
                     icon: Icon(
-                      isAlarmSet ? Icons.alarm_on_rounded : Icons.alarm_add_rounded,
+                      isAlarmSet
+                          ? Icons.alarm_on_rounded
+                          : Icons.alarm_add_rounded,
                       color: isAlarmSet
                           ? colorScheme.primary
                           : colorScheme.onSurfaceVariant.withAlpha(180),
@@ -94,11 +96,15 @@ class ClassCard extends ConsumerWidget {
                     ),
                     tooltip: isAlarmSet ? 'Remove Reminder' : 'Add Reminder',
                     onPressed: () async {
-                      final isConfigured = ref.read(academicReminderSettingsProvider).isConfigured;
+                      final isConfigured = ref
+                          .read(academicReminderSettingsProvider)
+                          .isConfigured;
                       if (!isConfigured) {
                         context.push(AppRoutes.academicReminderSettings);
                       } else {
-                        await ref.read(academicAlarmProvider.notifier).toggleReminder(day, session, context);
+                        await ref
+                            .read(academicAlarmProvider.notifier)
+                            .toggleReminder(day, session, context);
                       }
                     },
                   ),
