@@ -204,6 +204,7 @@ class _RouterNotifier extends ChangeNotifier {
   _RouterNotifier(this._ref);
 
   final Ref _ref;
+  String? _pendingLocation;
 
   void refresh() => notifyListeners();
 
@@ -233,9 +234,25 @@ class _RouterNotifier extends ChangeNotifier {
     }
 
     final authValue = _ref.read(authStateProvider);
+    final user = authValue.value;
+    final isAuthenticated = user != null;
+    final encState = _ref.read(currentEncryptionStateProvider);
+    final stateValue = encState.value;
+
+    // Save pending location if we are not yet ready/authenticated
+    if (loc != AppRoutes.splash &&
+        loc != AppRoutes.login &&
+        loc != AppRoutes.setupPassphrase &&
+        loc != AppRoutes.recoverPassphrase &&
+        loc != AppRoutes.academicReminderRinging) {
+      if (authValue.isLoading || !isAuthenticated || encState.isLoading || stateValue != EncryptionState.ready) {
+        _pendingLocation = state.uri.toString();
+        AppLogger.info('Router: Saved pending deep link/target location: $_pendingLocation');
+      }
+    }
 
     AppLogger.info(
-      'Router: Redirect called for loc: $loc. Auth status: isAuthenticated=${authValue.value != null}, isLoading=${authValue.isLoading}',
+      'Router: Redirect called for loc: $loc. Auth status: isAuthenticated=$isAuthenticated, isLoading=${authValue.isLoading}',
     );
 
     // 1. Auth still loading -> show splash
@@ -245,9 +262,6 @@ class _RouterNotifier extends ChangeNotifier {
       return AppRoutes.splash;
     }
 
-    final user = authValue.value;
-    final isAuthenticated = user != null;
-
     // 2. Not authenticated -> go to login
     if (!isAuthenticated) {
       AppLogger.info('Router: Unauthenticated. Directing to Login.');
@@ -256,7 +270,6 @@ class _RouterNotifier extends ChangeNotifier {
     }
 
     // 3. Authenticated -> Check Encryption State
-    final encState = _ref.read(currentEncryptionStateProvider);
     AppLogger.info(
       'Router: Authenticated user. Encryption status: value=${encState.value}, isLoading=${encState.isLoading}',
     );
@@ -270,7 +283,6 @@ class _RouterNotifier extends ChangeNotifier {
       return AppRoutes.splash;
     }
 
-    final stateValue = encState.value;
     if (stateValue == null) {
       AppLogger.info(
         'Router: Encryption state value is null. Directing/staying on Splash.',
@@ -293,13 +305,15 @@ class _RouterNotifier extends ChangeNotifier {
         return AppRoutes.recoverPassphrase;
 
       case EncryptionState.ready:
-        // If on splash, login, or gate screens, go to home
+        // If on splash, login, or gate screens, go to home or the pending location
         if (loc == AppRoutes.splash ||
             loc == AppRoutes.login ||
             loc == AppRoutes.setupPassphrase ||
             loc == AppRoutes.recoverPassphrase) {
-          AppLogger.info('Router: Encryption is ready. Redirecting to Home.');
-          return AppRoutes.home;
+          final target = _pendingLocation ?? AppRoutes.home;
+          _pendingLocation = null; // Clear it so we don't redirect repeatedly
+          AppLogger.info('Router: Encryption is ready. Redirecting to target: $target');
+          return target;
         }
         return null;
     }
