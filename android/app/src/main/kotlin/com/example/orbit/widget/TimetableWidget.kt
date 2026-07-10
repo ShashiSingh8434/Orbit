@@ -77,8 +77,8 @@ class TimetableWidget : GlanceAppWidget() {
 
     @Composable
     private fun TimetableWidgetContent(context: Context, state: TimetableWidgetState) {
-        val darkBgColor = Color(0xFF111214)
-        val cardColor = Color(0xFF1C1D21)
+        val darkBgColor = Color(0x66111214) // Translucent background (40% opacity)
+        val cardColor = Color(0xCC1C1D21) // Translucent card background (80% opacity)
         val textSecondaryColor = Color(0xFF9EA1AC)
         val textPrimaryColor = Color.White
         val accentColor = Color(0xFF5A84F2)
@@ -186,7 +186,7 @@ class TimetableWidget : GlanceAppWidget() {
                     modifier = GlanceModifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(Color(0xFF232529))
+                        .background(Color(0x4D232529)) // Translucent separator
                 ) {}
                 Spacer(modifier = GlanceModifier.height(8.dp))
 
