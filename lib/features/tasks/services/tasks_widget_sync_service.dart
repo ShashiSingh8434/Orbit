@@ -52,6 +52,7 @@ class TasksWidgetSyncService {
         'title': t.title,
         'status': t.status,
         'completedAt': t.completedAt?.toIso8601String(),
+        'createdAt': t.createdAt.toIso8601String(),
       };
     }).toList();
 
@@ -98,6 +99,20 @@ class TasksWidgetSyncService {
       }
     } catch (_) {
       // Fail silently to avoid breaking app lifecycle transitions
+    }
+  }
+}
+
+@pragma('vm:entry-point')
+Future<void> tasksWidgetBackgroundCallback(Uri? uri) async {
+  if (uri != null && (uri.host == 'toggleTask' || uri.host == 'reloadTasks')) {
+    final container = ProviderContainer();
+    try {
+      await TasksWidgetSyncService.checkAndSyncToggles(container);
+    } catch (_) {
+      // Fail silently if DB is encrypted and passphrase is not accessible in isolate
+    } finally {
+      container.dispose();
     }
   }
 }

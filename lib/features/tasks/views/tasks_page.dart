@@ -40,14 +40,6 @@ class _TasksPageState extends ConsumerState<TasksPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<List<TaskModel>>>(tasksProvider, (prev, next) {
-      next.whenOrNull(
-        data: (tasks) {
-          TasksWidgetSyncService.syncTasks(tasks);
-        },
-      );
-    });
-
     final tasksAsync = ref.watch(tasksProvider);
 
     return Scaffold(

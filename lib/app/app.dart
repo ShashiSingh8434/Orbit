@@ -12,6 +12,8 @@ import 'router/app_routes.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_notifier.dart';
 import '../features/tasks/services/tasks_widget_sync_service.dart';
+import '../features/tasks/controllers/task_controller.dart';
+import '../features/tasks/models/task_model.dart';
 
 /// Root widget of the Orbit application.
 class OrbitApp extends ConsumerStatefulWidget {
@@ -68,6 +70,15 @@ class _OrbitAppState extends ConsumerState<OrbitApp> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
+    // Keep Tasks Widget in sync whenever any task changes in the database globally
+    ref.listen<AsyncValue<List<TaskModel>>>(tasksProvider, (prev, next) {
+      next.whenOrNull(
+        data: (tasks) {
+          TasksWidgetSyncService.syncTasks(tasks);
+        },
+      );
+    });
+
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeNotifierProvider);
 

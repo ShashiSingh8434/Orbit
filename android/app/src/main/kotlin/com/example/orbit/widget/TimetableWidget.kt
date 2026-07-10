@@ -78,7 +78,7 @@ class TimetableWidget : GlanceAppWidget() {
     @Composable
     private fun TimetableWidgetContent(context: Context, state: TimetableWidgetState) {
         val darkBgColor = Color(0x66111214) // Translucent background (40% opacity)
-        val cardColor = Color(0xCC1C1D21) // Translucent card background (80% opacity)
+        val cardColor = Color(0x331C1D21) // Translucent card background (20% opacity)
         val textSecondaryColor = Color(0xFF9EA1AC)
         val textPrimaryColor = Color.White
         val accentColor = Color(0xFF5A84F2)
@@ -104,12 +104,12 @@ class TimetableWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Prev Day Button: 56dp tap target for comfortable touch
+                    // Prev Day Button: 40dp tap target for comfortable touch
                     Box(
                         modifier = GlanceModifier
-                            .width(56.dp)
-                            .height(56.dp)
-                            .cornerRadius(28.dp)
+                            .width(40.dp)
+                            .height(40.dp)
+                            .cornerRadius(20.dp)
                             .clickable(actionRunCallback<PrevDayAction>()),
                         contentAlignment = Alignment.Center
                     ) {
@@ -127,7 +127,7 @@ class TimetableWidget : GlanceAppWidget() {
                     Box(
                         modifier = GlanceModifier
                             .defaultWeight()
-                            .height(56.dp)
+                            .height(40.dp)
                             .clickable(actionStartActivity(deepLinkIntent_academic)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -144,9 +144,9 @@ class TimetableWidget : GlanceAppWidget() {
                     // Reload Button: Resets to today's day and refreshes widget data
                     Box(
                         modifier = GlanceModifier
-                            .width(56.dp)
-                            .height(56.dp)
-                            .cornerRadius(28.dp)
+                            .width(40.dp)
+                            .height(40.dp)
+                            .cornerRadius(20.dp)
                             .clickable(actionRunCallback<ResetDayAction>()),
                         contentAlignment = Alignment.Center
                     ) {
@@ -160,12 +160,12 @@ class TimetableWidget : GlanceAppWidget() {
                         )
                     }
 
-                    // Next Day Button: 56dp tap target for comfortable touch
+                    // Next Day Button: 40dp tap target for comfortable touch
                     Box(
                         modifier = GlanceModifier
-                            .width(56.dp)
-                            .height(56.dp)
-                            .cornerRadius(28.dp)
+                            .width(40.dp)
+                            .height(40.dp)
+                            .cornerRadius(20.dp)
                             .clickable(actionRunCallback<NextDayAction>()),
                         contentAlignment = Alignment.Center
                     ) {

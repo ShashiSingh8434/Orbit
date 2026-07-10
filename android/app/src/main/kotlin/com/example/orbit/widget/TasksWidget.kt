@@ -34,7 +34,6 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.text.TextDecoration
 import androidx.glance.unit.ColorProvider
 import com.example.orbit.MainActivity
 
@@ -43,6 +42,7 @@ class TasksWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
+            val prefs = currentState<Preferences>()
             val tasks = TasksWidgetUpdater.getTasks(context)
             TasksWidgetContent(context, tasks)
         }
@@ -51,7 +51,7 @@ class TasksWidget : GlanceAppWidget() {
     @Composable
     private fun TasksWidgetContent(context: Context, tasks: List<TaskItem>) {
         val darkBgColor = Color(0x66111214) // Translucent background (40% opacity)
-        val cardColor = Color(0xCC1C1D21) // Translucent card background (80% opacity)
+        val cardColor = Color(0x331C1D21) // Translucent card background (20% opacity)
         val textSecondaryColor = Color(0xFF9EA1AC)
         val textPrimaryColor = Color.White
         val accentColor = Color(0xFF5A84F2)
@@ -72,22 +72,47 @@ class TasksWidget : GlanceAppWidget() {
                 .padding(12.dp)
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
-                // Header Title: Centered, tapping deep links into the app
-                Box(
-                    modifier = GlanceModifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .clickable(actionStartActivity(deepLinkIntent_tasks)),
-                    contentAlignment = Alignment.Center
+                // Header Title & Reload Row
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Today's Tasks",
-                        style = TextStyle(
-                            color = ColorProvider(textPrimaryColor),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                    // Header Title: Leftmost, tapping deep links into the app
+                    Box(
+                        modifier = GlanceModifier
+                            .defaultWeight()
+                            .height(40.dp)
+                            .clickable(actionStartActivity(deepLinkIntent_tasks)),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            text = "Today's Tasks",
+                            style = TextStyle(
+                                color = ColorProvider(textPrimaryColor),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
-                    )
+                    }
+
+                    // Reload Button: Rightmost
+                    Box(
+                        modifier = GlanceModifier
+                            .width(40.dp)
+                            .height(40.dp)
+                            .cornerRadius(20.dp)
+                            .clickable(actionRunCallback<ReloadTasksAction>()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "↶",
+                            style = TextStyle(
+                                color = ColorProvider(textSecondaryColor),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
                 }
 
                 Spacer(modifier = GlanceModifier.height(4.dp))
@@ -100,8 +125,14 @@ class TasksWidget : GlanceAppWidget() {
                 ) {}
                 Spacer(modifier = GlanceModifier.height(8.dp))
 
-                // Schedule list display
-                if (tasks.isEmpty()) {
+                // Filter tasks into pending and completed sections
+                // Pending ordered newest to oldest (by ID descending)
+                val pendingTasks = tasks.filter { !it.isCompleted }.sortedByDescending { it.id }
+                // Completed ordered newest to oldest (by completedAt descending, fallback to ID descending)
+                val completedTasks = tasks.filter { it.isCompleted }
+                    .sortedWith(compareByDescending<TaskItem> { it.completedAt ?: "" }.thenByDescending { it.id })
+
+                if (pendingTasks.isEmpty() && completedTasks.isEmpty()) {
                     Box(
                         modifier = GlanceModifier
                             .fillMaxSize()
@@ -119,18 +150,55 @@ class TasksWidget : GlanceAppWidget() {
                     }
                 } else {
                     LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                        items(tasks) { item ->
-                            Box(
-                                modifier = GlanceModifier.padding(bottom = 10.dp)
-                            ) {
-                                TaskItemRow(
-                                    item = item,
-                                    cardBg = cardColor,
-                                    textPrimary = textPrimaryColor,
-                                    textSecondary = textSecondaryColor,
-                                    accent = accentColor,
-                                    launchIntent = deepLinkIntent_tasks
-                                )
+                        if (pendingTasks.isNotEmpty()) {
+                            items(pendingTasks) { item ->
+                                Box(
+                                    modifier = GlanceModifier.padding(bottom = 10.dp)
+                                ) {
+                                    TaskItemRow(
+                                        item = item,
+                                        cardBg = cardColor,
+                                        textPrimary = textPrimaryColor,
+                                        textSecondary = textSecondaryColor,
+                                        accent = accentColor,
+                                        launchIntent = deepLinkIntent_tasks
+                                    )
+                                }
+                            }
+                        }
+
+                        if (completedTasks.isNotEmpty()) {
+                            // Section Header for completed tasks
+                            item {
+                                Box(
+                                    modifier = GlanceModifier
+                                        .fillMaxWidth()
+                                        .padding(top = 8.dp, bottom = 12.dp)
+                                ) {
+                                    Text(
+                                        text = "Completed (${completedTasks.size})",
+                                        style = TextStyle(
+                                            color = ColorProvider(textSecondaryColor),
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                            }
+
+                            items(completedTasks) { item ->
+                                Box(
+                                    modifier = GlanceModifier.padding(bottom = 10.dp)
+                                ) {
+                                    TaskItemRow(
+                                        item = item,
+                                        cardBg = cardColor,
+                                        textPrimary = textPrimaryColor,
+                                        textSecondary = textSecondaryColor,
+                                        accent = accentColor,
+                                        launchIntent = deepLinkIntent_tasks
+                                    )
+                                }
                             }
                         }
                     }
@@ -189,15 +257,15 @@ class TasksWidget : GlanceAppWidget() {
 
                 Spacer(modifier = GlanceModifier.width(12.dp))
 
-                // Task Title
+                // Task Title (with defaultWeight to prevent horizontal overflow/scrollbar)
                 Text(
                     text = item.title,
                     maxLines = 2,
+                    modifier = GlanceModifier.defaultWeight(),
                     style = TextStyle(
                         color = ColorProvider(if (item.isCompleted) textSecondary else textPrimary),
                         fontSize = 14.sp,
-                        fontWeight = if (item.isCompleted) FontWeight.Normal else FontWeight.Medium,
-                        textDecoration = if (item.isCompleted) TextDecoration.LineThrough else null
+                        fontWeight = if (item.isCompleted) FontWeight.Normal else FontWeight.Medium
                     )
                 )
             }
