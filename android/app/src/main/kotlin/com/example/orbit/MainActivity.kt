@@ -49,7 +49,8 @@ class MainActivity : FlutterActivity() {
                     result.success(supported)
                 }
                 "requestWidgetPin" -> {
-                    val success = WidgetPinManager.requestPin(applicationContext)
+                    val widgetType = call.argument<String>("widgetType") ?: "timetable"
+                    val success = WidgetPinManager.requestPin(applicationContext, widgetType)
                     result.success(success)
                 }
                 else -> {

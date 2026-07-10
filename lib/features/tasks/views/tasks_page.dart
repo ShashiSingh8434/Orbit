@@ -6,6 +6,8 @@ import '../models/task_model.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/security/exceptions/crypto_exceptions.dart';
 import 'task_edit_page.dart';
+import '../../academic/services/home_widget_pin_service.dart';
+import '../services/tasks_widget_sync_service.dart';
 
 enum TaskFilter { pending, completed, today }
 
@@ -20,12 +22,46 @@ class TasksPage extends ConsumerStatefulWidget {
 class _TasksPageState extends ConsumerState<TasksPage> {
   TaskFilter _currentFilter = TaskFilter.pending;
 
+  Future<void> _handlePinWidget() async {
+    final isSupported = await HomeWidgetPinService.isWidgetPinningSupported();
+    if (!mounted) return;
+    if (!isSupported) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Home screen widget pinning is not supported by your launcher.',
+          ),
+        ),
+      );
+      return;
+    }
+    await HomeWidgetPinService.requestWidgetPin(widgetType: 'tasks');
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<List<TaskModel>>>(tasksProvider, (prev, next) {
+      next.whenOrNull(
+        data: (tasks) {
+          TasksWidgetSyncService.syncTasks(tasks);
+        },
+      );
+    });
+
     final tasksAsync = ref.watch(tasksProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Tasks')),
+      appBar: AppBar(
+        title: const Text('My Tasks'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.widgets_outlined),
+            tooltip: 'Pin Widget',
+            onPressed: _handlePinWidget,
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: Column(
         children: [
           // Filter Chips Row

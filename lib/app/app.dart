@@ -11,6 +11,7 @@ import 'router/app_router.dart';
 import 'router/app_routes.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_notifier.dart';
+import '../features/tasks/services/tasks_widget_sync_service.dart';
 
 /// Root widget of the Orbit application.
 class OrbitApp extends ConsumerStatefulWidget {
@@ -20,17 +21,26 @@ class OrbitApp extends ConsumerStatefulWidget {
   ConsumerState<OrbitApp> createState() => _OrbitAppState();
 }
 
-class _OrbitAppState extends ConsumerState<OrbitApp> {
+class _OrbitAppState extends ConsumerState<OrbitApp> with WidgetsBindingObserver {
   StreamSubscription<AlarmSettings>? _ringSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _ringSubscription = Alarm.ringStream.stream.listen((alarmSettings) {
       ref.read(ringingAlarmProvider.notifier).state = alarmSettings;
     });
 
     _checkActiveRingingAlarms();
+    TasksWidgetSyncService.checkAndSyncToggles(ref);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      TasksWidgetSyncService.checkAndSyncToggles(ref);
+    }
   }
 
   Future<void> _checkActiveRingingAlarms() async {
@@ -51,6 +61,7 @@ class _OrbitAppState extends ConsumerState<OrbitApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _ringSubscription?.cancel();
     super.dispose();
   }

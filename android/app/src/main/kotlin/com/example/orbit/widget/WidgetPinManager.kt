@@ -26,11 +26,16 @@ object WidgetPinManager {
      * Attempts to request native home screen widget pinning.
      * Returns true if request was sent successfully, false otherwise.
      */
-    fun requestPin(context: Context): Boolean {
+    fun requestPin(context: Context, widgetType: String = "timetable"): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 val appWidgetManager = AppWidgetManager.getInstance(context)
-                val provider = ComponentName(context, TimetableWidgetReceiver::class.java)
+                val receiverClass = if (widgetType == "tasks") {
+                    TasksWidgetReceiver::class.java
+                } else {
+                    TimetableWidgetReceiver::class.java
+                }
+                val provider = ComponentName(context, receiverClass)
                 
                 if (appWidgetManager.isRequestPinAppWidgetSupported) {
                     appWidgetManager.requestPinAppWidget(provider, null, null)
