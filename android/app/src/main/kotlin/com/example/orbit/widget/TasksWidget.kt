@@ -228,13 +228,13 @@ class TasksWidget : GlanceAppWidget() {
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Circular Checkbox
+                // Circular Checkbox (Double-box to simulate circular border in Glance)
                 Box(
                     modifier = GlanceModifier
                         .width(24.dp)
                         .height(24.dp)
                         .cornerRadius(12.dp)
-                        .background(if (item.isCompleted) accent else Color(0xFF33353C))
+                        .background(if (item.isCompleted) accent else Color(0xFF6E7179))
                         .clickable(actionRunCallback<ToggleTaskStatusAction>(
                             actionParametersOf(
                                 ToggleTaskStatusAction.taskIdKey to item.id,
@@ -252,6 +252,15 @@ class TasksWidget : GlanceAppWidget() {
                                 fontWeight = FontWeight.Bold
                             )
                         )
+                    } else {
+                        // Inner circle of cardBg to create the border look
+                        Box(
+                            modifier = GlanceModifier
+                                .width(20.8.dp)
+                                .height(20.8.dp)
+                                .cornerRadius(10.4.dp)
+                                .background(cardBg)
+                        ) {}
                     }
                 }
 
