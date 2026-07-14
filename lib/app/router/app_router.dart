@@ -245,9 +245,14 @@ class _RouterNotifier extends ChangeNotifier {
         loc != AppRoutes.setupPassphrase &&
         loc != AppRoutes.recoverPassphrase &&
         loc != AppRoutes.academicReminderRinging) {
-      if (authValue.isLoading || !isAuthenticated || encState.isLoading || stateValue != EncryptionState.ready) {
+      if (authValue.isLoading ||
+          !isAuthenticated ||
+          encState.isLoading ||
+          stateValue != EncryptionState.ready) {
         _pendingLocation = state.uri.toString();
-        AppLogger.info('Router: Saved pending deep link/target location: $_pendingLocation');
+        AppLogger.info(
+          'Router: Saved pending deep link/target location: $_pendingLocation',
+        );
       }
     }
 
@@ -312,7 +317,9 @@ class _RouterNotifier extends ChangeNotifier {
             loc == AppRoutes.recoverPassphrase) {
           final target = _pendingLocation ?? AppRoutes.home;
           _pendingLocation = null; // Clear it so we don't redirect repeatedly
-          AppLogger.info('Router: Encryption is ready. Redirecting to target: $target');
+          AppLogger.info(
+            'Router: Encryption is ready. Redirecting to target: $target',
+          );
           return target;
         }
         return null;

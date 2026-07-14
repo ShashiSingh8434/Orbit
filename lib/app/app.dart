@@ -23,7 +23,8 @@ class OrbitApp extends ConsumerStatefulWidget {
   ConsumerState<OrbitApp> createState() => _OrbitAppState();
 }
 
-class _OrbitAppState extends ConsumerState<OrbitApp> with WidgetsBindingObserver {
+class _OrbitAppState extends ConsumerState<OrbitApp>
+    with WidgetsBindingObserver {
   StreamSubscription<AlarmSettings>? _ringSubscription;
 
   @override

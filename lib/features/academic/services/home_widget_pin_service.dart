@@ -22,7 +22,9 @@ class HomeWidgetPinService {
 
   /// Requests the native home screen widget pinning dialog.
   /// Returns true if the dialog request was initiated successfully, false otherwise.
-  static Future<bool> requestWidgetPin({String widgetType = 'timetable'}) async {
+  static Future<bool> requestWidgetPin({
+    String widgetType = 'timetable',
+  }) async {
     try {
       final bool? success = await _channel.invokeMethod<bool>(
         'requestWidgetPin',

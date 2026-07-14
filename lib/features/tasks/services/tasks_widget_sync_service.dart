@@ -16,7 +16,7 @@ class TasksWidgetSyncService {
   /// Filters, sorts, and serializes Today's tasks to SharedPreferences for Glance widget.
   static Future<void> syncTasks(List<TaskModel> tasks) async {
     final todayKey = OrbitDateUtils.todayKey();
-    
+
     // Filter Today's tasks matching the view logic
     final todayTasks = tasks.where((t) {
       if (t.dueDate != null) {
@@ -72,8 +72,12 @@ class TasksWidgetSyncService {
     if (uid == null) return;
 
     try {
-      final pendingTogglesStr = await HomeWidget.getWidgetData<String>('pending_task_toggles');
-      if (pendingTogglesStr != null && pendingTogglesStr.isNotEmpty && pendingTogglesStr != '{}') {
+      final pendingTogglesStr = await HomeWidget.getWidgetData<String>(
+        'pending_task_toggles',
+      );
+      if (pendingTogglesStr != null &&
+          pendingTogglesStr.isNotEmpty &&
+          pendingTogglesStr != '{}') {
         final Map<String, dynamic> pending = json.decode(pendingTogglesStr);
         if (pending.isNotEmpty) {
           final repo = ref.read(taskRepositoryProvider);
@@ -86,7 +90,9 @@ class TasksWidgetSyncService {
               isCompleted ? 'completed' : 'pending',
               completedAt: isCompleted ? DateTime.now() : null,
             );
-            await ref.read(dayRepositoryProvider).invalidateDayCache(uid, DateTime.now());
+            await ref
+                .read(dayRepositoryProvider)
+                .invalidateDayCache(uid, DateTime.now());
           }
 
           // Clear queue in SharedPreferences

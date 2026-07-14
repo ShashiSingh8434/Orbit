@@ -153,7 +153,7 @@ class EventSection extends StatelessWidget {
   List<EventModel> _getSortedEvents() {
     if (events == null) return [];
     final sorted = List<EventModel>.from(events!);
-    sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    sorted.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     return sorted;
   }
 }
