@@ -26,9 +26,7 @@ class MultimodalExtractionService {
 
   // Only qwen/qwen3.6-27b supports vision (image_url) on the Groq free tier.
   // The gpt-oss models are text-only on Groq and return an instant 400 for image inputs.
-  static const List<String> _models = [
-    'qwen/qwen3.6-27b',
-  ];
+  static const List<String> _models = ['qwen/qwen3.6-27b'];
 
   /// Updates the AI processing status displayed in the global notch.
   void _updateStatus(bool isProcessing, String? message) {
@@ -247,10 +245,12 @@ class MultimodalExtractionService {
     //   2. If a <think> tag still remains (unclosed / truncated block), jump past
     //      the last </think> occurrence. If there is none, the model spent all its
     //      token budget thinking and produced no JSON — throw a retryable error.
-    cleanText = cleanText.replaceAll(
-      RegExp(r'<think>[\s\S]*?</think>', caseSensitive: false),
-      '',
-    ).trim();
+    cleanText = cleanText
+        .replaceAll(
+          RegExp(r'<think>[\s\S]*?</think>', caseSensitive: false),
+          '',
+        )
+        .trim();
 
     final lowerText = cleanText.toLowerCase();
     if (lowerText.contains('<think>')) {
