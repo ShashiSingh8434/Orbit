@@ -55,63 +55,62 @@ class ModelConfig {
   });
 }
 
+// ── Gemini free-tier limits (per model, as of 2026-07) ───────────────────────
+// gemini-3.1-flash-lite : 15 RPM, 500 RPD, 250K TPM
+// gemini-2.5-flash-lite : 10 RPM,  20 RPD, 250K TPM
+// gemini-2.5-flash      :  5 RPM,  20 RPD, 250K TPM
+// gemini-3-flash        :  5 RPM,  20 RPD, 250K TPM
 const _geminiModels = [
   ModelConfig(
-    model: 'gemini-3.1-flash-lite',
+    model: 'gemini-3.1-flash-lite', // 15 RPM · 500 RPD · 250K TPM
     id: 'gemini_3_1_flash_lite',
     name: 'Gemini 3.1 Flash Lite',
     priority: 1,
   ),
   ModelConfig(
-    model: 'gemini-2.5-flash-lite',
+    model: 'gemini-2.5-flash-lite', // 10 RPM · 20 RPD · 250K TPM
     id: 'gemini_2_5_flash_lite',
     name: 'Gemini 2.5 Flash Lite',
     priority: 2,
   ),
   ModelConfig(
-    model: 'gemini-2.5-flash',
+    model: 'gemini-2.5-flash', //  5 RPM · 20 RPD · 250K TPM
     id: 'gemini_2_5_flash',
     name: 'Gemini 2.5 Flash',
     priority: 3,
   ),
   ModelConfig(
-    model: 'gemini-3-flash',
+    model: 'gemini-3-flash', //  5 RPM · 20 RPD · 250K TPM
     id: 'gemini_3_flash',
     name: 'Gemini 3 Flash',
     priority: 4,
   ),
 ];
 
+// ── Groq free-tier limits (per model, as of 2026-07) ─────────────────────────
+// llama-3.3-70b-versatile : 30 RPM · 1K RPD · 12K TPM · 100K TPD
+// qwen/qwen3.6-27b        : 30 RPM · 1K RPD ·  8K TPM · 200K TPD
+// llama-3.1-8b-instant    : 30 RPM · 14.4K RPD ·  6K TPM · 500K TPD
+// Ordered by TPM headroom descending so the router prefers the model with the
+// most token budget when multiple providers are equally healthy.
 const _groqModels = [
   ModelConfig(
-    model: 'llama-3.1-8b-instant',
-    id: 'groq_llama_3_1_8b',
-    name: 'Llama 3.1 8B Instant',
+    model: 'llama-3.3-70b-versatile', // 12K TPM · 100K TPD
+    id: 'groq_llama_3_3_70b',
+    name: 'Llama 3.3 70B',
     priority: 5,
   ),
   ModelConfig(
-    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-    id: 'groq_llama_4_scout',
-    name: 'Llama 4 Scout 17B',
+    model: 'qwen/qwen3.6-27b', //  8K TPM · 200K TPD
+    id: 'groq_qwen3_6_27b',
+    name: 'Qwen 3.6 27B',
     priority: 6,
   ),
   ModelConfig(
-    model: 'qwen/qwen3-32b',
-    id: 'groq_qwen3_32b',
-    name: 'Qwen 3 32B',
+    model: 'llama-3.1-8b-instant', //  6K TPM · 500K TPD (highest daily budget)
+    id: 'groq_llama_3_1_8b',
+    name: 'Llama 3.1 8B Instant',
     priority: 7,
-  ),
-  ModelConfig(
-    model: 'llama-3.3-70b-versatile',
-    id: 'groq_llama_3_3_70b',
-    name: 'Llama 3.3 70B',
-    priority: 8,
-  ),
-  ModelConfig(
-    model: 'qwen/qwen3.6-27b',
-    id: 'groq_qwen3_6_27b',
-    name: 'Qwen 3.6 27B',
-    priority: 9,
   ),
 ];
 
@@ -232,7 +231,7 @@ class AiRequestManager {
       case 'gemini':
         testProvider = GeminiProvider(
           apiKey: apiKey,
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.1-flash-lite', // lightest currently-available model
           id: 'test',
           name: 'test',
           priority: 1,

@@ -81,8 +81,13 @@ const _defaultProviders = {
     name: 'Google Gemini',
     description: 'Fast, powerful, and great at structured tasks.',
     setupUrl: 'https://aistudio.google.com/app/apikey',
-    availableModels: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'],
-    recommendedModel: 'gemini-2.5-flash',
+    availableModels: [
+      'gemini-3.1-flash-lite',
+      'gemini-2.5-flash-lite',
+      'gemini-2.5-flash',
+      'gemini-3-flash',
+    ],
+    recommendedModel: 'gemini-3.1-flash-lite',
   ),
   'groq': ProviderInfo(
     id: 'groq',
@@ -91,7 +96,7 @@ const _defaultProviders = {
     setupUrl: 'https://console.groq.com/keys',
     availableModels: [
       'llama-3.3-70b-versatile',
-      'mixtral-8x7b-32768',
+      'qwen/qwen3.6-27b',
       'llama-3.1-8b-instant',
     ],
     recommendedModel: 'llama-3.3-70b-versatile',
