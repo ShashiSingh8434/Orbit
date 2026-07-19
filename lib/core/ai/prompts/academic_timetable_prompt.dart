@@ -5,24 +5,23 @@ class AcademicTimetablePromptBuilder {
   /// Builds the prompt instructions for extracting the academic timetable.
   static String buildPrompt() {
     return '''
-You are an expert AI document parser specializing in extracting registered courses from university timetable documents.
-Your task is to analyze the provided image(s) and extract the list of all unique registered courses.
+Extract all registered courses from the university timetable image(s). Output ONLY a raw JSON object — no markdown, no explanation, no <think> blocks.
 
-Follow these strict instructions:
-1. READ ALL IMAGES: Analyze all uploaded images carefully. They may contain different parts of the course registration details list.
-2. DETAILED COURSE INFO: Extract a list of all unique courses from the registered courses details table. For each course, identify:
-   - `code`: e.g. "CSE3001"
-   - `name`: e.g. "Database Management Systems"
-   - `faculty`: e.g. "Rajneesh Kumar Patel"
-   - `room`: e.g. "LC-002" (Look for columns named "Venue", "Room", or "Classroom" in the timetable to extract this)
-   - `slot`: e.g. "A11+A12+A13" (This represents the slots, combine them exactly as shown with +)
-   - `credits`: e.g. 4 (as an integer)
-   - `type`: e.g. "Lecture" or "Lab" or "Lecture and Tutorial"
-   - `category`: e.g. "Programme Core"
-   - `classNo`: e.g. "BL2026270100478" (sometimes labelled as class number, class no., number, etc.)
-3. CLEAN AND DE-DUPLICATE: Ignore duplicated courses.
-4. MISSING FIELDS: If any field cannot be found or is not applicable, use an empty string "" for strings, or null/default value where appropriate. Do not guess.
-5. RETURN ONLY VALID JSON: Return only a JSON object matching the requested schema. No markdown formatting (like ```json), no comments, no explanations.
+Output format (example row):
+{"courses":[{"code":"CSE3001","name":"Database Management Systems","faculty":"Rajneesh Kumar Patel","room":"LC-002","slot":"A11+A12+A13","credits":4,"type":"Lecture and Tutorial","category":"Programme Core","classNo":"BL2026270100478"}]}
+
+Fields:
+- code: course code (e.g. CSE3001)
+- name: plain course title only, no parentheticals
+- faculty: instructor name in title case; strip department tags (SCOPE/SCAI/SASL/SMEC)
+- room: room code only (e.g. LC-002, AB02-409); venue cell may have slot on line 1, room on line 2
+- slot: compound slot joined with + (e.g. A11+A12+A13); use "" if NIL
+- credits: total credits integer from L-T-P-J-C column (last number)
+- type: from course name parenthetical — Lecture/Lab/Lecture and Tutorial/Practical Hours Only/Project Only
+- category: category column value (e.g. Programme Core, Programme Elective)
+- classNo: class ID/registration number
+
+Rules: include all images, deduplicate by code, use "" for missing strings, 0 for missing credits, output nothing but the JSON object.
 ''';
   }
 

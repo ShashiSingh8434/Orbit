@@ -24,8 +24,9 @@ class MultimodalExtractionService {
 
   MultimodalExtractionService(this._ref);
 
+  // Only qwen/qwen3.6-27b supports vision (image_url) on the Groq free tier.
+  // The gpt-oss models are text-only on Groq and return an instant 400 for image inputs.
   static const List<String> _models = [
-    'meta-llama/llama-4-scout-17b-16e-instruct',
     'qwen/qwen3.6-27b',
   ];
 
@@ -122,9 +123,7 @@ class MultimodalExtractionService {
       final analytics = _ref.read(aiAnalyticsServiceProvider);
       final log = AiUsageLog(
         provider: 'Groq (Multimodal)',
-        modelName: modelName.contains('scout')
-            ? 'Llama 4 Scout (Multimodal)'
-            : 'Qwen 3.6 (Multimodal)',
+        modelName: 'Qwen 3.6 27B (Multimodal)',
         modelId: modelName,
         aiMode: 'Orbit',
         apiSource: 'Orbit API',
@@ -184,9 +183,16 @@ class MultimodalExtractionService {
     }
 
     final systemPrompt =
-        'You are an AI assistant. You MUST respond with valid JSON matching the requested structure. '
-        'No markdown formatting (like ```json), no comments, no explanations. Just raw JSON.';
+        'You are a JSON-only extraction assistant. '
+        'Your ENTIRE response must be a single raw JSON object. '
+        'Do NOT include any <think> blocks, reasoning traces, markdown fences (```), prose, '
+        'comments, or explanations of any kind. '
+        'Output starts with { and ends with }. Nothing else.';
 
+    // NOTE: response_format is intentionally omitted.
+    // Qwen uses a thinking mode that emits <think>...</think> before JSON output.
+    // Groq's server-side json_object validation rejects this, causing json_validate_failed (400).
+    // We strip the think block ourselves in _parseJsonResponse instead.
     final response = await http
         .post(
           Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
@@ -201,10 +207,13 @@ class MultimodalExtractionService {
               {'role': 'user', 'content': userContent},
             ],
             'temperature': 0.1,
-            'response_format': {'type': 'json_object'},
+            // Keep total request under Groq's 8K TPM free-tier limit.
+            // Qwen needs headroom for its internal thinking tokens + the JSON output.
+            // input (~3000 tokens) + max_tokens (3500) = ~6500, safely under 8K.
+            'max_tokens': 3500,
           }),
         )
-        .timeout(const Duration(seconds: 25));
+        .timeout(const Duration(seconds: 60));
 
     if (response.statusCode == 200) {
       final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -226,6 +235,44 @@ class MultimodalExtractionService {
       'MultimodalExtractionService: Raw response from model: $text',
     );
     var cleanText = text.trim();
+
+    // ── Strip Qwen <think> blocks ─────────────────────────────────────────────
+    // Qwen emits <think>...</think> reasoning before its JSON answer.
+    // When max_tokens is exhausted mid-think the closing tag may be absent,
+    // so a replaceAll regex requiring both tags silently fails and the raw
+    // <think> text reaches jsonDecode, causing a FormatException at char 1.
+    //
+    // Strategy:
+    //   1. Remove any COMPLETE <think>...</think> pairs.
+    //   2. If a <think> tag still remains (unclosed / truncated block), jump past
+    //      the last </think> occurrence. If there is none, the model spent all its
+    //      token budget thinking and produced no JSON — throw a retryable error.
+    cleanText = cleanText.replaceAll(
+      RegExp(r'<think>[\s\S]*?</think>', caseSensitive: false),
+      '',
+    ).trim();
+
+    final lowerText = cleanText.toLowerCase();
+    if (lowerText.contains('<think>')) {
+      final lastClose = lowerText.lastIndexOf('</think>');
+      if (lastClose != -1) {
+        cleanText = cleanText.substring(lastClose + 8).trim();
+      } else {
+        // Model exhausted its token budget inside the thinking block.
+        throw Exception(
+          'Model response contained only a thinking block with no JSON output. '
+          'Please try again.',
+        );
+      }
+    }
+
+    // Strip markdown code fences (```json ... ```).
+    cleanText = cleanText
+        .replaceAll(RegExp(r'```(?:json)?', caseSensitive: false), '')
+        .replaceAll('```', '')
+        .trim();
+
+    // Extract the outermost JSON object {…}.
     final firstBrace = cleanText.indexOf('{');
     final lastBrace = cleanText.lastIndexOf('}');
     if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {

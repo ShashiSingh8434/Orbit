@@ -7,7 +7,6 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/security/exceptions/crypto_exceptions.dart';
 import 'task_edit_page.dart';
 import '../../academic/services/home_widget_pin_service.dart';
-import '../services/tasks_widget_sync_service.dart';
 
 enum TaskFilter { pending, completed, today }
 
