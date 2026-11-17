@@ -24,9 +24,9 @@ class MultimodalExtractionService {
 
   MultimodalExtractionService(this._ref);
 
-  // Only qwen/qwen3.6-27b supports vision (image_url) on the Groq free tier.
-  // The gpt-oss models are text-only on Groq and return an instant 400 for image inputs.
-  static const List<String> _models = ['qwen/qwen3.6-27b'];
+  // qwen/qwen3.8-27b is the current free-tier vision model on Groq (131K context, 16K max output).
+  // qwen/qwen3.6-27b has been decommissioned.
+  static const List<String> _models = ['qwen/qwen3.8-27b'];
 
   /// Updates the AI processing status displayed in the global notch.
   void _updateStatus(bool isProcessing, String? message) {
@@ -121,7 +121,7 @@ class MultimodalExtractionService {
       final analytics = _ref.read(aiAnalyticsServiceProvider);
       final log = AiUsageLog(
         provider: 'Groq (Multimodal)',
-        modelName: 'Qwen 3.6 27B (Multimodal)',
+        modelName: 'Qwen 3.8 27B (Multimodal)',
         modelId: modelName,
         aiMode: 'Orbit',
         apiSource: 'Orbit API',
@@ -180,17 +180,16 @@ class MultimodalExtractionService {
       });
     }
 
+    // System prompt is kept short to save input tokens against the 8K TPM cap.
+    // We do NOT use response_format:json_object — Groq rejects Qwen's <think>
+    // prefix during server-side validation (json_validate_failed 400).
+    // The think block is stripped in-app by _parseJsonResponse instead.
     final systemPrompt =
-        'You are a JSON-only extraction assistant. '
-        'Your ENTIRE response must be a single raw JSON object. '
-        'Do NOT include any <think> blocks, reasoning traces, markdown fences (```), prose, '
-        'comments, or explanations of any kind. '
-        'Output starts with { and ends with }. Nothing else.';
+        'Output ONLY a raw JSON object. '
+        'No <think> blocks, no markdown fences, no prose. '
+        'Response starts with { and ends with }.';
 
-    // NOTE: response_format is intentionally omitted.
-    // Qwen uses a thinking mode that emits <think>...</think> before JSON output.
-    // Groq's server-side json_object validation rejects this, causing json_validate_failed (400).
-    // We strip the think block ourselves in _parseJsonResponse instead.
+    // NOTE: response_format is intentionally omitted — see comment above.
     final response = await http
         .post(
           Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
@@ -205,10 +204,14 @@ class MultimodalExtractionService {
               {'role': 'user', 'content': userContent},
             ],
             'temperature': 0.1,
-            // Keep total request under Groq's 8K TPM free-tier limit.
-            // Qwen needs headroom for its internal thinking tokens + the JSON output.
-            // input (~3000 tokens) + max_tokens (3500) = ~6500, safely under 8K.
-            'max_tokens': 3500,
+            // Token budget for Groq free tier: 8 K TPM hard cap.
+            // AI returns ONLY raw course rows; all schedule building/dedup/sort
+            // is handled in-app by _parseJsonResponse — no derived fields in output.
+            //
+            // Measured output for a typical 7–15 course timetable ≈ 500–1200 tokens.
+            // system prompt (~60) + user prompt (~250) + image (~700) ≈ 1 010 input.
+            // 1 010 input + 2 000 max_output = ~3 010 total — well under 8 K TPM.
+            'max_tokens': 2000,
           }),
         )
         .timeout(const Duration(seconds: 60));

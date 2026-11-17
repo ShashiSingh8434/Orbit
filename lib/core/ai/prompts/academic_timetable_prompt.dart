@@ -1,27 +1,35 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 /// Prompt builder and schema definition for the Academic Timetable Parser.
+///
+/// Design goal: minimise AI output tokens.
+/// The AI returns ONLY raw course rows. All derived data (schedule mapping,
+/// deduplication, chronological sort) is computed in-app by
+/// [MultimodalExtractionService._parseJsonResponse].
 class AcademicTimetablePromptBuilder {
   /// Builds the prompt instructions for extracting the academic timetable.
+  ///
+  /// Kept intentionally compact — every saved input token lowers the chance
+  /// of hitting Groq's 8 K TPM free-tier limit across concurrent requests.
   static String buildPrompt() {
     return '''
-Extract all registered courses from the university timetable image(s). Output ONLY a raw JSON object — no markdown, no explanation, no <think> blocks.
+You are a data-extraction engine. Look at the timetable image(s) and return ONLY a compact raw JSON object — no markdown fences, no prose, no <think> blocks.
 
-Output format (example row):
-{"courses":[{"code":"CSE3001","name":"Database Management Systems","faculty":"Rajneesh Kumar Patel","room":"LC-002","slot":"A11+A12+A13","credits":4,"type":"Lecture and Tutorial","category":"Programme Core","classNo":"BL2026270100478"}]}
+Schema (one object per course row):
+{"courses":[{"code":"","name":"","faculty":"","room":"","slot":"","credits":0,"type":"","category":"","classNo":""}]}
 
-Fields:
-- code: course code (e.g. CSE3001)
-- name: plain course title only, no parentheticals
-- faculty: instructor name in title case; strip department tags (SCOPE/SCAI/SASL/SMEC)
-- room: room code only (e.g. LC-002, AB02-409); venue cell may have slot on line 1, room on line 2
-- slot: compound slot joined with + (e.g. A11+A12+A13); use "" if NIL
-- credits: total credits integer from L-T-P-J-C column (last number)
-- type: from course name parenthetical — Lecture/Lab/Lecture and Tutorial/Practical Hours Only/Project Only
-- category: category column value (e.g. Programme Core, Programme Elective)
-- classNo: class ID/registration number
+Field mapping (column → field):
+- Course Code → code
+- Course Title → name (title only, strip parentheticals)
+- Faculty column → faculty (Title Case; remove dept tags: SCOPE/SCAI/SASL/SMEC/ACAD)
+- Venue column → room (room code only e.g. AB02-018)
+- Slot column → slot (join multiple with +, e.g. A11+A12+A13; "" if NIL/blank)
+- L T P J C column → credits (last integer only)
+- Course Type column → type
+- Course Category column → category
+- Class No. column → classNo
 
-Rules: include all images, deduplicate by code, use "" for missing strings, 0 for missing credits, output nothing but the JSON object.
+Constraints: scan ALL image pages, "" for missing strings, 0 for missing credits, output ONLY the JSON object starting with { and ending with }.
 ''';
   }
 

@@ -3,41 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'voice_provider.dart';
 import 'voice_controller.dart';
 
-/// A self-contained microphone button that drives voice-to-text for any
-/// [TextEditingController].
-///
-/// ## Minimal usage
-/// ```dart
-/// VoiceInputButton(controller: myController)
-/// ```
-///
-/// ## With append/replace control
-/// ```dart
-/// VoiceInputButton(
-///   controller: myController,
-///   appendMode: false, // replace existing text
-/// )
-/// ```
-///
-/// ## With custom duration and callbacks
-/// ```dart
-/// VoiceInputButton(
-///   controller: myController,
-///   listenFor: const Duration(minutes: 10),
-///   pauseFor:  const Duration(seconds: 6),
-///   onListeningStarted: () => print('🎙 started'),
-///   onListeningStopped: () => print('🎙 stopped'),
-///   onTextChanged:      (t) => print('text: $t'),
-///   onError:            (e) => print('error: $e'),
-/// )
-/// ```
-///
-/// ## Theme behaviour
-/// - Idle:      [ColorScheme.surfaceContainerHighest] background.
-/// - Listening: [ColorScheme.errorContainer] background + pulse animation.
-/// - Unavailable / initialising: button is disabled.
-///
-/// No colours are hardcoded.
+/*
+
+VoiceInputButton(controller: myController)
+
+VoiceInputButton(
+  controller: myController,
+  appendMode: false, // replace existing text
+)
+
+VoiceInputButton(
+  controller: myController,
+  listenFor: const Duration(minutes: 10),
+  pauseFor:  const Duration(seconds: 6),
+  onListeningStarted: () => print('🎙 started'),
+  onListeningStopped: () => print('🎙 stopped'),
+  onTextChanged:      (t) => print('text: $t'),
+  onError:            (e) => print('error: $e'),
+)
+
+*/
+
 class VoiceInputButton extends ConsumerStatefulWidget {
   const VoiceInputButton({
     super.key,
@@ -61,7 +47,6 @@ class VoiceInputButton extends ConsumerStatefulWidget {
     this.tooltip,
   });
 
-  /// The text field this button will write into.
   final TextEditingController controller;
 
   /// When true (default) recognised words are appended after existing text.
@@ -72,33 +57,24 @@ class VoiceInputButton extends ConsumerStatefulWidget {
   /// Defaults to 5 minutes — generous for long dictation.
   final Duration listenFor;
 
-  /// Silence duration before the mic auto-closes. Defaults to 8 seconds so
-  /// users have time to think between sentences.
   final Duration pauseFor;
 
   /// BCP-47 locale string (e.g. "hi-IN", "en-US"). When null the device's
   /// default locale is used. Pass a value to enable language selection.
   final String? localeId;
 
-  /// Called immediately when the microphone opens.
   final VoidCallback? onListeningStarted;
 
-  /// Called when the microphone closes (user tap or timeout).
   final VoidCallback? onListeningStopped;
 
-  /// Called after every partial or final text update.
   final void Function(String text)? onTextChanged;
 
-  /// Called if the STT engine reports an error.
   final void Function(String error)? onError;
 
-  /// Icon size in logical pixels.
   final double iconSize;
 
-  /// Outer button diameter in logical pixels.
   final double buttonSize;
 
-  /// Custom tooltip text. Falls back to a sensible default.
   final String? tooltip;
 
   @override
